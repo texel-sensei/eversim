@@ -3,6 +3,7 @@
 build/
 bin/
 !.gitignore
+!.dummy
 *~
 
 # Prerequisites
