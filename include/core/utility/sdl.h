@@ -15,7 +15,7 @@ namespace eversim { namespace core { namespace sdl {
 			if(!w) return;
 			SDL_DestroyRenderer(w);
 		}
-		inline void cleanup(SDL_GLContext* w) {
+		inline void cleanup(SDL_GLContext w) {
 			if(!w) return;
 			SDL_GL_DeleteContext(w);
 		}
@@ -79,12 +79,25 @@ namespace eversim { namespace core { namespace sdl {
 		}
 		return o;
 	}
+
 	using renderer_ptr = detail::SDL_Ptr<SDL_Renderer>;
-	inline renderer_ptr make_renderer(SDL_Window* w, int device, uint32_t flags) {
+	inline renderer_ptr make_renderer(SDL_Window* w, int device, uint32_t flags)
+	{
 		auto o = renderer_ptr{SDL_CreateRenderer(w, device, flags)};
 		if(!o) {
 			throw sdl_error("Failed to create renderer!");
 		}
 		return o;
 	}
+
+	using context_ptr = detail::SDL_Ptr<void>; // SDL_GLContext is a typedef to void*
+	inline context_ptr make_context(SDL_Window* w)
+	{
+		auto o = context_ptr{ SDL_GL_CreateContext(w) };
+		if(!o) {
+			throw sdl_error{ "Failed to create context!" };
+		}
+		return o;
+	}
+
 } /* sdl */ } /* core */ } /* eversim */
