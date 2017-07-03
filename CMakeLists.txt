@@ -85,8 +85,8 @@ add_executable(game ${GAME_SOURCES})
 add_executable(editor ${EDITOR_SOURCES})
 
 link_libraries(${LIBS})
-target_link_libraries(game eversim)
-target_link_libraries(editor eversim)
+target_link_libraries(game eversim ${LIBS})
+target_link_libraries(editor eversim ${LIBS})
 
 #######################################################################
 #                             output dir                              #

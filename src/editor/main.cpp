@@ -8,6 +8,8 @@
 #include <imgui/imgui.h>
 #include <GL/glew.h>
 
+#undef main
+
 using namespace eversim::core;
 using namespace std;
 
