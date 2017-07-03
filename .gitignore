@@ -1,3 +1,10 @@
+# Basics
+.*
+build/
+bin/
+!.gitignore
+*~
+
 # Prerequisites
 *.d
 
