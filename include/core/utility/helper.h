@@ -1,37 +1,54 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <functional>
 #include <utility>
 #include <sstream>
 
 namespace eversim { namespace core { namespace utility {
-	namespace detail{
-		template<typename Func>
-		struct finally_helper {
-			finally_helper(Func&& f) : f(std::forward<Func>(f)) {}
-			~finally_helper() noexcept(noexcept(finally_helper::f())) {
-				f();
-			}
-		private:
-			Func f;
-		};
-	} // namespace detail
-
-	template<typename Func>
-	auto finally(Func&& f) -> detail::finally_helper<Func> {
-		return {std::forward<Func>(f)};	
-	}
-
-	template<typename T>
-	struct print_type;
-
+	
 	template<typename F, typename... Args>
-	struct is_callable{
+	struct is_callable {
 		template<typename U> static auto test(U* p) -> decltype((*p)(std::declval<Args>()...), void(), std::true_type());
 		template<typename U> static auto test(...) -> decltype(std::false_type());
 
 		using type = decltype(test<F>(nullptr));
 		static constexpr bool value = type::value;
 	};
+
+	template<typename F, typename... Args>
+	constexpr bool is_callable_v = is_callable<F, Args>::value;
+		
+	struct final_action {
+		final_action() = default;
+		template<typename Func>
+		final_action(Func&& f) : f(std::forward<Func>(f)) {}
+		~final_action() {
+			if(f) f();
+		}
+		final_action(final_action&&) = default;
+		
+		final_action& operator=(final_action const&) = delete;
+		final_action& operator=(final_action&&) = default;
+
+		template<typename Func, 
+			typename = std::enable_if_t<is_callable_v<Func>>
+		>
+		final_action& operator=(Func&& new_func) {
+			if (f) f();
+			f = std::forward<Func>(new_func);
+		}
+	private:
+		std::function<void()> f;
+	};
+	
+
+	template<typename Func>
+	auto finally(Func&& f) -> final_action {
+		return {std::forward<Func>(f)};	
+	}
+
+	template<typename T>
+	struct print_type;
 
 	template<typename T>
 	std::string to_string(T const& t) {
