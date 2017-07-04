@@ -1,8 +1,8 @@
 #include "core/rendering/render_manager.h"
+#include "core/physics/physics_manager.h"
 #include "core/utility/helper.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
-#include <soil/SOIL.h>
 
 #include <easylogging++.h>
 #include <imgui/imgui.h>
@@ -69,6 +69,16 @@ int main(int argc, char* argv[]) {
 
 	rendering::draw_line({}, {1,1},120);
 
+	physics::physics_manager physics;
+
+	for(int i = 0; i < 10; ++i)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			physics.add_particle({ {i*0.05f-0.25f, j * 0.1f + 0.1f} });
+		}
+	}
+
 	while(handle_sdl_events())
 	{
 		ImGui_ImplSdlGL3_NewFrame(window);
@@ -78,6 +88,13 @@ int main(int argc, char* argv[]) {
 
 		// do rendering stuff
 		ImGui::ShowTestWindow();
+
+		physics.integrate(1/60.f);
+
+		for(auto&& p : physics.get_particles())
+		{
+			rendering::draw_point(p.pos);
+		}
 
 		renderer.do_draw();
 
