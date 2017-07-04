@@ -1,10 +1,8 @@
 #include "core/rendering/render_manager.h"
 #include "core/utility/helper.h"
-#include "core/test.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 
-#include <iostream>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
 
@@ -46,6 +44,7 @@ bool handle_sdl_events() {
 	}
 	return should_continue;
 }
+
 
 int main() {
 	
