@@ -4,11 +4,22 @@
 #include "core/utility/helper.h"
 
 #include <GL/glew.h>
+#include <algorithm>
 #include <iostream>
 
 using namespace std;
 
 namespace eversim { namespace core { namespace rendering {
+
+	class render_manager* myrenderer;
+	void draw_line(glm::vec2 a, glm::vec2 b, int dur)
+	{
+		myrenderer->draw_line(a, b, dur);
+	}
+	void draw_point(glm::vec2 p)
+	{
+		myrenderer->draw_point(p);
+	}
 
 	render_manager::render_manager(glm::ivec2 resolution, bool fullscreen) :
 		resolution(resolution)
@@ -16,6 +27,40 @@ namespace eversim { namespace core { namespace rendering {
 		setup(fullscreen);
 	}
 
+	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)
+	{
+		lines.push_back({ a, b, dur });
+	}
+	void render_manager::draw_point(glm::vec2 p)
+	{
+		points.emplace_back(p);
+	}
+
+	void render_manager::do_draw()
+	{
+		glPointSize(10);
+		glBegin(GL_POINTS);
+		for(auto const& p : points)
+		{
+			glVertex2f(p.x, p.y);
+		}
+		glEnd();
+
+		glBegin(GL_LINES);
+		for(auto& l : lines)
+		{
+			glVertex2f(l.a.x, l.a.y);
+			glVertex2f(l.b.x, l.b.y);
+			l.dur--;
+		}
+		glEnd();
+		auto zero_dur = [](auto const& l) { return l.dur <= 0; };
+		lines.erase(
+			std::remove_if(lines.begin(), lines.end(), zero_dur),
+			lines.end()
+		);
+		points.clear();
+	}
 
 	void render_manager::setup(bool fullscreen)
 	{

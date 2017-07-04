@@ -65,6 +65,10 @@ int main(int argc, char* argv[]) {
 	io.DisplaySize.x = resolution.x;
 	io.DisplaySize.y = resolution.y;
 
+	rendering::myrenderer = &renderer;
+
+	rendering::draw_line({}, {1,1},120);
+
 	while(handle_sdl_events())
 	{
 		ImGui_ImplSdlGL3_NewFrame(window);
@@ -74,6 +78,8 @@ int main(int argc, char* argv[]) {
 
 		// do rendering stuff
 		ImGui::ShowTestWindow();
+
+		renderer.do_draw();
 
 		ImGui::Render();
 		SDL_GL_SwapWindow(window);
