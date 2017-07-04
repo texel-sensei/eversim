@@ -16,7 +16,7 @@ namespace eversim { namespace core { namespace utility {
 	};
 
 	template<typename F, typename... Args>
-	constexpr bool is_callable_v = is_callable<F, Args>::value;
+	constexpr bool is_callable_v = is_callable<F, Args...>::value;
 		
 	struct final_action {
 		final_action() = default;
@@ -36,6 +36,7 @@ namespace eversim { namespace core { namespace utility {
 		final_action& operator=(Func&& new_func) {
 			if (f) f();
 			f = std::forward<Func>(new_func);
+			return *this;
 		}
 	private:
 		std::function<void()> f;
