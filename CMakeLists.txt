@@ -71,6 +71,7 @@ SET(LIBS ${LIBS} imgui)
 #soil
 add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)
+SET(LIBS ${LIBS} SOIL)
 
 ############# COMPILER FLAGS ###############
 
