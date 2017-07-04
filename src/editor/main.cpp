@@ -4,10 +4,13 @@
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
 
+#include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
 
 #undef main
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace eversim::core;
 using namespace std;
@@ -47,8 +50,10 @@ bool handle_sdl_events() {
 }
 
 
-int main() {
-	
+int main(int argc, char* argv[]) {
+	START_EASYLOGGINGPP(argc, argv);
+
+	LOG(INFO) << "Hello World!";
 	auto resolution = glm::ivec2(1920, 1080);
 
 	auto renderer = rendering::render_manager(resolution, false);

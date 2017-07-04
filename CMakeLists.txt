@@ -73,6 +73,13 @@ add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)
 SET(LIBS ${LIBS} SOIL)
 
+#easyloggingpp
+option(build_static_lib "Build easyloggingpp as a static library" ON)
+add_subdirectory(${EXTERNALS}/easyloggingpp)
+set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
+include_directories(${EXTERNALS}/easyloggingpp/src)
+SET(LIBS ${LIBS} easyloggingpp)
+
 ############# COMPILER FLAGS ###############
 
 if(WIN32)
@@ -81,13 +88,15 @@ endif(WIN32)
 
 ############# SOURCE ###############
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
+
 file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
-add_library(eversim STATIC ${CORE_SOURCES})
-add_executable(game ${GAME_SOURCES})
-add_executable(editor ${EDITOR_SOURCES})
+add_library(eversim STATIC ${HEADERS} ${CORE_SOURCES})
+add_executable(game ${HEADERS} ${GAME_SOURCES})
+add_executable(editor ${HEADERS} ${EDITOR_SOURCES})
 
 link_libraries(${LIBS})
 target_link_libraries(game eversim ${LIBS})
