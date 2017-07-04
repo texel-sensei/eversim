@@ -68,6 +68,10 @@ target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
 SET(LIBS ${LIBS} imgui)
 
+#soil
+add_subdirectory(${EXTERNALS}/soil)
+include_directories(${EXTERNALS}/soil/include/)
+
 ############# COMPILER FLAGS ###############
 
 if(WIN32)
