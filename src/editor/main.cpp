@@ -2,6 +2,7 @@
 #include "core/utility/helper.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
+#include <soil/SOIL.h>
 
 #include <imgui/imgui.h>
 #include <GL/glew.h>
