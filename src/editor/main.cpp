@@ -24,8 +24,6 @@ bool handle_keypress(SDL_Keysym sym, bool /*down*/)
 }
 
 bool handle_sdl_events() {
-
-	auto a = SOIL_create_OGL_texture;
 	SDL_Event event;
 	auto& io = ImGui::GetIO();
 	auto should_continue = true;
