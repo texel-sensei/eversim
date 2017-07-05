@@ -110,14 +110,14 @@ int main(int argc, char* argv[]) {
 		GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 		const GLchar* message, const void* userParam)
 	{
-		cout << "GL Debug Message" << endl;
-		cout << "GL Debug Message" << endl;
-		cout << string(80, '=') << endl;
-		cout << "src: " << source << endl;
-		cout << "type: " << glTypeToString(type) << endl;
-		cout << "severity: " << glSeverityToString(type) << endl;
-		cout << message << endl;
-		cout << string(80, '=');
+		LOG(INFO) << "GL Debug Message" << endl;
+		LOG(INFO) << "GL Debug Message" << endl;
+		LOG(INFO) << string(80, '=') << endl;
+		LOG(INFO) << "src: " << source << endl;
+		LOG(INFO) << "type: " << glTypeToString(type) << endl;
+		LOG(INFO) << "severity: " << glSeverityToString(type) << endl;
+		LOG(INFO) << message << endl;
+		LOG(INFO) << string(80, '=');
 	},
 		nullptr
 		);
