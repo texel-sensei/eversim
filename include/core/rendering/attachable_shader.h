@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gl/glew.h>
+#include <easylogging++.h>
 
 #include <fstream>
 #include <string>
@@ -28,7 +29,7 @@ public:
 
 	void compile(const std::string& filename)
 	{
-		std::cout << "create " << filename << std::endl;
+		LOG(INFO) << "create " << filename << std::endl;
 		std::ifstream file(filename);
 		if (!file) throw std::exception("Could not open source file for compilation");
 		std::string sourcecode("");
@@ -44,7 +45,8 @@ public:
 		//TODO error
 		glCompileShader(id);
 		//TODO error
-		std::cout << "\tcreate successfull" << std::endl;
+		LOG(INFO) << "\tcreate successfull" << std::endl;
+
 	}
 
 	std::string GetShaderInfoLog () const

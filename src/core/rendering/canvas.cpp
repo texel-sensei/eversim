@@ -33,7 +33,6 @@ namespace eversim {
 					resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
 
 				glBindTexture(GL_TEXTURE_2D, 0);
-				std::cout << resolution[0] << " " << resolution[1] << std::endl;
 			}
 
 			void canvas::init(
@@ -63,8 +62,6 @@ namespace eversim {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 				glBindTexture(GL_TEXTURE_2D, 0);
-
-				std::cout << resolution[0] << " " << resolution[1] << std::endl;
 			}
 
 			void canvas::draw()

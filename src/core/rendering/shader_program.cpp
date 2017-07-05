@@ -1,6 +1,7 @@
 #include "core/rendering/shader_program.h"
 
 #include <GL/glew.h>
+#include <easylogging++.h>
 
 #include <exception>
 #include <iostream>
@@ -28,7 +29,7 @@ namespace eversim {
 					throw exception(string("The shader you try to attach is not yet compiled. Tried to attach: " + shader.name).c_str());
 				glAttachShader(id, shader.getID());
 				//TODO Error
-				cout << "attached " << shader.name << " to " << name << endl;
+				LOG(INFO) << "attached " << shader.name << " to " << name << endl;
 			}
 
 			void ShaderProgram::attach(const std::string& filename, const GLenum TYPE)
@@ -71,13 +72,13 @@ namespace eversim {
 			void ShaderProgram::create()
 			{
 				id = glCreateProgram();
-				cout << "create program " << name << ":" << id << endl;
+				LOG(INFO) << "create program " << name << ":" << id << endl;
 			}
 
 			void ShaderProgram::link()
 			{
 				glLinkProgram(id);
-				cout << "link program " << name << endl;
+				LOG(INFO) << "link program " << name << endl;
 			}
 
 			void ShaderProgram::use() const
