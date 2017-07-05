@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
 			0, 0, 1, 0,
 			0, 0, 0, 1));
 
-	std::string path("F:\\git_repos\\eversim\\resources\\sprites\\brick_gray0\\brick_gray0.png");
+	std::string path("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
 	eversim::core::rendering::canvas texture;
 	texture.init(path,
 		glm::f32mat4(1, 0, 0, 0,
@@ -137,15 +137,15 @@ int main(int argc, char* argv[]) {
 			0, 0, 1, 0,
 			0, 0, 0, 1));
 
-	rendering::ShaderProgram* program = new rendering::ShaderProgram("simple quad shader");
-	program->create();
-	program->attach
+	rendering::ShaderProgram program("simple quad shader");
+	program.create();
+	program.attach
 	({
-		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
-		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
-		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
+		{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
 	});
-	program->link();
+	program.link();
 
 	while(handle_sdl_events())
 	{
@@ -165,8 +165,9 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_DEPTH_TEST);
 
 		//render
-		program->use();
+		program.use();
 		canvas.draw();
+		//texture.draw();
 		glUseProgram(0);
 
 		SDL_GL_SwapWindow(window);
