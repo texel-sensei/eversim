@@ -14,6 +14,7 @@ namespace eversim {
 				glm::ivec2 resolution;
 				glm::f32mat4 M;
 				GLuint tex;
+				//GLuint vaoid, vboid;
 				std::vector<canvas*> children;
 			public:
 				explicit canvas();
@@ -29,6 +30,7 @@ namespace eversim {
 				*/
 				void init(const std::string& path,
 					const glm::f32mat4& M);
+				void draw();
 				void add_child(canvas*);
 
 			};
