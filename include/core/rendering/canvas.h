@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core\rendering\shader_program.h"
+
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
@@ -13,9 +15,12 @@ namespace eversim {
 			private:
 				glm::ivec2 resolution;
 				glm::f32mat4 M;
-				GLuint tex;
+				GLuint tex, fbo_tex;
+				GLuint fbo;
 				//GLuint vaoid, vboid;
 				std::vector<canvas*> children;
+
+				void create_framebuffer();
 			public:
 				explicit canvas();
 				/*
@@ -30,7 +35,8 @@ namespace eversim {
 				*/
 				void init(const std::string& path,
 					const glm::f32mat4& M);
-				void draw();
+				void draw(const ShaderProgram& program);
+				void draw_to_texture(const ShaderProgram& program, GLuint texture);
 				void add_child(canvas*);
 
 			};

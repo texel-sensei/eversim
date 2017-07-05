@@ -45,7 +45,7 @@ public:
 		//TODO error
 		glCompileShader(id);
 		//TODO error
-		LOG(INFO) << "\tcreate successfull" << std::endl;
+		LOG(INFO) << "\tcreate successfull";
 
 	}
 

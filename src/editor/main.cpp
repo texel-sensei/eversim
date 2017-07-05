@@ -159,6 +159,9 @@ int main(int argc, char* argv[]) {
 
 		ImGui::Render();
 		SDL_GL_SwapWindow(window);*/
+		//ImGuiContext* context = ImGui::GetCurrentContext();
+		//ImDrawList* list = ImGui::GetWindowDrawList();
+		//list->
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
@@ -166,8 +169,8 @@ int main(int argc, char* argv[]) {
 
 		//render
 		program.use();
-		canvas.draw();
-		//texture.draw();
+		canvas.draw(program);
+		texture.draw(program);
 		glUseProgram(0);
 
 		SDL_GL_SwapWindow(window);

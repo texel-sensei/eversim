@@ -17,6 +17,29 @@ namespace eversim {
 		namespace rendering {
 			canvas::canvas(){}
 
+			void canvas::create_framebuffer()
+			{
+				//create framebuffer
+				glGenFramebuffers(1, &fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
+
+				//Texture for framebuffer
+				glGenTextures(1, &fbo_tex);
+				glBindTexture(GL_TEXTURE_2D, fbo_tex);
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo_tex, 0);
+				GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+				glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
 			void canvas::init(
 				const glm::ivec2& resolution,
 				const glm::f32mat4& M)
@@ -28,11 +51,18 @@ namespace eversim {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, tex);
 
-				std::vector<unsigned char> image(resolution[0] * resolution[1] * 3,0.3);
+				std::vector<unsigned char> image(resolution[0] * resolution[1] * 3,40);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 
 					resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
 
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 				glBindTexture(GL_TEXTURE_2D, 0);
+
+				create_framebuffer();
 			}
 
 			void canvas::init(
@@ -58,15 +88,22 @@ namespace eversim {
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 				glBindTexture(GL_TEXTURE_2D, 0);
+
+				create_framebuffer();
 			}
 
-			void canvas::draw()
+			void canvas::draw(const ShaderProgram& program)
 			{
+				GLint loc = glGetUniformLocation(program.getID(), "tex");
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D,tex);
+				glUniform1i(loc, 0);
 				glDrawArrays(GL_POINTS, 0, 1);
+				glBindTexture(GL_TEXTURE_2D, 0);
 			}
 		}
 	}

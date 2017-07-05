@@ -29,7 +29,7 @@ namespace eversim {
 					throw exception(string("The shader you try to attach is not yet compiled. Tried to attach: " + shader.name).c_str());
 				glAttachShader(id, shader.getID());
 				//TODO Error
-				LOG(INFO) << "attached " << shader.name << " to " << name << endl;
+				LOG(INFO) << "attached " << shader.name << " to " << name;
 			}
 
 			void ShaderProgram::attach(const std::string& filename, const GLenum TYPE)
@@ -72,13 +72,13 @@ namespace eversim {
 			void ShaderProgram::create()
 			{
 				id = glCreateProgram();
-				LOG(INFO) << "create program " << name << ":" << id << endl;
+				LOG(INFO) << "create program " << name << ":" << id;
 			}
 
 			void ShaderProgram::link()
 			{
 				glLinkProgram(id);
-				LOG(INFO) << "link program " << name << endl;
+				LOG(INFO) << "link program " << name;
 			}
 
 			void ShaderProgram::use() const
