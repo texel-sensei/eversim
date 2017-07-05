@@ -2,8 +2,11 @@
 
 #include "core/utility/sdl.h"
 #include "core/utility/helper.h"
+#include "core/rendering/canvas.h"
 
 #include <glm/glm.hpp>
+
+#include <vector>
 
 namespace eversim { namespace core { namespace rendering {
 
