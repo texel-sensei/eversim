@@ -4,6 +4,7 @@
 #include "core/system/program_gui.h"
 
 #include "core/rendering/canvas.h"
+#include "core/rendering/shader_program.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
@@ -50,6 +51,37 @@ bool handle_sdl_events() {
 	return should_continue;
 }
 
+namespace {
+	const char* glTypeToString(GLenum type) {
+		switch (type) {
+		case GL_DEBUG_TYPE_ERROR:
+			return "ERROR";
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			return "DEPRECATED_BEHAVIOR";
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			return "UNDEFINED_BEHAVIOR";
+		case GL_DEBUG_TYPE_PORTABILITY:
+			return "PORTABILITY";
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			return "PERFORMANCE";
+		case GL_DEBUG_TYPE_OTHER:
+			return "OTHER";
+		}
+		return "UNKNOWN";
+	}
+
+	const char* glSeverityToString(GLenum severity) {
+		switch (severity) {
+		case GL_DEBUG_SEVERITY_LOW:
+			return "LOW";
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			return "MEDIUM";
+		case GL_DEBUG_SEVERITY_HIGH:
+			return "HIGH";
+		}
+		return "UNKNOWN";
+	}
+}
 
 int main() {
 	
@@ -63,6 +95,27 @@ int main() {
 	auto& io = ImGui::GetIO();
 	io.DisplaySize.x = resolution.x;
 	io.DisplaySize.y = resolution.y;
+
+	//Enable Debugging
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+	glDebugMessageCallback([](
+		GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+		const GLchar* message, const void* userParam)
+	{
+		cout << "GL Debug Message" << endl;
+		cout << "GL Debug Message" << endl;
+		cout << string(80, '=') << endl;
+		cout << "src: " << source << endl;
+		cout << "type: " << glTypeToString(type) << endl;
+		cout << "severity: " << glSeverityToString(type) << endl;
+		cout << message << endl;
+		cout << string(80, '=');
+	},
+		nullptr
+		);
 
 	eversim::core::rendering::canvas canvas;
 	canvas.init(resolution,
@@ -79,9 +132,19 @@ int main() {
 			0, 0, 1, 0,
 			0, 0, 0, 1));
 
+	rendering::ShaderProgram* program = new rendering::ShaderProgram("simple quad shader");
+	program->create();
+	program->attach
+	({
+		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
+		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
+		{ "F:\\git_repos\\eversim\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	program->link();
+
 	while(handle_sdl_events())
 	{
-		ImGui_ImplSdlGL3_NewFrame(window);
+		/*ImGui_ImplSdlGL3_NewFrame(window);
 		//prepare frame
 		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -90,23 +153,18 @@ int main() {
 		ImGui::ShowTestWindow();
 
 		ImGui::Render();
+		SDL_GL_SwapWindow(window);*/
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+
+		//render
+		program->use();
+		canvas.draw();
+		glUseProgram(0);
+
 		SDL_GL_SwapWindow(window);
 	}
-
-	//TEST
-	/*eversim::core::system::programsequencer sequence;
-	sequence.push_back(new eversim::core::system::program_gui);
-
-	while (handle_sdl_events())
-	{
-		//prepare frame
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		sequence.run();
-
-		SDL_GL_SwapWindow(window);
-	}*/
-
 	return 0;
 }

@@ -66,6 +66,11 @@ namespace eversim {
 
 				std::cout << resolution[0] << " " << resolution[1] << std::endl;
 			}
+
+			void canvas::draw()
+			{
+				glDrawArrays(GL_POINTS, 0, 1);
+			}
 		}
 	}
 }
