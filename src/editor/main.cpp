@@ -124,18 +124,12 @@ int main(int argc, char* argv[]) {
 
 	eversim::core::rendering::canvas canvas;
 	canvas.init(resolution,
-		glm::f32mat4(1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1));
+		glm::ivec2(0,0));
 
 	std::string path("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
 	eversim::core::rendering::canvas texture;
 	texture.init(path,
-		glm::f32mat4(1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1));
+		glm::ivec2(30, 60));
 
 	rendering::ShaderProgram program("simple quad shader");
 	program.create();
@@ -169,8 +163,8 @@ int main(int argc, char* argv[]) {
 
 		//render
 		program.use();
-		canvas.draw(program);
-		texture.draw(program);
+		canvas.draw(program, resolution);
+		texture.draw(program, resolution);
 		glUseProgram(0);
 
 		SDL_GL_SwapWindow(window);

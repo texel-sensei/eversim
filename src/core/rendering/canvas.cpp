@@ -42,10 +42,10 @@ namespace eversim {
 
 			void canvas::init(
 				const glm::ivec2& resolution,
-				const glm::f32mat4& M)
+				const glm::ivec2& position)
 			{
 				this->resolution = resolution;
-				this->M = M;
+				this->position = position;
 
 				glGenTextures(1, &tex);
 				glActiveTexture(GL_TEXTURE0);
@@ -67,13 +67,13 @@ namespace eversim {
 
 			void canvas::init(
 				const std::string& path,
-				const glm::f32mat4& M)
+				const glm::ivec2& position)
 			{
 				
 				if (!std::experimental::filesystem::exists(path))
 					throw std::exception("File not found");
 
-				this->M = M;
+				this->position = position;
 
 				glGenTextures(1, &tex);
 				glActiveTexture(GL_TEXTURE0);
@@ -96,12 +96,23 @@ namespace eversim {
 				create_framebuffer();
 			}
 
-			void canvas::draw(const ShaderProgram& program)
+			void canvas::draw(const ShaderProgram& program,
+				const glm::ivec2& target_resolution)
 			{
 				GLint loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D,tex);
 				glUniform1i(loc, 0);
+
+				loc = glGetUniformLocation(program.getID(), "window");
+				glUniform2f(loc, target_resolution[0], target_resolution[1]);
+
+				loc = glGetUniformLocation(program.getID(), "size");
+				glUniform2f(loc, resolution[0], resolution[1]);
+
+				loc = glGetUniformLocation(program.getID(), "position");
+				glUniform2f(loc, position[0], position[1]);
+
 				glDrawArrays(GL_POINTS, 0, 1);
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
