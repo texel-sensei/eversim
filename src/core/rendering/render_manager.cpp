@@ -58,6 +58,7 @@ namespace eversim { namespace core { namespace rendering {
 			cerr << glewGetErrorString(res);
 			throw sdl::sdl_error{ "Failed to init GLEW!" };
 		}
+
 	}
 
 } /* rendering */ } /* core */ } /* eversim */

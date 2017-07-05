@@ -1,5 +1,9 @@
 #include "core/rendering/render_manager.h"
 #include "core/utility/helper.h"
+#include "core/system/programsequencer.h"
+#include "core/system/program_gui.h"
+
+#include "core/rendering/canvas.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
@@ -60,6 +64,21 @@ int main() {
 	io.DisplaySize.x = resolution.x;
 	io.DisplaySize.y = resolution.y;
 
+	eversim::core::rendering::canvas canvas;
+	canvas.init(resolution,
+		glm::f32mat4(1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1));
+
+	std::string path("F:\\git_repos\\eversim\\resources\\sprites\\brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::canvas texture;
+	texture.init(path,
+		glm::f32mat4(1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1));
+
 	while(handle_sdl_events())
 	{
 		ImGui_ImplSdlGL3_NewFrame(window);
@@ -73,6 +92,21 @@ int main() {
 		ImGui::Render();
 		SDL_GL_SwapWindow(window);
 	}
+
+	//TEST
+	/*eversim::core::system::programsequencer sequence;
+	sequence.push_back(new eversim::core::system::program_gui);
+
+	while (handle_sdl_events())
+	{
+		//prepare frame
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		sequence.run();
+
+		SDL_GL_SwapWindow(window);
+	}*/
 
 	return 0;
 }
