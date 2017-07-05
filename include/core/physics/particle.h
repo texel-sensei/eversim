@@ -8,6 +8,8 @@ namespace eversim { namespace core { namespace physics {
 		glm::vec2 pos;
 		glm::vec2 vel;
 
+		float inv_mass;
+
 		glm::vec2 projected_position;
 	};
 
