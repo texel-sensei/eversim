@@ -42,6 +42,8 @@ namespace eversim {
 					const glm::ivec2& target_resolution
 					);
 				void draw_to_texture(const ShaderProgram& program, GLuint texture);
+				GLuint texture_id() const { return fbo_tex; };
+				//GLuint texture_id() const { return tex; };
 			};
 
 		}
