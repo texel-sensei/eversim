@@ -9,9 +9,9 @@ uniform vec2 window;
 uniform vec2 size;
 uniform vec2 position;
 
-vec2 allign(vec2 v,vec2 size)
+vec2 allign(vec2 v,vec2 s)
 {
-	v /= size;
+	v /= s;
 	v *= 2.0;
 	v -= vec2(1.0);
 	return v;

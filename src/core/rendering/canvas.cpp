@@ -27,16 +27,12 @@ namespace eversim {
 				//Texture for framebuffer
 				glGenTextures(1, &fbo_tex);
 				glBindTexture(GL_TEXTURE_2D, fbo_tex);
-
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glBindTexture(GL_TEXTURE_2D, fbo_tex);
 
-				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo_tex, 0);
-				GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-				glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_tex, 0);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
 
@@ -99,6 +95,10 @@ namespace eversim {
 			void canvas::draw(const ShaderProgram& program,
 				const glm::ivec2& target_resolution)
 			{
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+
 				GLint loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D,tex);
@@ -114,7 +114,9 @@ namespace eversim {
 				glUniform2f(loc, position[0], position[1]);
 
 				glDrawArrays(GL_POINTS, 0, 1);
+				
 				glBindTexture(GL_TEXTURE_2D, 0);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
 		}
 	}

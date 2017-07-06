@@ -141,14 +141,15 @@ int main(int argc, char* argv[]) {
 	});
 	program.link();
 
+
 	while(handle_sdl_events())
 	{
-		/*ImGui_ImplSdlGL3_NewFrame(window);
+		ImGui_ImplSdlGL3_NewFrame(window);
 		//prepare frame
-		glClearColor(0, 0, 0, 0);
+		/*glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// do rendering stuff
+		//do rendering stuff
 		ImGui::ShowTestWindow();
 
 		ImGui::Render();
@@ -161,11 +162,37 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		//render
 		program.use();
-		canvas.draw(program, resolution);
-		texture.draw(program, resolution);
+		//canvas.draw(program, resolution);
+		//texture.draw(program, resolution);
+		texture.draw(program, glm::ivec2(32, 32) );
 		glUseProgram(0);
+
+		//render
+		ImGui::ShowTestWindow();
+		ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiSetCond_Once);
+		ImGui::Begin("Game");
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		ImVec2 size = ImGui::GetWindowSize();
+		cout << size.x << "/" << size.y << endl;
+			ImGui::GetWindowDrawList()->AddImage(
+				(void*)(texture.texture_id()),
+				ImVec2(
+					pos.x,
+					pos.y  
+				)
+				, 
+				ImVec2(pos.x + 640, pos.y + 640)
+			);
+
+		ImGui::End();
+
+
+
+		ImGui::Render();
+
+
 
 		SDL_GL_SwapWindow(window);
 	}
