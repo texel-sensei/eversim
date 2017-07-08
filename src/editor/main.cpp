@@ -154,9 +154,11 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_DEPTH_TEST);
 
 		program.use();
-		//canvas.draw(program, resolution);
 		conjuration_texture.draw(program, resolution);
 		texture.draw_to_fbo(program);
+
+		//conjuration_texture.draw_to_canvas(program,texture);
+
 		glUseProgram(0);
 
 		//render
@@ -168,7 +170,7 @@ int main(int argc, char* argv[]) {
 		ImVec2 size = ImGui::GetWindowSize();
 		//cout << size.x << "/" << size.y << endl;
 			ImGui::GetWindowDrawList()->AddImage(
-				(void*)(texture.texture_id()),
+				(void*)(texture.get_fbo_texture_id()),
 				ImVec2(
 					pos.x,
 					pos.y  

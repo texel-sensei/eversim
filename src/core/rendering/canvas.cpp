@@ -4,9 +4,6 @@
 #include <soil/SOIL.h>
 
 
-//TESTING
-#include <windows.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,32 +14,6 @@ namespace eversim {
 	namespace core {
 		namespace rendering {
 			canvas::canvas(){}
-
-			void canvas::create_framebuffer()
-			{
-				/*//create framebuffer
-				glGenFramebuffers(1, &fbo);
-				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-				
-				//Texture for framebuffer
-				glGenTextures(1, &fbo_tex);
-
-				glBindTexture(GL_TEXTURE_2D, fbo_tex);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_tex, 0);
-				GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-				glDrawBuffers(1, DrawBuffers);
-				
-				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-					LOG(ERROR) << "u fucked up";
-
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
-				fbuffer = Framebuffer(resolution);
-			}
 
 			void canvas::init(
 				const glm::ivec2& res,
@@ -66,7 +37,7 @@ namespace eversim {
 
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				create_framebuffer();
+				fbo = Framebuffer(resolution);
 			}
 
 			void canvas::init(
@@ -100,7 +71,7 @@ namespace eversim {
 
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				create_framebuffer();
+				fbo = Framebuffer(resolution);
 			}
 
 			void canvas::draw(const ShaderProgram& program,
@@ -128,28 +99,28 @@ namespace eversim {
 			void canvas::draw_to_canvas(const ShaderProgram& program,
 				canvas& other_canvas)
 			{
-				other_canvas.BindFramebuffer();
+				other_canvas.bind_framebuffer();
 
-				switch_viewport tmp(0, 0, other_canvas.get_resolution()[0], other_canvas.get_resolution()[1]);
+				switch_viewport tmp(0, 0, other_canvas.get_fbo_viewport()[0], other_canvas.get_fbo_viewport()[1]);
 
-				draw(program,other_canvas.get_resolution());
+				draw(program,other_canvas.get_fbo_viewport());
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
 
 			void canvas::draw_to_fbo(const ShaderProgram& program)
 			{
-				BindFramebuffer();
+				bind_framebuffer();
 
-				switch_viewport tmp(0, 0, resolution[0], resolution[1]);
+				switch_viewport tmp(0, 0, fbo.viewport()[0], fbo.viewport()[1] );
 				draw(program, resolution);
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
 
-			void canvas::BindFramebuffer()
+			void canvas::bind_framebuffer()
 			{
-				fbuffer.bind();
+				fbo.bind();
 			}
 		}
 	}

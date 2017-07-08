@@ -15,12 +15,8 @@ namespace eversim {
 			class canvas {
 			private:
 				glm::ivec2 resolution, position;
-				GLuint tex, fbo_tex;
-				GLuint fbo;
-				//GLuint vaoid, vboid;
-				Framebuffer fbuffer;
-
-				void create_framebuffer();
+				GLuint tex;
+				Framebuffer fbo;
 			public:
 				std::vector<canvas> children;
 
@@ -46,10 +42,12 @@ namespace eversim {
 									canvas& other_canvas);
 				void draw_to_fbo(const ShaderProgram& program);
 				//void draw_to_texture(const ShaderProgram& program, GLuint texture);
-				GLuint texture_id() const { return fbuffer.get_tex_id(); };
-				void BindFramebuffer();
-				glm::ivec2 get_resolution() const { return fbuffer.viewport(); }
-				//GLuint texture_id() const { return tex; };
+				GLuint get_texture_id() const { return tex; };
+				GLuint get_fbo_texture_id() const { return fbo.get_tex_id(); }
+				glm::ivec2 get_fbo_viewport() const { return fbo.viewport(); }
+				void bind_framebuffer();
+
+				glm::ivec2 get_resolution() const { return resolution; }
 			};
 
 		}
