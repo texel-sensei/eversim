@@ -6,7 +6,7 @@ layout(triangle_strip, max_vertices = 4) out;
 out vec2 texcoord;
 
 uniform vec2 window;
-uniform vec2 size;
+uniform vec2 size; //Texture size
 uniform vec2 position;
 
 vec2 allign(vec2 v,vec2 s)

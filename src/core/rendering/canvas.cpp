@@ -1,4 +1,5 @@
-#include <core/rendering/canvas.h>
+#include "core/rendering/canvas.h"
+#include "core/rendering/switch_viewport.h"
 
 #include <soil/SOIL.h>
 
@@ -19,29 +20,36 @@ namespace eversim {
 
 			void canvas::create_framebuffer()
 			{
-				//create framebuffer
+				/*//create framebuffer
 				glGenFramebuffers(1, &fbo);
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
-
+				
 				//Texture for framebuffer
 				glGenTextures(1, &fbo_tex);
+
 				glBindTexture(GL_TEXTURE_2D, fbo_tex);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glBindTexture(GL_TEXTURE_2D, fbo_tex);
+				glBindTexture(GL_TEXTURE_2D, 0);
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_tex, 0);
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+				glDrawBuffers(1, DrawBuffers);
+				
+				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+					LOG(ERROR) << "u fucked up";
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+				fbuffer = Framebuffer(resolution);
 			}
 
 			void canvas::init(
-				const glm::ivec2& resolution,
-				const glm::ivec2& position)
+				const glm::ivec2& res,
+				const glm::ivec2 pos)
 			{
-				this->resolution = resolution;
-				this->position = position;
+				this->resolution = res;
+				this->position = pos;
 
 				glGenTextures(1, &tex);
 				glActiveTexture(GL_TEXTURE0);
@@ -63,7 +71,7 @@ namespace eversim {
 
 			void canvas::init(
 				const std::string& path,
-				const glm::ivec2& position)
+				const glm::ivec2 position)
 			{
 				
 				if (!std::experimental::filesystem::exists(path))
@@ -77,6 +85,9 @@ namespace eversim {
 
 				unsigned char* image = SOIL_load_image(path.c_str(), 
 					&resolution[0], &resolution[1], 0, SOIL_LOAD_RGB);
+
+				LOG(INFO) << "Create Texture " << path << " with size " << resolution[0] << "/" <<
+					resolution[1];
 
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 
@@ -95,10 +106,6 @@ namespace eversim {
 			void canvas::draw(const ShaderProgram& program,
 				const glm::ivec2& target_resolution)
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-				glClear(GL_COLOR_BUFFER_BIT);
-
 				GLint loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D,tex);
@@ -114,9 +121,35 @@ namespace eversim {
 				glUniform2f(loc, position[0], position[1]);
 
 				glDrawArrays(GL_POINTS, 0, 1);
-				
+
 				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+
+			void canvas::draw_to_canvas(const ShaderProgram& program,
+				canvas& other_canvas)
+			{
+				other_canvas.BindFramebuffer();
+
+				switch_viewport tmp(0, 0, other_canvas.get_resolution()[0], other_canvas.get_resolution()[1]);
+
+				draw(program,other_canvas.get_resolution());
+
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
+			void canvas::draw_to_fbo(const ShaderProgram& program)
+			{
+				BindFramebuffer();
+
+				switch_viewport tmp(0, 0, resolution[0], resolution[1]);
+				draw(program, resolution);
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
+			void canvas::BindFramebuffer()
+			{
+				fbuffer.bind();
 			}
 		}
 	}
