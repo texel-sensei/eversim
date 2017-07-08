@@ -7,6 +7,5 @@ out vec3 FragColor;
 
 void main()
 {
-	//gl_FragColor = texture(tex,texcoord);
 	FragColor = texture(tex,texcoord).xyz;
 }

@@ -87,15 +87,15 @@ if(WIN32)
 endif(WIN32)
 
 ############# SOURCE ###############
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 file(GLOB_RECURSE CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/core/*.h)
 file(GLOB_RECURSE GAME_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/game/*.h)
 file(GLOB_RECURSE EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/editor/*.h)
 
-
 file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
+
 
 add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})

@@ -60,6 +60,7 @@ namespace eversim {
 					glDeleteFramebuffers(1, &fbo);
 					glDeleteTextures(1, &tex);
 					if(with_depth) glDeleteRenderbuffers(1, &depth);
+					valid = false;
 				}
 			}
 
