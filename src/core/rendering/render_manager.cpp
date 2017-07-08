@@ -38,17 +38,20 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::do_draw()
 	{
-		glPointSize(10);
+		glPointSize(5);
 		glBegin(GL_POINTS);
 		for(auto const& p : points)
 		{
+			glColor3f(1, 1, 1);
 			glVertex2f(p.x, p.y);
 		}
 		glEnd();
 
+		
 		glBegin(GL_LINES);
 		for(auto& l : lines)
 		{
+			glColor3f(1, 0, 0);
 			glVertex2f(l.a.x, l.a.y);
 			glVertex2f(l.b.x, l.b.y);
 			l.dur--;

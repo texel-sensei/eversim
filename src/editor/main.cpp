@@ -1,12 +1,14 @@
 #include "core/rendering/render_manager.h"
 #include "core/physics/physics_manager.h"
+#include "core/physics/constraints/distance_constraint.h"
 #include "core/utility/helper.h"
 
-#include "imgui/imgui_impl_sdl_gl3.h"
+#include <imgui/imgui_impl_sdl_gl3.h>
 
 #include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
+#include "core/physics/constraints/angle_constraint.h"
 
 #undef main
 
@@ -38,11 +40,13 @@ bool handle_sdl_events()
 		case SDL_QUIT:
 			return false;
 		case SDL_KEYDOWN:
-			if (skip_key) break;
+			if (skip_key)
+				break;
 			should_continue &= handle_keypress(event.key.keysym, true);
 			break;
 		case SDL_KEYUP:
-			if (skip_key) break;
+			if (skip_key)
+				break;
 			should_continue &= handle_keypress(event.key.keysym, false);
 			break;
 		default:
@@ -66,38 +70,15 @@ public:
 		return particles[0]->projected_position.y - height;
 	}
 
-	array<glm::vec2, arity> grad() const override
+	array<glm::vec2, arity()> grad() const override
 	{
-		return { glm::vec2{ 0.f,1.f } };
+		return {glm::vec2{0.f,1.f}};
 	}
 
 private:
 	float height;
 };
 
-class distance_constraint : public physics::constraint<2> {
-public:
-
-	explicit distance_constraint(float distance)
-		: distance(distance)
-	{
-		type = physics::constraint_type::equality;
-	}
-
-	float operator()() const override
-	{
-		return length(particles[0]->projected_position - particles[1]->projected_position) - distance;
-	}
-
-	array<glm::vec2, arity> grad() const override
-	{
-		const auto n = normalize(particles[0]->projected_position - particles[1]->projected_position);
-		return{ n, -n };
-	}
-
-private:
-	float distance;
-};
 
 int main(int argc, char* argv[])
 {
@@ -121,42 +102,46 @@ int main(int argc, char* argv[])
 
 	physics::physics_manager physics;
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 1; j++)
 		{
 			physics.add_particle({{i * 0.05f - 0.25f, j * 0.1f + 0.1f},{0.f,1.f},1.f});
 		}
 	}
-	auto& anchor = physics.get_particle(0);
+	auto& anchor = physics.get_particle(1);
 	anchor.inv_mass = 0;
 	anchor.vel = {};
+	physics.get_particle(0).inv_mass = 0.9;
 
-	for(int i = 0; i < physics.get_particles().size(); ++i)
+	for (int i = 0; i < physics.get_particles().size(); ++i)
 	{
-		auto c = floor_constraint{ floor_height };
+		auto c = floor_constraint{floor_height};
 		c.particles[0] = &physics.get_particle(i);
-		physics.add_constraint<1>(c);
+		physics.add_constraint(c);
 	}
 
-	for(int i = 0; i < 9; ++i)
+	auto& p0 = physics.get_particle(0);
+	auto& p1 = physics.get_particle(1);
+	auto& p2 = physics.get_particle(2);
+
+	const auto v1 = normalize(p0.pos - p1.pos);
+	const auto v2 = normalize(p2.pos - p1.pos);
+
+	auto make_distance_constraint = [&](auto& a, auto& b)
 	{
-		auto& p0 = physics.get_particle(i*3);
-		auto& down = physics.get_particle(i*3 + 1);
-		auto& down_right = physics.get_particle((i+1) * 3 + 1);
-		auto& right = physics.get_particle((i + 1) * 3);
-		auto dist = [](auto& a, auto& b) {return glm::length(a.pos - b.pos); };
-		auto make_constraint = [&](auto& a, auto& b)
-		{
-			auto c = distance_constraint{ dist(a,b) };
-			c.particles = { &a, &b };
-			physics.add_constraint<2>(c);
-		};
-		make_constraint(p0, down);
-		make_constraint(p0, right);
-		make_constraint(p0, down_right);
-		
-	}
+		auto c = physics::distance_constraint{glm::length(a.pos-b.pos) };
+		c.particles = { &a, &b };
+		physics.add_constraint(c);
+	};
+
+	make_distance_constraint(p0, p1);
+	make_distance_constraint(p2, p1);
+
+	const auto angle = acosf(dot(v1, v2));
+	auto c = physics::angle_constraint{angle};
+	c.particles = { &p0, &p1, &p2 };
+	physics.add_constraint(c);
 
 	while (handle_sdl_events())
 	{
@@ -168,17 +153,42 @@ int main(int argc, char* argv[])
 		// do rendering stuff
 		ImGui::ShowTestWindow();
 
-		static float dt = 1 / 60.f;
+
 		static bool autostep = false;
-		ImGui::InputFloat("dt", &dt);
-		ImGui::Checkbox("Autostep", &autostep);
-		if(autostep){
-			physics.integrate(dt);
-		}else
+
+
+		static bool render_all = true;
+		ImGui::Checkbox("Render all constraints", &render_all);
+		if (render_all)
 		{
-			if(ImGui::Button("step"))
+			physics.draw_constraints();
+		}
+
+		static float dt = 1 / 60.f;
+		ImGui::InputFloat("dt", &dt);
+
+		static bool atomic_steps = false;
+		ImGui::Checkbox("Atomic stepping", &atomic_steps);
+
+		if (atomic_steps || !physics.finished_frame())
+		{
+			if(ImGui::Button("atomic step"))
+			{
+				physics.atomic_step(dt);
+			}
+		} else
+		{
+			ImGui::Checkbox("Autostep", &autostep);
+
+			if (autostep)
 			{
 				physics.integrate(dt);
+			} else
+			{
+				if (ImGui::Button("step"))
+				{
+					physics.integrate(dt);
+				}
 			}
 		}
 

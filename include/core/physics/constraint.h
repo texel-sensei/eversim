@@ -12,11 +12,22 @@ namespace eversim { namespace core { namespace physics {
 		inequality
 	};
 
+	class abstract_constraint {
+		template<size_t N>
+		friend class constraint;
+
+		abstract_constraint() = default;
+	};
+
 	template<size_t N>
-	class constraint {
+	class constraint : public abstract_constraint {
 	public:
-		constexpr static auto arity = N;
 		virtual ~constraint(){};
+
+		constexpr static size_t arity()
+		{
+			return N;
+		}
 
 		virtual float operator()() const = 0;
 		virtual std::array<glm::vec2,N> grad() const = 0;
