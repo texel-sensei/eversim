@@ -127,7 +127,7 @@ namespace eversim { namespace core { namespace physics {
 
 	namespace {
 		template <size_t N>
-		void project_single_constraint(constraint<N> const& c)
+		void project_single_constraint(constraint<N> const& c, int solver_iterations)
 		{
 			const auto err = c();
 			switch (c.get_type())
@@ -163,10 +163,12 @@ namespace eversim { namespace core { namespace physics {
 			}();
 			const auto scale = err / sum;
 
+			const auto k = 1.f - powf(1.f - c.stiffness, 1.f / solver_iterations);
+
 			for (auto i = 0; i < N; ++i)
 			{
 				auto& p = c.particles[i];
-				const auto correction = -scale * p->inv_mass * grad[i];
+				const auto correction = -scale * p->inv_mass * grad[i] * k;
 				rendering::draw_line(p->projected_position, p->projected_position + correction,60);
 				p->projected_position += correction;
 			}
@@ -175,10 +177,10 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::project_constraints()
 	{
-		iterate(constraints, std::make_index_sequence<max_constraint_arity>{}, [](auto&& cs, auto){
+		iterate(constraints, std::make_index_sequence<max_constraint_arity>{}, [this](auto&& cs, auto){
 			for(auto const& c : cs)
 			{
-				project_single_constraint(*c);
+				project_single_constraint(*c, solver_iterations);
 			}
 		});
 	}
