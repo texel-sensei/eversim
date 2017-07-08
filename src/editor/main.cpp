@@ -154,6 +154,7 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_DEPTH_TEST);
 
 		program.use();
+
 		conjuration_texture.draw(program, resolution);
 		texture.draw_to_fbo(program);
 

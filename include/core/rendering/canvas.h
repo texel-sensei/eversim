@@ -2,6 +2,7 @@
 
 #include "core/rendering/shader_program.h"
 #include "core/rendering/framebuffer.h"
+#include "core/rendering/texture.h"
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -15,7 +16,8 @@ namespace eversim {
 			class canvas {
 			private:
 				glm::ivec2 resolution, position;
-				GLuint tex;
+				//GLuint tex;
+				Texture tex;
 				Framebuffer fbo;
 			public:
 				std::vector<canvas> children;
@@ -42,7 +44,7 @@ namespace eversim {
 									canvas& other_canvas);
 				void draw_to_fbo(const ShaderProgram& program);
 				//void draw_to_texture(const ShaderProgram& program, GLuint texture);
-				GLuint get_texture_id() const { return tex; };
+				GLuint get_texture_id() const { return tex.get_tex_id(); };
 				GLuint get_fbo_texture_id() const { return fbo.get_tex_id(); }
 				glm::ivec2 get_fbo_viewport() const { return fbo.viewport(); }
 				void bind_framebuffer();

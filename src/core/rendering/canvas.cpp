@@ -22,7 +22,7 @@ namespace eversim {
 				this->resolution = res;
 				this->position = pos;
 
-				glGenTextures(1, &tex);
+				/*glGenTextures(1, &tex);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -35,8 +35,9 @@ namespace eversim {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-				glBindTexture(GL_TEXTURE_2D, 0);
+				glBindTexture(GL_TEXTURE_2D, 0);*/
 
+				tex = Texture(resolution);
 				fbo = Framebuffer(resolution);
 			}
 
@@ -50,7 +51,7 @@ namespace eversim {
 
 				this->position = position;
 
-				glGenTextures(1, &tex);
+				/*glGenTextures(1, &tex);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -69,8 +70,9 @@ namespace eversim {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-				glBindTexture(GL_TEXTURE_2D, 0);
-
+				glBindTexture(GL_TEXTURE_2D, 0);*/
+				tex = Texture(path);
+				resolution = tex.get_resolution();
 				fbo = Framebuffer(resolution);
 			}
 
@@ -79,7 +81,7 @@ namespace eversim {
 			{
 				GLint loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D,tex);
+				glBindTexture(GL_TEXTURE_2D,tex.get_tex_id());
 				glUniform1i(loc, 0);
 
 				loc = glGetUniformLocation(program.getID(), "window");
