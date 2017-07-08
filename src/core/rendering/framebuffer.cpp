@@ -12,18 +12,10 @@ namespace eversim {
 									const bool with_depth) :
 				with_depth(with_depth),resolution(resolution)
 			{
-				//create framebuffer
 				glGenFramebuffers(1, &fbo);
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
 				//Texture for framebuffer
-				/*glGenTextures(1, &tex);
-				glBindTexture(GL_TEXTURE_2D, tex);
-
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution[0], resolution[1], 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glBindTexture(GL_TEXTURE_2D, 0);*/
 				color_tex0 = Texture(resolution);
 
 				if (with_depth)

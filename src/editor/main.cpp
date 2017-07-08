@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
 					pos.y  
 				)
 				, 
-				ImVec2(pos.x + 640, pos.y + 640)
+				ImVec2(pos.x + size.x, pos.y + size.y)
 			);
 
 		ImGui::End();
