@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 		nullptr
 		);
 
-	eversim::core::rendering::canvas canvas;
+	/*eversim::core::rendering::canvas canvas;
 	canvas.init(resolution,
 		glm::ivec2(0,0));
 
@@ -132,7 +132,11 @@ int main(int argc, char* argv[]) {
 
 	std::string conjuration("..\\resources\\sprites\\brick_gray0\\conjuration.png");
 	eversim::core::rendering::canvas conjuration_texture;
-	conjuration_texture.init(conjuration);
+	conjuration_texture.init(conjuration);*/
+
+	eversim::core::rendering::Texture brickwall("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::canvas empty_canvas;
+	empty_canvas.init(glm::ivec2(1920,1080));
 
 	rendering::ShaderProgram program("simple quad shader");
 	program.create();
@@ -144,7 +148,7 @@ int main(int argc, char* argv[]) {
 	});
 	program.link();
 
-
+	int cnt = 0;
 	while(handle_sdl_events())
 	{
 		ImGui_ImplSdlGL3_NewFrame(window);
@@ -153,14 +157,20 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		program.use();
+		/*program.use();
 
 		conjuration_texture.draw(program, resolution);
 		texture.draw_to_fbo(program);
 
 		//conjuration_texture.draw_to_canvas(program,texture);
 
-		glUseProgram(0);
+		glUseProgram(0);*/
+
+		empty_canvas.clear();
+		empty_canvas.place_texture(program, brickwall, glm::ivec2(cnt++, 0));
+		empty_canvas.place_texture(program, brickwall, glm::ivec2(128, 128));
+		empty_canvas.place_texture(program, brickwall, glm::ivec2(640, 640));
+		empty_canvas.draw(program,resolution);
 
 		//render
 		ImGui::ShowTestWindow();
@@ -171,7 +181,7 @@ int main(int argc, char* argv[]) {
 		ImVec2 size = ImGui::GetWindowSize();
 		//cout << size.x << "/" << size.y << endl;
 			ImGui::GetWindowDrawList()->AddImage(
-				(void*)(texture.get_fbo_texture_id()),
+				(void*)(brickwall.get_tex_id()),
 				ImVec2(
 					pos.x,
 					pos.y  

@@ -15,12 +15,9 @@ namespace eversim {
 
 			class canvas {
 			private:
-				glm::ivec2 resolution, position;
-				//GLuint tex;
-				Texture tex;
 				Framebuffer fbo;
 			public:
-				std::vector<canvas> children;
+				//std::vector<canvas> children;
 
 				explicit canvas();
 				/*
@@ -28,28 +25,28 @@ namespace eversim {
 				at position defined by the modelmatrix M
 				*/
 				void init(
-					const glm::ivec2& resolution,
-					const glm::ivec2 position = glm::ivec2(0, 0)
+					const glm::ivec2& resolution
 				);
 				/*
-				Init canvas with texture defined by path
-				at position defined by the modelmatrix M
+				Draw texture on canvas
 				*/
-				void init(const std::string& path,
-					const glm::ivec2 position = glm::ivec2(0,0));
-				void draw(const ShaderProgram& program,
-					const glm::ivec2& target_resolution
-					);
-				void draw_to_canvas(const ShaderProgram& program,
-									canvas& other_canvas);
-				void draw_to_fbo(const ShaderProgram& program);
-				//void draw_to_texture(const ShaderProgram& program, GLuint texture);
-				GLuint get_texture_id() const { return tex.get_tex_id(); };
-				GLuint get_fbo_texture_id() const { return fbo.get_tex_id(); }
+				void place_texture(const ShaderProgram& program,
+								Texture& texture, const glm::ivec2 position	
+				);
+				/*
+				Clear the framebuffer
+				*/
+				void clear();
+				/*
+				Draw the canvas without binding the framebuffer
+				*/
+				void draw(const ShaderProgram& program, 
+					const glm::ivec2& target_resolution);
+
+				GLuint get_texture_id() const { return fbo.get_tex_id(); }
 				glm::ivec2 get_fbo_viewport() const { return fbo.viewport(); }
 				void bind_framebuffer();
-
-				glm::ivec2 get_resolution() const { return resolution; }
+				glm::ivec2 get_resolution() const { return fbo.viewport(); }
 			};
 
 		}
