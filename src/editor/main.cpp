@@ -167,10 +167,10 @@ int main(int argc, char* argv[]) {
 		glUseProgram(0);*/
 
 		empty_canvas.clear();
-		empty_canvas.place_texture(program, brickwall, glm::ivec2(cnt++, 0));
-		empty_canvas.place_texture(program, brickwall, glm::ivec2(128, 128));
-		empty_canvas.place_texture(program, brickwall, glm::ivec2(640, 640));
-		empty_canvas.draw(program,resolution);
+		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
+		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
+		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
+		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		//render
 		ImGui::ShowTestWindow();

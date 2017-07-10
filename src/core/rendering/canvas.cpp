@@ -3,6 +3,8 @@
 
 #include <soil/SOIL.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -22,7 +24,9 @@ namespace eversim {
 			}
 
 			void canvas::place_texture(const ShaderProgram& program,
-				Texture& texture, const glm::ivec2 position
+				Texture& texture, 
+				const glm::vec2 translation,
+				const glm::vec2 scale
 			)
 			{
 				program.use();
@@ -36,14 +40,18 @@ namespace eversim {
 				glBindTexture(GL_TEXTURE_2D, texture.get_tex_id());
 				glUniform1i(loc, 0);
 
-				loc = glGetUniformLocation(program.getID(), "window");
+				loc = glGetUniformLocation(program.getID(), "target_resolution");
 				glUniform2f(loc, fbo.viewport()[0], fbo.viewport()[1]);
 
-				loc = glGetUniformLocation(program.getID(), "size");
+				loc = glGetUniformLocation(program.getID(), "texture_size");
 				glUniform2f(loc, texture.get_resolution()[0], texture.get_resolution()[1]);
 
-				loc = glGetUniformLocation(program.getID(), "position");
-				glUniform2f(loc, position[0], position[1]);
+				glm::mat4 T = glm::translate(glm::vec3(translation,0.f));
+				glm::mat4 S = glm::scale(glm::vec3(scale, 1));
+				glm::mat4 M = T*S;
+
+				loc = glGetUniformLocation(program.getID(), "M");
+				glUniformMatrix4fv(loc,1,GL_FALSE,&M[0][0]);
 
 				glDrawArrays(GL_POINTS, 0, 1);
 
@@ -55,7 +63,9 @@ namespace eversim {
 			}
 
 			void canvas::draw(const ShaderProgram& program, 
-				const glm::ivec2& target_resolution)
+				const glm::ivec2& target_resolution,
+				const glm::vec2 translation,
+				const glm::vec2 scale)
 			{
 
 				program.use();
@@ -65,15 +75,18 @@ namespace eversim {
 				glBindTexture(GL_TEXTURE_2D, fbo.get_tex_id());
 				glUniform1i(loc, 0);
 
-				loc = glGetUniformLocation(program.getID(), "window");
+				loc = glGetUniformLocation(program.getID(), "target_resolution");
 				glUniform2f(loc, target_resolution[0], target_resolution[1]);
 
-				loc = glGetUniformLocation(program.getID(), "size");
+				loc = glGetUniformLocation(program.getID(), "texture_size");
 				glUniform2f(loc, fbo.viewport()[0], fbo.viewport()[1]);
 
-				//TODO position !
-				loc = glGetUniformLocation(program.getID(), "position");
-				glUniform2f(loc, 0, 0);
+				glm::mat4 T = glm::translate(glm::vec3(translation, 0.f));
+				glm::mat4 S = glm::scale(glm::vec3(scale, 1));
+				glm::mat4 M = T*S;
+
+				loc = glGetUniformLocation(program.getID(), "M");
+				glUniformMatrix4fv(loc, 1, GL_FALSE, &M[0][0]);
 
 				glDrawArrays(GL_POINTS, 0, 1);
 
