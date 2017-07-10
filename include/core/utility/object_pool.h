@@ -91,6 +91,11 @@ namespace eversim { namespace core { namespace utility {
 				return !(a == b);
 			}
 
+			operator base_iterator<const U>() const
+			{
+				return const_iterator{ current_node, last_pos, pos };
+			}
+
 		private:
 			friend class object_pool;
 			using node_iterator = typename std::list<node>::iterator;
@@ -164,7 +169,7 @@ namespace eversim { namespace core { namespace utility {
 			return size() == 0;
 		}
 
-		iterator erase(const_iterator pos)
+		const_iterator erase(const_iterator pos)
 		{
 			auto* ptr = const_cast<T*>(pos.pos);
 			ptr->~T();
@@ -200,7 +205,7 @@ namespace eversim { namespace core { namespace utility {
 				}
 			}
 
-			bool is_slot_filled(T* ptr) const
+			bool is_slot_filled(T const* ptr) const
 			{
 				return filled_spots[indexof(ptr)];
 			}
@@ -276,7 +281,7 @@ namespace eversim { namespace core { namespace utility {
 			free_store.push_back(ptr);
 			auto pos = memory_map.lower_bound(ptr);
 			assert(pos != memory_map.end());
-			pos->second->mark_filled(ptr, false);
+			pos->second->mark_slot(ptr, false);
 		}
 	};
 
