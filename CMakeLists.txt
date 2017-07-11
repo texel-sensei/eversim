@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(EXTERNALS ${CMAKE_CURRENT_SOURCE_DIR}/external)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(MAIN_INCLUDE_DIR "" CACHE FILEPATH "Path to your lib includes")
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${MAIN_INCLUDE_DIR}/include)
@@ -96,6 +97,9 @@ file(GLOB_RECURSE EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/editor/*.h)
 file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
+
+source_group("utility" REGULAR_EXPRESSION /utility/)
+source_group("rendering" REGULAR_EXPRESSION /rendering/)
 
 add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
