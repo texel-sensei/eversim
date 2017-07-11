@@ -47,6 +47,15 @@ namespace eversim { namespace core { namespace utility {
 			new(place) T(std::move(t));
 		}
 
+		template<typename Iterator>
+		void insert(Iterator begin, Iterator end)
+		{
+			for(; begin != end; ++begin)
+			{
+				push_back(*begin);
+			}
+		}
+
 		template <typename U>
 		struct base_iterator {
 			using difference_type = void;
