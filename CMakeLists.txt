@@ -74,6 +74,11 @@ add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)
 SET(LIBS ${LIBS} SOIL)
 
+#catch
+set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
+add_library(Catch INTERFACE)
+target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
+
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
@@ -110,9 +115,23 @@ target_link_libraries(game eversim ${LIBS})
 target_link_libraries(editor eversim ${LIBS})
 
 #######################################################################
-#                             output dir                              #
+#                             testing                                 #
 #######################################################################
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(TEST_BIN eversim_tests)
+file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
+add_executable(${TEST_BIN} ${TEST_SOURCES})
+target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
+
+enable_testing()
+include(ParseAndAddCatchTests)
+ParseAndAddCatchTests(${TEST_BIN})
+
+add_custom_command(
+     TARGET ${TEST_BIN}
+     COMMENT "Run tests"
+     POST_BUILD 
+     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+     COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> --output-on-failures
+)
+
