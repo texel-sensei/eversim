@@ -177,7 +177,7 @@ namespace eversim { namespace core { namespace utility {
 			return ++pos;
 		}
 
-		iterator erase(const_iterator first, const_iterator last)
+		const_iterator erase(const_iterator first, const_iterator last)
 		{
 			for(;first != last; ++first)
 			{
