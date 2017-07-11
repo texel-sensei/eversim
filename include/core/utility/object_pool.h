@@ -105,7 +105,7 @@ namespace eversim { namespace core { namespace utility {
 
 			void seek_next()
 			{
-				while (true)
+				while (pos != last_pos)
 				{
 					++pos;
 					if (pos == last_pos)
