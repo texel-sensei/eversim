@@ -4,6 +4,8 @@
 
 namespace eversim { namespace core { namespace physics {
 	
+	struct body;
+
 	struct particle {
 		glm::vec2 pos;
 		glm::vec2 vel;
@@ -11,6 +13,7 @@ namespace eversim { namespace core { namespace physics {
 		float inv_mass;
 
 		glm::vec2 projected_position;
+		body* owner;
 	};
 
 }}}

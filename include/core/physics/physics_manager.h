@@ -1,8 +1,10 @@
 #pragma once
 #include "core/physics/particle.h"
 #include "core/physics/constraint.h"
+#include "core/physics/body.h"
 
 #include "core/utility/helper.h"
+#include "core/utility/object_pool.h"
 
 #include <bitset>
 #include <tuple>
@@ -13,8 +15,6 @@
 
 namespace eversim { namespace core { namespace physics {
 	
-
-
 	class physics_manager {
 	public:
 		constexpr static size_t max_constraint_arity = 3;
@@ -42,6 +42,7 @@ namespace eversim { namespace core { namespace physics {
 	private:
 		int solver_iterations = 5;
 		std::vector<particle> particles;
+		utility::object_pool<body> bodies;
 
 		struct container {
 			template<size_t I>
