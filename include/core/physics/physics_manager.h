@@ -1,7 +1,7 @@
 #pragma once
 #include "core/physics/particle.h"
 #include "core/physics/constraint.h"
-#include "core/rendering/render_manager.h"
+
 #include "core/utility/helper.h"
 
 #include <bitset>
@@ -37,7 +37,7 @@ namespace eversim { namespace core { namespace physics {
 		// debug functions
 		void atomic_step(float dt);
 		bool finished_frame() const { return current_state == simulation_state::external; }
-		void draw_constraints(std::bitset<max_constraint_arity> to_render = -1);
+		void draw_constraints(std::bitset<max_constraint_arity> to_render = ~0UL);
 
 	private:
 		int solver_iterations = 5;

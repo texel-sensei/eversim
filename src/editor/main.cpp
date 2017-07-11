@@ -93,8 +93,8 @@ int main(int argc, char* argv[])
 	ImGui_ImplSdlGL3_Init(window);
 	auto d_im = utility::finally(ImGui_ImplSdlGL3_Shutdown);
 	auto& io = ImGui::GetIO();
-	io.DisplaySize.x = resolution.x;
-	io.DisplaySize.y = resolution.y;
+	io.DisplaySize.x = float(resolution.x);
+	io.DisplaySize.y = float(resolution.y);
 
 	rendering::myrenderer = &renderer;
 	auto floor_height = -0.35f;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 	auto& anchor = physics.get_particle(1);
 	anchor.inv_mass = 0;
 	anchor.vel = {};
-	physics.get_particle(0).inv_mass = 0.9;
+	physics.get_particle(0).inv_mass = 0.9f;
 
 	for (int i = 0; i < physics.get_particles().size(); ++i)
 	{
