@@ -105,6 +105,7 @@ file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
 source_group("utility" REGULAR_EXPRESSION /utility/)
 source_group("rendering" REGULAR_EXPRESSION /rendering/)
+source_group("physics" REGULAR_EXPRESSION /physics/)
 
 add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
