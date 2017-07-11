@@ -182,7 +182,7 @@ namespace eversim { namespace core { namespace utility {
 		{
 			auto* ptr = const_cast<T*>(pos.pos);
 			ptr->~T();
-			deallocate(ptr);
+			deallocate(ptr, *pos.current_node);
 			return ++pos;
 		}
 
@@ -286,11 +286,16 @@ namespace eversim { namespace core { namespace utility {
 
 		void deallocate(T* ptr)
 		{
-			size_--;
-			free_store.push_back(ptr);
 			auto pos = memory_map.lower_bound(ptr);
 			assert(pos != memory_map.end());
-			pos->second->mark_slot(ptr, false);
+			deallocate(ptr, pos->second);
+		}
+
+		void deallocate(T* ptr, node& n)
+		{
+			size_--;
+			free_store.push_back(ptr);
+			n.mark_slot(ptr, false);
 		}
 	};
 
