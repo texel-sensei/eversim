@@ -126,12 +126,3 @@ target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
 enable_testing()
 include(ParseAndAddCatchTests)
 ParseAndAddCatchTests(${TEST_BIN})
-
-add_custom_command(
-     TARGET ${TEST_BIN}
-     COMMENT "Run tests"
-     POST_BUILD 
-     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-     COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> --output-on-failures
-)
-
