@@ -29,22 +29,25 @@ namespace eversim { namespace core { namespace utility {
 		object_pool& operator=(object_pool const&) = delete;
 
 		template <typename... Args>
-		void emplace_back(Args&&... args)
+		T* emplace(Args&&... args)
 		{
 			const auto place = allocate();
 			new(place) T(std::forward<Args>(args)...);
+			return place;
 		}
 
-		void push_back(T const& t)
+		T* insert(T const& t)
 		{
 			const auto place = allocate();
 			new(place) T(t);
+			return place;
 		}
 
-		void push_back(T&& t)
+		T* insert(T&& t)
 		{
 			const auto place = allocate();
 			new(place) T(std::move(t));
+			return place;
 		}
 
 		template<typename Iterator>
@@ -52,7 +55,7 @@ namespace eversim { namespace core { namespace utility {
 		{
 			for(; begin != end; ++begin)
 			{
-				push_back(*begin);
+				insert(*begin);
 			}
 		}
 
@@ -178,6 +181,23 @@ namespace eversim { namespace core { namespace utility {
 			return size() == 0;
 		}
 
+		iterator locate(T* ptr)
+		{
+			auto pos = memory_map.upper_bound(ptr);
+			if (pos == memory_map.begin())
+				return end();
+			pos = prev(pos);
+			if (!pos->second->contains(ptr))
+				return end();
+			return iterator{ pos->second, current_pos, ptr };
+		}
+
+		const_iterator locate(T const* ptr) const
+		{
+			auto* const nonconst_this = const_cast<object_pool*>(this);
+			return nonconst_this->locate(const_cast<T*>(ptr));
+		}
+
 		const_iterator erase(const_iterator pos)
 		{
 			auto* ptr = const_cast<T*>(pos.pos);
@@ -198,11 +218,16 @@ namespace eversim { namespace core { namespace utility {
 	private:
 		struct node {
 			static_assert(sizeof(T) >= sizeof(node*), "Objects in a pool must at leas have the size of a pointer!");
-			size_t indexof(T const* ptr) const
+			
+			size_t indexof(T const* ptr) const noexcept
 			{
 				assert(ptr >= begin());
 				assert(ptr < end());
 				return ptr - begin();
+			}
+
+			bool contains(T const* ptr) const noexcept {
+				return ptr >= begin() && ptr < end();
 			}
 
 			void mark_slot(T* ptr, bool filled)
@@ -219,22 +244,22 @@ namespace eversim { namespace core { namespace utility {
 				return filled_spots[indexof(ptr)];
 			}
 
-			T* begin()
+			T* begin() noexcept
 			{
 				return reinterpret_cast<T*>(memory);
 			}
 
-			T* end()
+			T* end() noexcept
 			{
 				return reinterpret_cast<T*>(memory + sizeof(memory));
 			}
 
-			T const* begin() const
+			T const* begin() const noexcept
 			{
 				return reinterpret_cast<T const*>(memory);
 			}
 
-			T const* end() const
+			T const* end() const noexcept
 			{
 				return reinterpret_cast<T const*>(memory + sizeof(memory));
 			}
@@ -244,9 +269,10 @@ namespace eversim { namespace core { namespace utility {
 			std::bitset<page_size> filled_spots;
 		};
 
-		std::list<node> memory;
+		using nodelist = std::list<node>;
+		nodelist memory;
 		std::vector<T*> free_store;
-		std::map<T*, node*> memory_map;
+		std::map<T const*, typename nodelist::iterator> memory_map;
 		T* current_pos = nullptr;
 		size_t size_ = 0;
 
@@ -256,7 +282,7 @@ namespace eversim { namespace core { namespace utility {
 			{
 				memory.emplace_back();
 				current_pos = memory.back().begin();
-				memory_map[current_pos] = &memory.back();
+				memory_map[current_pos] = std::prev(memory.end());
 			}
 		}
 
@@ -286,13 +312,14 @@ namespace eversim { namespace core { namespace utility {
 
 		void deallocate(T* ptr)
 		{
-			auto pos = memory_map.lower_bound(ptr);
-			assert(pos != memory_map.end());
-			deallocate(ptr, pos->second);
+			auto pos = locate(ptr);
+			assert(pos != end());
+			deallocate(ptr, *pos->current_node);
 		}
 
 		void deallocate(T* ptr, node& n)
 		{
+			assert(n.contains(ptr));
 			size_--;
 			free_store.push_back(ptr);
 			n.mark_slot(ptr, false);

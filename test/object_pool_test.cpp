@@ -8,18 +8,108 @@
 using namespace std;
 using namespace eversim::core::utility;
 
+TEST_CASE("object_pool c'tor/d'tor", "[utility][object_pool]")
+{
+	struct tester {
+		int* v;
+		tester(int* p) : v(p) { *v = *v + 1; }
+		~tester() {*v = *v -1; }
+		tester(tester const&) = delete;
+		tester& operator=(tester const&) = delete;
+	};
+
+	int check = 0;
+	object_pool<tester, 2> the_pool;
+
+	SECTION("single object test") {
+		REQUIRE(check == 0);
+		auto obj_ptr = the_pool.emplace(&check);
+		REQUIRE(check == 1);
+		const auto it = the_pool.locate(obj_ptr);
+		REQUIRE(it != the_pool.end());
+		the_pool.erase(it);
+		REQUIRE(check == 0);
+	}
+
+	SECTION("multiple objects")
+	{
+		REQUIRE(check == 0);
+		for(int i = 0; i < 30; ++i)
+		{
+			the_pool.emplace(&check);
+			REQUIRE(check == (i+1));
+		}
+		REQUIRE(check == 30);
+
+		SECTION("deletion")
+		{
+			while(!the_pool.empty())
+			{
+				the_pool.erase(the_pool.begin());
+			}
+			REQUIRE(check == 0);
+		}
+	}
+}
+
+TEST_CASE("object_pool locate", "[utility][object_pool]")
+{
+	object_pool<long long,4> the_pool;
+	long long* seven_ptr = nullptr;
+	for(int i = 0; i < 20; ++i)
+	{
+		auto ptr = the_pool.insert(i);
+		if (i == 7)
+			seven_ptr = ptr;
+	}
+
+	REQUIRE(*seven_ptr == 7);
+
+	SECTION("locate invalid")
+	{
+		REQUIRE(the_pool.locate(nullptr) == the_pool.end());
+		long long something_else = 9;
+		auto other_ptr = &something_else;
+		REQUIRE(the_pool.locate(other_ptr) == the_pool.end());
+	}
+
+	SECTION("find and locate simple") {
+		auto find_it = find(the_pool.begin(), the_pool.end(), 7);
+		REQUIRE(*find_it == 7);
+
+		auto locate_it = the_pool.locate(seven_ptr);
+		REQUIRE(locate_it != the_pool.end());
+		REQUIRE(find_it == locate_it);
+		REQUIRE(*locate_it == 7);
+	}
+	SECTION("find and locate extra")
+	{
+		for(auto& obj : the_pool)
+		{
+			auto find_it = find(the_pool.begin(), the_pool.end(), obj);
+			REQUIRE(*find_it == obj);
+			REQUIRE(&(*find_it) == &obj);
+
+			auto locate_it = the_pool.locate(&obj);
+			INFO("Current object is " << obj);
+			REQUIRE(find_it == locate_it);
+			REQUIRE(*locate_it == obj);
+		}
+	}
+}
+
 TEST_CASE("object_pool size", "[utility][object_pool]")
 {
 	object_pool<long long> the_pool;
 	REQUIRE(the_pool.size() == 0);
 	REQUIRE(the_pool.empty() == true);
 
-	the_pool.push_back(5);
+	the_pool.insert(5);
 
 	REQUIRE(the_pool.size() == 1);
 	REQUIRE(the_pool.empty() == false);
 
-	the_pool.push_back(7);
+	the_pool.insert(7);
 
 	REQUIRE(the_pool.size() == 2);
 }
@@ -39,7 +129,7 @@ TEST_CASE("Iterating object_pool", "[utility][object_pool]")
 	
 	SECTION("Iterate single element")
 	{
-		the_pool.push_back(5);
+		the_pool.insert(5);
 		REQUIRE(the_pool.size() == 1);
 		for(auto&& e : the_pool)
 		{
@@ -51,7 +141,7 @@ TEST_CASE("Iterating object_pool", "[utility][object_pool]")
 		auto numbers = vector<int>(30, 0);
 		for(int i = 0; i < numbers.size(); ++i)
 		{
-			the_pool.push_back(i);
+			the_pool.insert(i);
 		}
 
 		SECTION("find all elements")
