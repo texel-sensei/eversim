@@ -1,7 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <array>
+#include <vector>
+
 
 namespace eversim { namespace core { namespace physics {
 	
@@ -12,32 +13,25 @@ namespace eversim { namespace core { namespace physics {
 		inequality
 	};
 
-	class abstract_constraint {
-		template<size_t N>
-		friend class constraint;
-
-		abstract_constraint() = default;
-	};
-
-	template<size_t N>
-	class constraint : public abstract_constraint {
+	class constraint{
 	public:
+		explicit constraint(size_t N) : arity(N) {}
 		virtual ~constraint(){};
 
-		constexpr static size_t arity()
-		{
-			return N;
-		}
+		constraint(constraint const&) = delete;
+		constraint& operator=(constraint const&) = delete;
 
 		virtual float operator()() const = 0;
-		virtual std::array<glm::vec2,N> grad() const = 0;
+		virtual std::vector<glm::vec2> grad() const = 0;
 
 		constraint_type get_type() const noexcept { return type; }
+		size_t get_arity() const noexcept { return arity;}
 
-		std::array<particle*, N> particles;
+		std::vector<particle*> particles;
 		float stiffness = 1.f;
 	protected:
 		constraint_type type = constraint_type::equality;
+		size_t arity;
 	};
 
 }}}

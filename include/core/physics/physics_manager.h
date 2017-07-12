@@ -1,6 +1,6 @@
 #pragma once
 #include "core/physics/particle.h"
-#include "core/physics/constraint.h"
+#include "core/physics/constraints/constraint_base.h"
 #include "core/physics/body.h"
 
 #include "core/utility/helper.h"
@@ -25,15 +25,6 @@ namespace eversim { namespace core { namespace physics {
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle> const& get_particles() const { return particles; }
 
-		template<typename Constraint,
-			typename = std::enable_if_t<std::is_base_of<abstract_constraint, Constraint>::value>
-		>
-		void add_constraint(Constraint const& c)
-		{
-			static_assert(c.arity() <= max_constraint_arity, "Constraint arity is too big, increase max_constraint_arity!");
-			std::get<c.arity() - 1>(constraints).push_back(std::make_unique<Constraint>(c));
-		}
-
 		// debug functions
 		void atomic_step(float dt);
 		bool finished_frame() const { return current_state == simulation_state::external; }
@@ -43,20 +34,8 @@ namespace eversim { namespace core { namespace physics {
 		int solver_iterations = 5;
 		std::vector<particle> particles;
 		utility::object_pool<body> bodies;
-
-		struct container {
-			template<size_t I>
-			using constraint_container = std::vector<std::unique_ptr<constraint<I+1>>>;
-
-			template<size_t... Is >
-			static auto make(std::index_sequence<Is...>)->std::tuple<constraint_container<Is>...>;
-
-			template<size_t MaxArity>
-			using type = decltype(make(std::make_index_sequence<MaxArity>{}));
-		};
-
 		
-		container::type<max_constraint_arity> constraints;
+		std::vector<std::unique_ptr<constraint>> constraints;
 
 		enum class simulation_state {
 			external,

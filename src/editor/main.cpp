@@ -56,11 +56,11 @@ bool handle_sdl_events()
 	return should_continue;
 }
 
-class floor_constraint : public physics::constraint<1> {
+class floor_constraint : public physics::constraint {
 public:
 
 	explicit floor_constraint(float height)
-		: height(height)
+		: constraint(1), height(height)
 	{
 		type = physics::constraint_type::inequality;
 	}
@@ -70,7 +70,7 @@ public:
 		return particles[0]->projected_position.y - height;
 	}
 
-	array<glm::vec2, arity()> grad() const override
+	vector<glm::vec2> grad() const override
 	{
 		return {glm::vec2{0.f,1.f}};
 	}
@@ -78,7 +78,6 @@ public:
 private:
 	float height;
 };
-
 
 int main(int argc, char* argv[])
 {
@@ -101,47 +100,6 @@ int main(int argc, char* argv[])
 	rendering::draw_line({-1.f,floor_height}, {1.f,floor_height}, 99999999);
 
 	physics::physics_manager physics;
-
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 1; j++)
-		{
-			physics.add_particle({{i * 0.05f - 0.25f, j * 0.1f + 0.1f},{0.f,1.f},1.f});
-		}
-	}
-	auto& anchor = physics.get_particle(1);
-	anchor.inv_mass = 0;
-	anchor.vel = {};
-	physics.get_particle(0).inv_mass = 0.9f;
-
-	for (int i = 0; i < physics.get_particles().size(); ++i)
-	{
-		auto c = floor_constraint{floor_height};
-		c.particles[0] = &physics.get_particle(i);
-		physics.add_constraint(c);
-	}
-
-	auto& p0 = physics.get_particle(0);
-	auto& p1 = physics.get_particle(1);
-	auto& p2 = physics.get_particle(2);
-
-	const auto v1 = normalize(p0.pos - p1.pos);
-	const auto v2 = normalize(p2.pos - p1.pos);
-
-	auto make_distance_constraint = [&](auto& a, auto& b)
-	{
-		auto c = physics::distance_constraint{glm::length(a.pos-b.pos) };
-		c.particles = { &a, &b };
-		physics.add_constraint(c);
-	};
-
-	make_distance_constraint(p0, p1);
-	make_distance_constraint(p2, p1);
-
-	const auto angle = acosf(dot(v1, v2));
-	auto c = physics::angle_constraint{angle};
-	c.particles = { &p0, &p1, &p2 };
-	physics.add_constraint(c);
 
 	while (handle_sdl_events())
 	{

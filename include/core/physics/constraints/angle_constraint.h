@@ -1,16 +1,16 @@
 #pragma once
 
-#include "core/physics/constraint.h"
+#include "core/physics/constraints/constraint_base.h"
 #include "core/physics/particle.h"
 #include <array>
 
 namespace eversim { namespace core { namespace physics {
 
-	class angle_constraint : public constraint<3> {
+	class angle_constraint : public constraint {
 	public:
 
 		explicit angle_constraint(float target_angle)
-			: target_angle(target_angle)
+			: constraint(3), target_angle(target_angle)
 		{
 			type = constraint_type::equality;
 		}
@@ -24,7 +24,7 @@ namespace eversim { namespace core { namespace physics {
 			return angle - target_angle;
 		}
 
-		std::array<glm::vec2, arity()> grad() const override
+		std::vector<glm::vec2> grad() const override
 		{
 			//const auto n = normalize(particles[0]->projected_position - particles[1]->projected_position);
 			//return{ n, -n };

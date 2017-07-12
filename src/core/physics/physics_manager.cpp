@@ -1,20 +1,12 @@
 #include "core/physics/physics_manager.h"
-#include "core/physics/constraint.h"
+#include "core/physics/constraints/constraint_base.h"
 #include "core/rendering/render_manager.h"
 #include <glm/gtx/norm.hpp>
 #include <bitset>
 
-namespace eversim { namespace core { namespace physics {
+using namespace std;
 
-	namespace {
-		template <typename Constraints, typename Func, size_t... Is>
-		void iterate(Constraints const& c, std::index_sequence<Is...>, Func&& fun)
-		{
-			std::initializer_list<int>{
-				(std::forward<Func>(fun)(std::get<Is>(c), Is), 0)...
-			};
-		}
-	}
+namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::add_particle(particle const& p)
 	{
@@ -85,27 +77,22 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
-	void physics_manager::draw_constraints(std::bitset<max_constraint_arity> to_render)
+	void physics_manager::draw_constraints(bitset<max_constraint_arity> to_render)
 	{
-		iterate(constraints, std::make_index_sequence<max_constraint_arity>{}, [to_render](auto const& cs, size_t I)
-		{
-			if(to_render[I])
+		for (auto const& c : constraints) {
+			if (!to_render[c->get_arity()])
+				continue;
+			for (int i = 0; i < c->get_arity(); ++i)
 			{
-				for (auto const& c : cs) {
-					for (int i = 0; i < c->arity(); ++i)
-					{
-						for (int j = 0; j < i; ++j)
-						{
-							auto p1 = c->particles[i];
-							auto p2 = c->particles[j];
-							rendering::draw_line(p1->projected_position, p2->projected_position);
-						}
-					}
+				for (int j = 0; j < i; ++j)
+				{
+					auto p1 = c->particles[i];
+					auto p2 = c->particles[j];
+					rendering::draw_line(p1->projected_position, p2->projected_position);
 				}
 			}
-		});
+		}
 	}
-
 
 	void physics_manager::apply_external_forces(float dt)
 	{
@@ -113,7 +100,7 @@ namespace eversim { namespace core { namespace physics {
 		{
 			if (p.inv_mass == 0.f)
 				continue;
-			p.vel += dt * glm::vec2{0,-1};
+			p.vel += dt * glm::vec2{0,-1}; // TODO: don't hardcode, support for other forces
 		}
 	}
 
@@ -126,8 +113,7 @@ namespace eversim { namespace core { namespace physics {
 	}
 
 	namespace {
-		template <size_t N>
-		void project_single_constraint(constraint<N> const& c, int solver_iterations)
+		void project_single_constraint(constraint const& c, int solver_iterations)
 		{
 			const auto err = c();
 			switch (c.get_type())
@@ -150,14 +136,14 @@ namespace eversim { namespace core { namespace physics {
 				}
 			}
 
-			const auto grad = c.grad();
+			auto grad = c.grad();
 
 			const auto sum = [&]
 			{
 				auto sum = 0.f;
-				for (auto i = 0; i < N; ++i)
+				for (auto i = 0; i < c.get_arity(); ++i)
 				{
-					sum += c.particles[i]->inv_mass * length2(grad[i]);
+					sum += c.particles[i]->inv_mass * glm::length2(grad[i]);
 				}
 				return sum;
 			}();
@@ -165,7 +151,7 @@ namespace eversim { namespace core { namespace physics {
 
 			const auto k = 1.f - powf(1.f - c.stiffness, 1.f / solver_iterations);
 
-			for (auto i = 0; i < N; ++i)
+			for (auto i = 0; i < c.get_arity(); ++i)
 			{
 				auto& p = c.particles[i];
 				const auto correction = -scale * p->inv_mass * grad[i] * k;
@@ -177,11 +163,9 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::project_constraints()
 	{
-		iterate(constraints, std::make_index_sequence<max_constraint_arity>{}, [this](auto&& cs, auto){
-			for(auto const& c : cs)
-			{
-				project_single_constraint(*c, solver_iterations);
-			}
-		});
+		for(auto const& c : constraints)
+		{
+			project_single_constraint(*c, solver_iterations);
+		}	
 	}
 }}}
