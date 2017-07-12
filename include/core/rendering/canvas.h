@@ -32,8 +32,8 @@ namespace eversim {
 				*/
 				void place_texture(const ShaderProgram& program,
 								Texture& texture,
-								const glm::vec2 translation,
-								const glm::vec2 scale
+								const glm::vec2 translation = glm::vec2(0, 0),
+					const glm::vec2 scale = glm::vec2(0, 0)
 				);
 				/*
 				Clear the framebuffer

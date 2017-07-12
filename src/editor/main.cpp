@@ -135,6 +135,13 @@ int main(int argc, char* argv[]) {
 	conjuration_texture.init(conjuration);*/
 
 	eversim::core::rendering::Texture brickwall("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::Texture brickwall_linear("..\\resources\\sprites\\brick_gray0\\brick_gray0.png",
+		[]() {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	});
 	eversim::core::rendering::canvas empty_canvas;
 	empty_canvas.init(glm::ivec2(1920,1080));
 
@@ -170,6 +177,7 @@ int main(int argc, char* argv[]) {
 		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
+		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		//render

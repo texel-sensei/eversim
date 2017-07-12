@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(EXTERNALS ${CMAKE_CURRENT_SOURCE_DIR}/external)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(MAIN_INCLUDE_DIR "" CACHE FILEPATH "Path to your lib includes")
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${MAIN_INCLUDE_DIR}/include)
@@ -73,6 +74,11 @@ add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)
 SET(LIBS ${LIBS} SOIL)
 
+#catch
+set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
+add_library(Catch INTERFACE)
+target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
+
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
@@ -92,10 +98,13 @@ file(GLOB_RECURSE CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/core/*.h)
 file(GLOB_RECURSE GAME_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/game/*.h)
 file(GLOB_RECURSE EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/editor/*.h)
 
+
 file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
+source_group("utility" REGULAR_EXPRESSION /utility/)
+source_group("rendering" REGULAR_EXPRESSION /rendering/)
 
 add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
@@ -106,9 +115,14 @@ target_link_libraries(game eversim ${LIBS})
 target_link_libraries(editor eversim ${LIBS})
 
 #######################################################################
-#                             output dir                              #
+#                             testing                                 #
 #######################################################################
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(TEST_BIN eversim_tests)
+file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
+add_executable(${TEST_BIN} ${TEST_SOURCES})
+target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
+
+enable_testing()
+include(ParseAndAddCatchTests)
+ParseAndAddCatchTests(${TEST_BIN})
