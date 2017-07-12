@@ -15,7 +15,7 @@ namespace eversim {
 
 			utility::texture_loader Texture::loader;
 
-			Texture::Texture() : valid_empty(false)
+			Texture::Texture()
 			{}
 
 			Texture::Texture(const ivec2& resolution,
@@ -36,20 +36,21 @@ namespace eversim {
 
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				valid_empty = true;
+				valid = true;
 			}
 
 			Texture::Texture(const string& path,
-				std::function<void()> filtering) : valid_empty(false)
+				std::function<void()> filtering)
 			{
-				unsigned char* image = SOIL_load_image(path.c_str(),
-					&resolution[0], &resolution[1], 0, SOIL_LOAD_RGB);
-				SOIL_free_image_data(image);
-
 				//Let the loader create a texture with immutable storage
 				//this needs opengl 4.2
-				tex_ptr = loader.load_file(path);
-				GLuint base_tex_id = *tex_ptr;
+				tex_ptr = loader.load(path);
+				utility::texture_packet& tp = *tex_ptr;
+				GLuint base_tex_id = tp.tex_id;
+				resolution = tp.resolution;
+
+				LOG(INFO) << "Create texture with size " << resolution[0] << "/" <<
+					resolution[1];
 
 				//Generate the texture we want to use for the view
 				glGenTextures(1, &tex_id);
@@ -60,11 +61,13 @@ namespace eversim {
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 				filtering();
 				glBindTexture(GL_TEXTURE_2D, 0);
+
+				valid = true;
 			}
 
 			Texture::Texture(Texture&& other)
 			{
-				std::swap(valid_empty, other.valid_empty);
+				std::swap(valid, other.valid);
 				std::swap(tex_id, other.tex_id);
 				std::swap(resolution, other.resolution);
 				std::swap(tex_ptr, other.tex_ptr);
@@ -72,15 +75,15 @@ namespace eversim {
 
 			Texture::~Texture()
 			{
-				if (valid_empty) {
+				if (valid) {
 					glDeleteTextures(1, &tex_id);
-					valid_empty = false;
+					valid = false;
 				}
 			}
 
 			Texture& Texture::operator=(Texture&& other)
 			{
-				std::swap(valid_empty,other.valid_empty);
+				std::swap(valid,other.valid);
 				std::swap(tex_id, other.tex_id);
 				std::swap(resolution, other.resolution);
 				std::swap(tex_ptr, other.tex_ptr);

@@ -35,7 +35,6 @@ public:
 		std::string sourcecode("");
 		std::string line;
 
-		
 		while (std::getline(file, line)) {
 			sourcecode += line + '\n';
 		}

@@ -24,23 +24,26 @@ namespace eversim {
 			class Texture {
 			private:
 
-				static utility::texture_loader loader;
-
-				bool valid_empty;
+				bool valid = false;
 				GLuint tex_id;	
-				std::shared_ptr<GLuint> tex_ptr;
+				std::shared_ptr<utility::texture_packet> tex_ptr;
 				glm::ivec2 resolution;
 
 			public:
+
+				static utility::texture_loader loader;
+
 				Texture();
-				Texture(const glm::ivec2& resolution,
+				explicit Texture(const glm::ivec2& resolution,
 					std::function<void()> filtering = default_filtering);
-				Texture(const std::string& string,
+				explicit Texture(const std::string& string,
 					std::function<void()> filtering = default_filtering);
 				Texture(Texture&& other);
+				Texture(Texture&) = delete;
 
 				~Texture();
 
+				Texture& operator=(const Texture& other) = delete;
 				Texture& operator=(Texture&& other);
 
 				const GLuint get_tex_id() const;

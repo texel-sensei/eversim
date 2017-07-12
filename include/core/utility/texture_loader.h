@@ -14,12 +14,29 @@ namespace eversim {
 	namespace core {
 		namespace utility {
 
-			struct texture_key {
-				std::string name;
+			struct texture_packet {
 				GLuint tex_id;
+				glm::ivec2 resolution;
+
+				texture_packet(const texture_packet&) = delete;
+
+				texture_packet(const GLuint tid, const glm::ivec2 res) :
+					tex_id(tid), resolution(res)
+				{}
+
+				~texture_packet() {
+					glDeleteTextures(1, &tex_id);
+					LOG(INFO) << "deleted texture";
+				}
+
+				texture_packet& operator=(const texture_packet&) = delete;
+
+				bool operator==(const texture_packet& other) const {
+					return tex_id == other.tex_id;
+				}
 			};
 
-			class texture_loader : public resource_manager<texture_loader, std::string, GLuint>
+			class texture_loader : public resource_manager<texture_loader, std::string, texture_packet>
 			{
 			public:
 				std::shared_ptr<value_type> load_file(std::string const& s) const
@@ -52,18 +69,7 @@ namespace eversim {
 				
 					SOIL_free_image_data(image);
 
-					std::shared_ptr<value_type> ptr(
-						new GLuint(tex_id),
-						[](GLuint* id)
-						{
-							glDeleteTextures(1, id);
-							delete id;
-							id = nullptr;
-							LOG(INFO) << "delete texture";
-						}
-					);
-
-					return ptr;
+					return std::make_shared<texture_packet>(tex_id,res);
 				}
 			};
 

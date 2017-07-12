@@ -5,6 +5,8 @@
 
 #include "core/rendering/canvas.h"
 #include "core/rendering/shader_program.h"
+#include "core/rendering/renderable_entity.h"
+#include "core/rendering/multibuffer.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
@@ -134,8 +136,22 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::canvas conjuration_texture;
 	conjuration_texture.init(conjuration);*/
 
-	eversim::core::rendering::Texture brickwall("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
-	eversim::core::rendering::Texture brickwall_linear("..\\resources\\sprites\\brick_gray0\\brick_gray0.png",
+	eversim::core::rendering::Multibuffer data("testbuffer");
+	data.attach(
+	{ 
+		{ 1,1,0.5 }, 
+		{ 0,1,0.5 },
+		{ 1,0,0.5 },
+		{ 0,0,0.5 }
+	}
+	);
+	data.set_draw_mode(GL_QUADS, 0, 4);
+	data.create_and_upload();
+
+	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
+	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
+	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -155,6 +171,15 @@ int main(int argc, char* argv[]) {
 	});
 	program.link();
 
+	rendering::ShaderProgram vertex_only_shaderprogram("simple shader");
+	vertex_only_shaderprogram.create();
+	vertex_only_shaderprogram.attach
+	({
+		{ "..\\resources\\shader\\vertex_only_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\vertex_only_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	vertex_only_shaderprogram.link();
+
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
@@ -164,21 +189,17 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		/*program.use();
-
-		conjuration_texture.draw(program, resolution);
-		texture.draw_to_fbo(program);
-
-		//conjuration_texture.draw_to_canvas(program,texture);
-
-		glUseProgram(0);*/
-
 		empty_canvas.clear();
 		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
 		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
+		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
+
+		vertex_only_shaderprogram.use();
+		data.bind_and_draw();
+		glUseProgram(0);
 
 		//render
 		ImGui::ShowTestWindow();
