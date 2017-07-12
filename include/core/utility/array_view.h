@@ -90,7 +90,7 @@ namespace eversim { namespace core { namespace utility {
 
 		array_view<T> slice(size_t left, size_t right) const
 		{
-			return array_view<T>(data_ + left, n - right);
+			return array_view<T>(data_ + left, n - right - left);
 		}
 
 		array_view<T> slice_n(size_t offset, size_t n) const
@@ -100,7 +100,7 @@ namespace eversim { namespace core { namespace utility {
 
 		operator bool() const noexcept
 		{
-			return data_;
+			return data_ && n;
 		}
 
 		operator array_view<const T>()
