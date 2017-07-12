@@ -89,6 +89,22 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
+	namespace {
+		void check_remainder(string const& name, istream& data)
+		{
+			if (data) {
+				data.exceptions(istream::badbit);
+				data >> ws;
+				string remainder;
+				getline(data, remainder);
+
+				if (!remainder.empty() && remainder[0] != '#')
+				{
+					throw runtime_error{ "Found remaining text while parsing "+ name + "!: " + remainder };
+				}
+			}
+		}
+	}
 
 	particle_descriptor particle_descriptor::parse(std::string const& str)
 	{
@@ -97,23 +113,28 @@ namespace eversim { namespace core { namespace physics {
 		data.exceptions(istream::badbit | istream::failbit);
 
 		data >> desc.pos.x >> desc.pos.y;
-		if(data) {
-			data.exceptions(istream::badbit);
-			data >> ws;
-			string remainder;
-			getline(data, remainder);
-
-			if(!remainder.empty() && remainder[0] != '#')
-			{
-				throw runtime_error{"Found remaining text while parsing particle!: " + remainder};
-			}
-		}
+		check_remainder("particle", data);
 		return desc;
 	}
 
 	constraint_descriptor constraint_descriptor::parse(std::string const& str)
 	{
-		throw "TODO!";
+		auto desc = constraint_descriptor{};
+		auto data = istringstream(str);
+		data.exceptions(istream::badbit | istream::failbit);
+		
+		data >> desc.arity;
+		desc.particles.resize(desc.arity);
+		for(int i = 0; i < desc.arity; ++i)
+		{
+			data >> desc.particles[i];
+		}
+		data >> desc.stiffness;
+		data >> desc.type;
+
+		check_remainder("constraint", data);
+
+		return desc;
 	}
 
 }}}
