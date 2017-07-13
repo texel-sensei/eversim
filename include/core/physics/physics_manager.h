@@ -39,6 +39,8 @@ namespace eversim { namespace core { namespace physics {
 		
 		std::vector<std::unique_ptr<constraint>> constraints;
 
+		utility::array_view<particle> allocate_particles(size_t num);
+
 		enum class simulation_state {
 			external,
 			damp,

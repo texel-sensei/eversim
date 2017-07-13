@@ -17,12 +17,12 @@ namespace eversim { namespace core { namespace physics {
 		auto* bdy = bodies.emplace();
 
 		// reserve space for new particles
-		particles.reserve(particles.size() + templ.particles.size());
-		auto old_size = particles.size();
-
+		
 		auto const& p_tmpl = templ.particles;
+		bdy->particles = allocate_particles(p_tmpl.size());
+
 		transform(
-			p_tmpl.begin(), p_tmpl.end(), back_inserter(particles),
+			p_tmpl.begin(), p_tmpl.end(), bdy->particles.begin(),
 			[&](particle_descriptor const& desc)
 		{
 			particle p;
@@ -30,8 +30,6 @@ namespace eversim { namespace core { namespace physics {
 			p.owner = bdy;
 			return p;
 		});
-		bdy->particles = particles;
-		bdy->particles.slice(old_size, 0);
 
 		// create constraints
 		for(auto const& cd : templ.constraints)
@@ -133,6 +131,26 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::add_constraint(std::unique_ptr<constraint> c)
 	{
 		constraints.push_back(move(c));
+	}
+
+	utility::array_view<particle> physics_manager::allocate_particles(size_t num)
+	{
+		const auto oldsize = particles.size();
+		const auto old_capacity = particles.capacity();
+
+		particles.resize(oldsize + num);
+
+		if (oldsize + num > old_capacity)
+		{
+			auto* ptr = particles.data();
+			for (auto& b : bodies)
+			{
+				auto s = b.particles.size();
+				b.particles = utility::make_array_view(ptr, s);
+				ptr += s;
+			}
+		}
+		return utility::make_array_view(particles).slice(oldsize, 0);
 	}
 
 	void physics_manager::apply_external_forces(float dt)
