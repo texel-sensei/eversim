@@ -111,6 +111,20 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
+	std::string physics_manager::get_step_name() const
+	{
+		switch(current_state)
+		{
+		case simulation_state::external: return "Applying external forces";
+		case simulation_state::damp: return "Damping velocity";
+		case simulation_state::apply_velocity: return "Moving particles by v*dt";
+		case simulation_state::constraint_iteration:
+			return "Constraint solver " + to_string(current_iteration) + "/" + to_string(solver_iterations) ;
+		case simulation_state::apply_changes: return "Moving particles to projected pos";
+		default: return "Invalid state!";
+		}
+	}
+
 	void physics_manager::draw_constraints(bitset<max_constraint_arity> to_render)
 	{
 		for (auto const& c : constraints) {
