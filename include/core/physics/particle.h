@@ -10,7 +10,7 @@ namespace eversim { namespace core { namespace physics {
 		glm::vec2 pos;
 		glm::vec2 vel;
 
-		float inv_mass;
+		float inv_mass = 1.f;
 
 		glm::vec2 projected_position;
 		body* owner;
