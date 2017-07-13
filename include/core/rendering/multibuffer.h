@@ -16,7 +16,7 @@ namespace eversim {
 			class Multibuffer
 			{
 			public:
-				std::vector<std::vector<glm::vec3>> arrays;
+				std::vector<std::vector<glm::fvec3>> arrays;
 
 				GLenum Type = 0;
 				GLuint VaoId = 0;
@@ -40,8 +40,8 @@ namespace eversim {
 				void create_and_upload() { create(); upload(); }
 				void set_draw_mode(GLenum type, GLint first, GLint count);
 				void bind_and_draw() const;
-				void attach(const std::vector<glm::vec3>& data/*,size_t elems,size_t parts*/);
-				void attach(std::vector<glm::vec3>&& data/*,size_t elems,size_t parts*/);
+				void attach(const std::vector<glm::fvec3>& data/*,size_t elems,size_t parts*/);
+				void attach(std::vector<glm::fvec3>&& data/*,size_t elems,size_t parts*/);
 			};
 
 		}
