@@ -9,6 +9,7 @@
 
 #include <imgui/imgui_impl_sdl_gl3.h>
 
+#define ELPP_FEATURE_PERFORMANCE_TRACKING
 #include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
@@ -29,6 +30,8 @@ bool handle_keypress(SDL_Keysym sym, bool /*down*/)
 	}
 	return true;
 }
+
+function<void(glm::ivec2, int)> mouse_click;
 
 bool handle_sdl_events()
 {
@@ -53,6 +56,13 @@ bool handle_sdl_events()
 				break;
 			should_continue &= handle_keypress(event.key.keysym, false);
 			break;
+		case SDL_MOUSEBUTTONDOWN:{
+			if (io.WantCaptureMouse)
+				break;
+			auto pos = glm::ivec2{ event.button.x, event.button.y };
+			mouse_click(pos,event.button.button);
+			break;
+		}
 		default:
 			break;
 		}
@@ -113,18 +123,32 @@ int main(int argc, char* argv[])
 
 	auto boulder_templ = loader.load("boulder.bdy");
 
-	physics.add_body(*boulder_templ, {0.f, 0.1f}, 0.1f);
-	physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f);
-	physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f);
-
-	for(auto& p : physics.get_particles())
+	auto add_floor_constraint = [&](physics::body* b)
 	{
-		auto owner = p.owner;
-		size_t offset = &p - owner->particles.data();
-		physics.add_constraint(make_unique<floor_constraint>(
-			physics::body_offset_ptr{owner,offset}, floor_height)
-		);
-	}
+		for(auto& p : b->particles)
+		{
+			size_t offset = &p - b->particles.data();
+			physics.add_constraint(make_unique<floor_constraint>(
+				physics::body_offset_ptr{ b,offset }, floor_height)
+			);
+		}
+	};
+
+	add_floor_constraint(physics.add_body(*boulder_templ, {  0.f, 0.1f }, 0.1f));
+	add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
+	add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
+
+	mouse_click = [&](glm::ivec2 pos, int button)
+	{
+		auto ss_pos = glm::vec2(pos) / glm::vec2(resolution);
+		ss_pos = ss_pos*2.f - 1.f;
+		ss_pos.y *= -1;
+		LOG(INFO) << "Pressed " << button;
+
+		if(button == 1) {	
+			add_floor_constraint(physics.add_body(*boulder_templ, ss_pos, 0.1f));
+		}
+	};
 
 	while (handle_sdl_events())
 	{
@@ -163,16 +187,11 @@ int main(int argc, char* argv[])
 		{
 			ImGui::Checkbox("Autostep", &autostep);
 
-			if (autostep)
+			if (autostep || ImGui::Button("step"))
 			{
+				TIMED_SCOPE(timer, "physics simulation");
 				physics.integrate(dt);
-			} else
-			{
-				if (ImGui::Button("step"))
-				{
-					physics.integrate(dt);
-				}
-			}
+			} 
 		}
 
 		for (auto&& p : physics.get_particles())
