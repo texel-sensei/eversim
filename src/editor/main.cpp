@@ -179,6 +179,7 @@ int main(int argc, char* argv[])
 
 		if (atomic_steps || !physics.finished_frame())
 		{
+			ImGui::Text("Next step: %s", physics.get_step_name().c_str());
 			if(ImGui::Button("atomic step"))
 			{
 				physics.atomic_step(dt);
