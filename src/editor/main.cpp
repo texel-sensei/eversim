@@ -1,6 +1,10 @@
 #include "core/rendering/render_manager.h"
+
 #include "core/physics/physics_manager.h"
+#include "core/physics/body_template.h"
 #include "core/physics/constraints/distance_constraint.h"
+#include "core/physics/constraints/angle_constraint.h"
+
 #include "core/utility/helper.h"
 
 #include <imgui/imgui_impl_sdl_gl3.h>
@@ -8,7 +12,7 @@
 #include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
-#include "core/physics/constraints/angle_constraint.h"
+
 
 #undef main
 
@@ -59,14 +63,16 @@ bool handle_sdl_events()
 class floor_constraint : public physics::constraint {
 public:
 
-	explicit floor_constraint(float height)
+	explicit floor_constraint(physics::body_offset_ptr p, float height)
 		: constraint(1), height(height)
 	{
 		type = physics::constraint_type::inequality;
+		particles[0] = p;
 	}
 
 	float operator()() const override
 	{
+		assert(particles.size() == get_arity());
 		return particles[0]->projected_position.y - height;
 	}
 
@@ -100,6 +106,25 @@ int main(int argc, char* argv[])
 	rendering::draw_line({-1.f,floor_height}, {1.f,floor_height}, 99999999);
 
 	physics::physics_manager physics;
+	physics::body_template_loader loader;
+
+	loader.register_factory("distance", make_unique<physics::distance_constraint_factory>());
+	loader.add_search_directory("../resources/physics");
+
+	auto boulder_templ = loader.load("boulder.bdy");
+
+	physics.add_body(*boulder_templ, {0.f, 0.1f}, 0.1f);
+	physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f);
+	physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f);
+
+	for(auto& p : physics.get_particles())
+	{
+		auto owner = p.owner;
+		size_t offset = &p - owner->particles.data();
+		physics.add_constraint(make_unique<floor_constraint>(
+			physics::body_offset_ptr{owner,offset}, floor_height)
+		);
+	}
 
 	while (handle_sdl_events())
 	{

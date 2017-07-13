@@ -6,22 +6,20 @@ using namespace std;
 
 namespace eversim { namespace core { namespace physics {
 
+	void body_template_loader::register_factory(std::string const& type, factory_ptr factory)
+	{
+		constraint_loaders[type] = move(factory);
+	}
+
 	body_template body_template_loader::parse(std::istream& data) const
 	{
-		try
-		{
-			data.exceptions(istream::badbit | istream::failbit);
-			body_template templ;
+		data.exceptions(istream::badbit | istream::failbit);
+		body_template templ;
 
-			load_particles(templ, data);
-			load_constraints(templ, data);
+		load_particles(templ, data);
+		load_constraints(templ, data);
 
-			return templ;
-		}
-		catch(exception const& e)
-		{
-			throw;
-		}
+		return templ;
 	}
 
 	shared_ptr<body_template_loader::value_type> body_template_loader::load_file(std::string const& path) const
@@ -53,16 +51,22 @@ namespace eversim { namespace core { namespace physics {
 		auto in = istringstream(load_line(data));
 		int num;
 		in >> num;
-		if (num <= 0)
+		if (num < 0)
 		{
-			throw runtime_error{ "Number of particles must be positive!" };
+			throw runtime_error{ "Number of constraints must be positive!" };
 		}
 
 		templ.constraints.resize(num);
 		for (int i = 0; i < num; ++i)
 		{
 			auto line = load_line(data);
-			auto c = constraint_descriptor::parse(line);
+
+			auto c = constraint_descriptor::parse(line,
+				[this](string const& type) -> constraint_factory const&
+			{
+				return *constraint_loaders.at(type);
+			});
+
 			for(auto index : c.particles)
 			{
 				if(index >= templ.particles.size())
@@ -90,7 +94,7 @@ namespace eversim { namespace core { namespace physics {
 	}
 
 	namespace {
-		void check_remainder(string const& name, istream& data)
+		std::string get_remainder(istream& data)
 		{
 			if (data) {
 				data.exceptions(istream::badbit);
@@ -98,11 +102,13 @@ namespace eversim { namespace core { namespace physics {
 				string remainder;
 				getline(data, remainder);
 
-				if (!remainder.empty() && remainder[0] != '#')
-				{
-					throw runtime_error{ "Found remaining text while parsing "+ name + "!: " + remainder };
-				}
+				auto pos = remainder.find('#');
+				if(pos != string::npos)
+					remainder = remainder.erase(pos);
+				remainder.erase(remainder.find_last_not_of(" \t") + 1);
+				return remainder;
 			}
+			return "";
 		}
 	}
 
@@ -113,12 +119,17 @@ namespace eversim { namespace core { namespace physics {
 		data.exceptions(istream::badbit | istream::failbit);
 
 		data >> desc.pos.x >> desc.pos.y;
-		check_remainder("particle", data);
+		auto rem = get_remainder(data);
+		if(!rem.empty())
+		{
+			throw runtime_error{"Too much data while parsing particle! " + rem};
+		}
 		return desc;
 	}
 
-	constraint_descriptor constraint_descriptor::parse(std::string const& str)
-	{
+	constraint_descriptor constraint_descriptor::parse(
+		string const& str, factory_getter get_factory
+	){
 		auto desc = constraint_descriptor{};
 		auto data = istringstream(str);
 		data.exceptions(istream::badbit | istream::failbit);
@@ -132,7 +143,24 @@ namespace eversim { namespace core { namespace physics {
 		data >> desc.stiffness;
 		data >> desc.type;
 
-		check_remainder("constraint", data);
+		auto rem = get_remainder(data);
+
+		auto extra = stringstream(rem);
+		auto const& f = get_factory(desc.type);
+		desc.factory = &f;
+
+		extra.exceptions(istream::badbit | istream::failbit);
+		desc.extra_data = f.parse(extra);
+		extra.exceptions(istream::badbit);
+
+		extra >> ws;
+		rem.clear();
+		getline(extra, rem);
+
+		if (!rem.empty())
+		{
+			throw runtime_error{ "Too much data while parsing constraint! " + rem };
+		}
 
 		return desc;
 	}

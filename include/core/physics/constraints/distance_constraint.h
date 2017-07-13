@@ -6,8 +6,8 @@
 namespace eversim { namespace core { namespace physics {
 
 	class distance_constraint : public physics::constraint {
+		friend class distance_constraint_factory;
 	public:
-
 		explicit distance_constraint(float distance)
 			: constraint(2), distance(distance)
 		{
@@ -25,8 +25,20 @@ namespace eversim { namespace core { namespace physics {
 			return{ n, -n };
 		}
 
+		float get_distance() const
+		{
+			return distance;
+		}
+
 	private:
 		float distance;
+	};
+
+	class distance_constraint_factory : public constraint_factory {
+	public:
+		data_container parse(std::istream&) const override;
+		std::unique_ptr<constraint> build(constraint_descriptor const&, body const*) const override;
+
 	};
 
 }}}

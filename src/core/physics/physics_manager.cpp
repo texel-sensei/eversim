@@ -3,10 +3,46 @@
 #include "core/rendering/render_manager.h"
 #include <glm/gtx/norm.hpp>
 #include <bitset>
+#include "core/physics/body_template.h"
+#include <easylogging++.h>
+#include <glm/detail/type_mat.hpp>
 
 using namespace std;
 
 namespace eversim { namespace core { namespace physics {
+
+	body* physics_manager::add_body(body_template const& templ, glm::vec2 pos, float scale)
+	{
+		// create body
+		auto* bdy = bodies.emplace();
+
+		// reserve space for new particles
+		particles.reserve(particles.size() + templ.particles.size());
+		auto old_size = particles.size();
+
+		auto const& p_tmpl = templ.particles;
+		transform(
+			p_tmpl.begin(), p_tmpl.end(), back_inserter(particles),
+			[&](particle_descriptor const& desc)
+		{
+			particle p;
+			p.pos = desc.pos * scale + pos;
+			p.owner = bdy;
+			return p;
+		});
+		bdy->particles = particles;
+		bdy->particles.slice(old_size, 0);
+
+		// create constraints
+		for(auto const& cd : templ.constraints)
+		{
+			auto& loader = cd.factory;
+			auto constraint = loader->build(cd, bdy);
+			add_constraint(move(constraint));
+		}
+		
+		return bdy;
+	}
 
 	void physics_manager::add_particle(particle const& p)
 	{
@@ -92,6 +128,11 @@ namespace eversim { namespace core { namespace physics {
 				}
 			}
 		}
+	}
+
+	void physics_manager::add_constraint(std::unique_ptr<constraint> c)
+	{
+		constraints.push_back(move(c));
 	}
 
 	void physics_manager::apply_external_forces(float dt)
