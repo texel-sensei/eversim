@@ -7,6 +7,7 @@
 #include "core/rendering/shader_program.h"
 #include "core/rendering/renderable_entity.h"
 #include "core/rendering/multibuffer.h"
+#include "core/rendering/camera.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
@@ -14,6 +15,7 @@
 #include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #undef main
 
@@ -136,16 +138,21 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::canvas conjuration_texture;
 	conjuration_texture.init(conjuration);*/
 
+	eversim::core::rendering::Camera cam("default_cam",
+										glm::fvec2(0,resolution[0]),
+										glm::fvec2(0,resolution[1]),
+										glm::fvec2(0.1f,100.f));
+
 	eversim::core::rendering::Multibuffer data("testbuffer");
 	data.attach(
 	{ 
-		{ 1,1,0.5 }, 
-		{ 0,1,0.5 },
-		{ 1,0,0.5 },
-		{ 0,0,0.5 }
+		{ 100,100,10 }, 
+		{ 0,100,10 },
+		{ 100,0,10 },
+		{ 0,0,10 }
 	}
 	);
-	data.set_draw_mode(GL_QUADS, 0, 4);
+	data.set_draw_mode(GL_POINTS, 0, 4);
 	data.create_and_upload();
 
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
@@ -180,6 +187,8 @@ int main(int argc, char* argv[]) {
 	});
 	vertex_only_shaderprogram.link();
 
+	glm::fmat4 M = glm::fmat4(1.f);
+
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
@@ -198,6 +207,14 @@ int main(int argc, char* argv[]) {
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		vertex_only_shaderprogram.use();
+
+		GLint location = glGetUniformLocation(vertex_only_shaderprogram.getID(), "M");
+		if (location == -1)
+			LOG(INFO) << "Uniform name ""V"" does not exist";
+		glUniformMatrix4fv(location, 1, GL_FALSE, &M[0][0]);
+
+		cam.use(vertex_only_shaderprogram);
+		glPointSize(20);
 		data.bind_and_draw();
 		glUseProgram(0);
 
