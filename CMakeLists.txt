@@ -81,6 +81,7 @@ target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
+add_definitions(-DELPP_FEATURE_ALL)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
 set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
 include_directories(${EXTERNALS}/easyloggingpp/src)
