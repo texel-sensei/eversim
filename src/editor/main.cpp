@@ -146,13 +146,22 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::Multibuffer data("testbuffer");
 	data.attach(
 	{ 
-		{ 100,100,10 }, 
+		{ -100,100,10 }, 
 		{ 0,100,10 },
-		{ 100,0,10 },
-		{ 0,0,10 }
+		{ 0,0,10 },
+		{ -100,0,10 }
 	}
 	);
-	data.set_draw_mode(GL_POINTS, 0, 4);
+
+	data.attach(
+	{
+		{ 1,0,0},
+		{ 0,1,0 },
+		{ 0,0,1 },
+		{ 1,1,1 }
+	}
+	);
+	data.set_draw_mode(GL_QUADS, 0, 4);
 	data.create_and_upload();
 
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
@@ -208,13 +217,14 @@ int main(int argc, char* argv[]) {
 
 		vertex_only_shaderprogram.use();
 
+		M = glm::translate(M, glm::fvec3(-10, 0, 0));
+
 		GLint location = glGetUniformLocation(vertex_only_shaderprogram.getID(), "M");
 		if (location == -1)
 			LOG(INFO) << "Uniform name ""V"" does not exist";
 		glUniformMatrix4fv(location, 1, GL_FALSE, &M[0][0]);
 
 		cam.use(vertex_only_shaderprogram);
-		glPointSize(20);
 		data.bind_and_draw();
 		glUseProgram(0);
 

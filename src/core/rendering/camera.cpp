@@ -33,7 +33,7 @@ namespace eversim {	namespace core { namespace rendering {
 
 	void Camera::use(ShaderProgram& program) const
 	{
-		program.use();
+		//program.use();
 
 		GLint location = glGetUniformLocation(program.getID(), "V");
 		if (location == -1)
@@ -45,7 +45,7 @@ namespace eversim {	namespace core { namespace rendering {
 			LOG(INFO) << "Uniform name ""P"" does not exist";
 		glUniformMatrix4fv(location, 1, GL_FALSE, &P[0][0]);
 
-		glUseProgram(0);
+		//glUseProgram(0);
 	}
 
 	void Camera::translate(const glm::fvec2& t)
