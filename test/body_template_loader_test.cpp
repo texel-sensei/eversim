@@ -9,19 +9,19 @@ using namespace eversim::core::physics;
 TEST_CASE("particle parser positive", "[physics][body_template_loader]")
 {
 	SECTION("simple") {
-		auto good = "0.75 1.0";
+		auto good = "0.75 1.0 2.5";
 		auto desc = particle_descriptor::parse(good);
 		REQUIRE(desc.pos.x == Approx(0.75f));
 		REQUIRE(desc.pos.y == Approx(1.00f));
 	}
 	SECTION("trailing whitespace") {
-		auto good = "-0.75 1.0				";
+		auto good = "-0.75 1.0	7.3			";
 		auto desc = particle_descriptor::parse(good);
 		REQUIRE(desc.pos.x == Approx(-0.75f));
 		REQUIRE(desc.pos.y == Approx(1.00f));
 	}
 	SECTION("trailing comment") {
-		auto good = "0.75 -1.0 #This particle is special!@@&&\"stuff";
+		auto good = "0.75 -1.0  3.14 #This particle is special!@@&&\"stuff";
 		auto desc = particle_descriptor::parse(good);
 		REQUIRE(desc.pos.x == Approx(0.75f));
 		REQUIRE(desc.pos.y == Approx(-1.00f));
@@ -37,12 +37,12 @@ TEST_CASE("particle parser negative", "[physics][body_template_loader]")
 	}
 	SECTION("invalid number")
 	{
-		auto txt = "0.75 0.1.1";
+		auto txt = "0.75 0.a 7.4";
 		REQUIRE_THROWS(particle_descriptor::parse(txt));
 	}
 	SECTION("too much data")
 	{
-		auto txt = "0.75 0.1 0.2";
+		auto txt = "0.75 0.1 0.2 0.4";
 		REQUIRE_THROWS(particle_descriptor::parse(txt));
 	}
 	SECTION("not enough data")
@@ -151,8 +151,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt = 
 			R"(
 				2
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 				1
 				2 0 1 0.75 distance
 			)";
@@ -166,8 +166,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt =
 				R"(
 				2
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 				1
 				2 0 1 0.75 distance 17.8
 			)";
@@ -181,8 +181,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt =
 				R"(
 				2
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 
 				1
 				2 0 1 0.75 distance
@@ -197,9 +197,9 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 				# This describes a rigid body
 				2 # Number of particles
 
-				0 0
+				0 0 1.0
 				# This is the second particle
-				1 1
+				1 1 2.0
 
 
 				1 # number of constraints
@@ -233,8 +233,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt =
 				R"(
 				1
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 
 				1
 				2 0 1 0.75 distance
@@ -247,8 +247,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt =
 				R"(
 				2
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 
 				999
 				2 0 1 0.75 distance
@@ -261,8 +261,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			auto txt =
 				R"(
 				2
-				0 0
-				1 1
+				0 0 1.0
+				1 1 2.0
 
 				1
 				2 999 1 0.75 distance

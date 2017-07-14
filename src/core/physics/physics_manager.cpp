@@ -28,6 +28,7 @@ namespace eversim { namespace core { namespace physics {
 			particle p;
 			p.pos = desc.pos * scale + pos;
 			p.owner = bdy;
+			p.inv_mass = 1.f / desc.mass;
 			return p;
 		});
 

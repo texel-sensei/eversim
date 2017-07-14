@@ -11,6 +11,7 @@ namespace eversim { namespace core { namespace physics {
 	
 	struct particle_descriptor {
 		glm::vec2 pos;
+		float mass;
 
 		static particle_descriptor parse(std::string const& str);
 	};
@@ -41,7 +42,7 @@ namespace eversim { namespace core { namespace physics {
 	 * Class to load a body template
 	 * Input file should have the format:
 	 *	<num_particles>
-	 *	<x> <y> <weight> # particle descriptor, num_particles times
+	 *	<x> <y> <mass> # particle descriptor, num_particles times
 	 *	<num_constraints>
 	 *	<arity> <particle_id1> ... <id_N> <stiffness> <type> # constraint descriptor, num_constrains times
 	 */

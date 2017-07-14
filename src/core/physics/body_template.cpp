@@ -118,7 +118,7 @@ namespace eversim { namespace core { namespace physics {
 		auto data = istringstream(str);
 		data.exceptions(istream::badbit | istream::failbit);
 
-		data >> desc.pos.x >> desc.pos.y;
+		data >> desc.pos.x >> desc.pos.y >> desc.mass;
 		auto rem = get_remainder(data);
 		if(!rem.empty())
 		{
