@@ -16,9 +16,15 @@ namespace eversim {
 			{
 			private:
 				GLuint id;
+				
+				std::vector<std::pair<GLenum,std::string>> attributes;
+				std::vector<std::pair<GLenum,std::string>> uniforms;
+				void readActiveUniforms();
+				void readActiveAttributes();
 
 			public:
 				const std::string name;
+				
 
 				ShaderProgram(const std::string& name);
 				~ShaderProgram();
@@ -32,6 +38,18 @@ namespace eversim {
 				void link();
 				void use() const;
 				GLuint getID() const { return id; }
+				const std::vector<std::pair<GLenum, std::string>>& getActiveUniforms() const
+				{
+					return uniforms; 
+				}
+				const std::vector<std::pair<GLenum, std::string>>& getActiveAttributes() const
+				{
+					return attributes;
+				}
+				void logUniforms() const;
+				void logAttributes() const;
+				void logUnfiformslogAttributes() const { logUniforms(); logAttributes(); }
+
 			};
 		}
 	}

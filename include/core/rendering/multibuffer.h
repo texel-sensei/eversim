@@ -35,6 +35,8 @@ namespace eversim {
 				Multibuffer(const Multibuffer& other) = delete;
 				Multibuffer(Multibuffer&&) = delete;
 
+				~Multibuffer();
+
 				Multibuffer& operator=(const Multibuffer& other) = delete;
 				Multibuffer& operator=(Multibuffer&& other) = delete;
 

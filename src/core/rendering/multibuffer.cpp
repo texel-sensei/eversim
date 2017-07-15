@@ -12,6 +12,12 @@ namespace eversim {
 			{
 			}
 
+			Multibuffer::~Multibuffer()
+			{
+				glDeleteBuffers(metadata.size(), VboIds);
+				glDeleteVertexArrays(1, &VaoId);
+			}
+
 			void Multibuffer::attach(const std::vector<glm::fvec2>& data)
 			{
 				arrays2.push_back(data);

@@ -193,6 +193,8 @@ int main(int argc, char* argv[]) {
 	});
 	vertex_only_shaderprogram.link();
 
+	vertex_only_shaderprogram.logUnfiformslogAttributes();
+
 	glm::fmat3 M = glm::fmat3(1.f);
 	
 

@@ -23,6 +23,54 @@ namespace eversim {
 			{
 			}
 
+			void ShaderProgram::readActiveAttributes()
+			{
+				GLint count = 0;
+				glGetProgramiv(id, GL_ACTIVE_ATTRIBUTES, &count);
+				for (GLuint i = 0; i < count; i++)
+				{
+					GLchar buffer[1024];
+					GLsizei length = 0;
+					GLsizei size = 0;
+					GLenum type = 0;
+					glGetActiveAttrib(id, i, 1024, &length, &size, &type, buffer);
+					uniforms.emplace_back(type, std::string(buffer, length));
+				}
+			}
+
+			void ShaderProgram::readActiveUniforms()
+			{
+				GLint count = 0;
+				glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
+				for (GLuint i = 0; i < count; i++)
+				{
+					GLchar buffer[1024];
+					GLsizei length = 0;
+					GLsizei size = 0;
+					GLenum type = 0;
+					glGetActiveUniform(id, i, 1024,&length,&size,&type,buffer);
+					uniforms.emplace_back(type,std::string(buffer,length));
+				}
+			}
+
+			void ShaderProgram::logUniforms() const
+			{
+				LOG(INFO) << "uniforms of " << name;
+				for (const auto& uniform : uniforms)
+				{
+					LOG(INFO) << uniform.first << " " << uniform.second;
+				}
+			}
+
+			void ShaderProgram::logAttributes() const
+			{
+				LOG(INFO) << "attributes of " << name;
+				for (const auto& attribute : attributes)
+				{
+					LOG(INFO) << attribute.first << " " << attribute.second;
+				}
+			}
+
 			void ShaderProgram::attach(const AttachableShader& shader)
 			{
 				if (!shader.created)
@@ -78,6 +126,8 @@ namespace eversim {
 			void ShaderProgram::link()
 			{
 				glLinkProgram(id);
+				readActiveAttributes();
+				readActiveUniforms();
 				LOG(INFO) << "link program " << name;
 			}
 
