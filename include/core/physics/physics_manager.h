@@ -55,5 +55,6 @@ namespace eversim { namespace core { namespace physics {
 		void apply_external_forces(float dt);
 		void damp_velocities();
 		void project_constraints();
+		void finalize_changes(float dt);
 	};
 }}}

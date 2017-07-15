@@ -17,9 +17,10 @@ namespace eversim { namespace core { namespace physics {
 		auto* bdy = bodies.emplace();
 
 		// reserve space for new particles
-		
+
 		auto const& p_tmpl = templ.particles;
 		bdy->particles = allocate_particles(p_tmpl.size());
+		bdy->position = bdy->old_position = pos;
 
 		transform(
 			p_tmpl.begin(), p_tmpl.end(), bdy->particles.begin(),
@@ -33,13 +34,13 @@ namespace eversim { namespace core { namespace physics {
 		});
 
 		// create constraints
-		for(auto const& cd : templ.constraints)
+		for (auto const& cd : templ.constraints)
 		{
 			auto& loader = cd.factory;
 			auto constraint = loader->build(cd, bdy);
 			add_constraint(move(constraint));
 		}
-		
+
 		return bdy;
 	}
 
@@ -62,11 +63,7 @@ namespace eversim { namespace core { namespace physics {
 			project_constraints();
 		}
 
-		for (auto& p : particles)
-		{
-			p.vel = (p.projected_position - p.pos) / dt;
-			p.pos = p.projected_position;
-		}
+		finalize_changes(dt);
 	}
 
 	void physics_manager::atomic_step(float dt)
@@ -89,22 +86,18 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::constraint_iteration;
 			break;
 		case simulation_state::constraint_iteration:
-			if(current_iteration < solver_iterations)
+			if (current_iteration < solver_iterations)
 			{
 				project_constraints();
 				current_iteration++;
-			}else
+			} else
 			{
 				current_iteration = 0;
 				current_state = simulation_state::apply_changes;
 			}
 			break;
 		case simulation_state::apply_changes:
-			for (auto& p : particles)
-			{
-				p.vel = (p.projected_position - p.pos) / dt;
-				p.pos = p.projected_position;
-			}
+			finalize_changes(dt);
 			current_state = simulation_state::external;
 			break;
 		default: ;
@@ -112,15 +105,15 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
-	std::string physics_manager::get_step_name() const
+	string physics_manager::get_step_name() const
 	{
-		switch(current_state)
+		switch (current_state)
 		{
 		case simulation_state::external: return "Applying external forces";
 		case simulation_state::damp: return "Damping velocity";
 		case simulation_state::apply_velocity: return "Moving particles by v*dt";
 		case simulation_state::constraint_iteration:
-			return "Constraint solver " + to_string(current_iteration) + "/" + to_string(solver_iterations) ;
+			return "Constraint solver " + to_string(current_iteration) + "/" + to_string(solver_iterations);
 		case simulation_state::apply_changes: return "Moving particles to projected pos";
 		default: return "Invalid state!";
 		}
@@ -128,7 +121,8 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::draw_constraints(bitset<max_constraint_arity> to_render)
 	{
-		for (auto const& c : constraints) {
+		for (auto const& c : constraints)
+		{
 			if (!to_render[c->get_arity()])
 				continue;
 			for (int i = 0; i < c->get_arity(); ++i)
@@ -143,7 +137,7 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
-	void physics_manager::add_constraint(std::unique_ptr<constraint> c)
+	void physics_manager::add_constraint(unique_ptr<constraint> c)
 	{
 		constraints.push_back(move(c));
 	}
@@ -172,9 +166,22 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto& p : particles)
 		{
+			const auto* bdy = p.owner;
+			const auto body_movement = bdy->position - bdy->old_position;
+			p.pos += body_movement;
+
+			const auto body_acceleration = bdy->velocity - bdy->old_velocity;
+			p.vel += body_acceleration;
+
 			if (p.inv_mass == 0.f)
 				continue;
+
 			p.vel += dt * glm::vec2{0,-1}; // TODO: don't hardcode, support for other forces
+		}
+		for(auto& b : bodies)
+		{
+			b.position = {};
+			b.velocity = {};
 		}
 	}
 
@@ -217,7 +224,7 @@ namespace eversim { namespace core { namespace physics {
 				auto sum = 0.f;
 				for (auto i = 0; i < c.get_arity(); ++i)
 				{
-					sum += c.particles[i]->inv_mass * glm::length2(grad[i]);
+					sum += c.particles[i]->inv_mass * length2(grad[i]);
 				}
 				return sum;
 			}();
@@ -229,7 +236,7 @@ namespace eversim { namespace core { namespace physics {
 			{
 				auto& p = c.particles[i];
 				const auto correction = -scale * p->inv_mass * grad[i] * k;
-				rendering::draw_line(p->projected_position, p->projected_position + correction,60);
+				rendering::draw_line(p->projected_position, p->projected_position + correction, 60);
 				p->projected_position += correction;
 			}
 		}
@@ -237,9 +244,27 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::project_constraints()
 	{
-		for(auto const& c : constraints)
+		for (auto const& c : constraints)
 		{
 			project_single_constraint(*c, solver_iterations);
-		}	
+		}
+	}
+
+	void physics_manager::finalize_changes(float dt)
+	{
+		for (auto& p : particles)
+		{
+			p.vel = (p.projected_position - p.pos) / dt;
+			p.pos = p.projected_position;
+
+			auto* const b = p.owner;
+			b->velocity += p.vel;
+			b->position += p.pos;
+		}
+		for(auto& b : bodies)
+		{
+			b.old_position = b.position = b.position/float(b.particles.size());
+			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
+		}
 	}
 }}}
