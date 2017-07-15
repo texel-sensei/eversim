@@ -146,19 +146,19 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::Multibuffer data("testbuffer");
 	data.attach(
 	{ 
-		{ -100,100,10 }, 
-		{ 0,100,10 },
-		{ 0,0,10 },
-		{ -100,0,10 }
+		{ 200,200}, 
+		{ 0,200 },
+		{ 0,0 },
+		{ 200,0 }
 	}
 	);
 
 	data.attach(
 	{
-		{ 1,0,0},
-		{ 0,1,0 },
-		{ 0,0,1 },
-		{ 1,1,1 }
+		{ 1,1,1},
+		{ 0,0,0 },
+		{ 1,1,1 },
+		{ 0,0,0 }
 	}
 	);
 	data.set_draw_mode(GL_QUADS, 0, 4);
@@ -196,7 +196,7 @@ int main(int argc, char* argv[]) {
 	});
 	vertex_only_shaderprogram.link();
 
-	glm::fmat4 M = glm::fmat4(1.f);
+	glm::fmat3 M = glm::fmat3(1.f);
 
 	int cnt = 0;
 	while(handle_sdl_events())
@@ -217,12 +217,12 @@ int main(int argc, char* argv[]) {
 
 		vertex_only_shaderprogram.use();
 
-		M = glm::translate(M, glm::fvec3(-10, 0, 0));
+		//M = glm::translate(M, glm::fvec3(-10, 0, 0));
 
 		GLint location = glGetUniformLocation(vertex_only_shaderprogram.getID(), "M");
 		if (location == -1)
-			LOG(INFO) << "Uniform name ""V"" does not exist";
-		glUniformMatrix4fv(location, 1, GL_FALSE, &M[0][0]);
+			LOG(INFO) << "Uniform name ""M"" does not exist";
+		glUniformMatrix3fv(location, 1, GL_FALSE, &M[0][0]);
 
 		cam.use(vertex_only_shaderprogram);
 		data.bind_and_draw();

@@ -32,7 +32,7 @@ namespace eversim {
 				void translate(const glm::fvec2& t);
 				void rotate(const float angle); //2D Game, so lets only rotate around z-axis
 			private:
-				glm::fmat4 P, V;
+				glm::fmat3 P, V;
 			};
 		}
 	}

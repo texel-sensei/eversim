@@ -10,13 +10,13 @@ namespace eversim {	namespace core { namespace rendering {
 		const glm::fvec2 position) :
 		name(n)
 	{
-		P = glm::ortho(	left_right[0],left_right[1],
-						bottom_top[0], bottom_top[1],
-						near_far[0], near_far[1] );
-		V = glm::lookAt(
-			glm::fvec3(position,0), //Eye
-			glm::fvec3(position,1), //Center
-			glm::fvec3(0,1,0) //Up
+		P = glm::fmat3(2.f / (left_right[1] - left_right[0]), 0, 0,
+						0, 2.f / (bottom_top[1] - bottom_top[0]),0,
+						-1,-1,1);
+		V = glm::fmat3(
+			1,0,0,
+			0,1,0,
+			-position[0], -position[1], 1
 		);
 	}
 
@@ -38,12 +38,12 @@ namespace eversim {	namespace core { namespace rendering {
 		GLint location = glGetUniformLocation(program.getID(), "V");
 		if (location == -1)
 			LOG(INFO) << "Uniform name ""V"" does not exist";
-		glUniformMatrix4fv(location, 1, GL_FALSE, &V[0][0]);
+		glUniformMatrix3fv(location, 1, GL_FALSE, &V[0][0]);
 
 		location = glGetUniformLocation(program.getID(), "P");
 		if (location == -1)
 			LOG(INFO) << "Uniform name ""P"" does not exist";
-		glUniformMatrix4fv(location, 1, GL_FALSE, &P[0][0]);
+		glUniformMatrix3fv(location, 1, GL_FALSE, &P[0][0]);
 
 		//glUseProgram(0);
 	}
