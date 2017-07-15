@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <tuple>
 
 namespace eversim {
 	namespace core {
@@ -17,7 +18,7 @@ namespace eversim {
 			private:
 				GLuint id;
 				
-				std::vector<std::pair<GLenum,std::string>> attributes;
+				std::vector<std::tuple<GLenum,std::string,GLint>> attributes;
 				std::vector<std::pair<GLenum,std::string>> uniforms;
 				void readActiveUniforms();
 				void readActiveAttributes();
@@ -42,7 +43,7 @@ namespace eversim {
 				{
 					return uniforms; 
 				}
-				const std::vector<std::pair<GLenum, std::string>>& getActiveAttributes() const
+				const std::vector<std::tuple<GLenum, std::string, GLint>>& getActiveAttributes() const
 				{
 					return attributes;
 				}

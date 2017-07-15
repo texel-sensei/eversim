@@ -25,31 +25,59 @@ namespace eversim {
 
 			void ShaderProgram::readActiveAttributes()
 			{
+				attributes.clear();
+				attributes.resize(0);
 				GLint count = 0;
-				glGetProgramiv(id, GL_ACTIVE_ATTRIBUTES, &count);
+				std::vector<GLchar> nameData(256);
+				std::vector<GLenum> properties = { GL_NAME_LENGTH , GL_TYPE, GL_LOCATION };
+				std::vector<GLint> values(properties.size());
+
+				glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &count);
+
 				for (GLuint i = 0; i < count; i++)
 				{
-					GLchar buffer[1024];
-					GLsizei length = 0;
-					GLsizei size = 0;
-					GLenum type = 0;
-					glGetActiveAttrib(id, i, 1024, &length, &size, &type, buffer);
-					uniforms.emplace_back(type, std::string(buffer, length));
+					glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, properties.size(),
+						&properties[0], values.size(), NULL, &values[0]);
+
+					nameData.resize(values[0]);
+
+					glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), NULL, &nameData[0]);
+					attributes.push_back(
+						std::make_tuple(
+							values[1], 
+							std::string(nameData.data(), nameData.size()),
+							values[2])
+					);
 				}
+
+				std::sort(begin(attributes), end(attributes), 
+					[]( std::tuple<GLenum, std::string, GLint>& a,
+						std::tuple<GLenum, std::string, GLint>& b )
+				{
+					return std::get<2>(a) < std::get<2>(b);
+				});
 			}
 
 			void ShaderProgram::readActiveUniforms()
 			{
+				uniforms.clear();
+				uniforms.resize(0);
 				GLint count = 0;
-				glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
+				std::vector<GLchar> nameData(256);
+				std::vector<GLenum> properties = { GL_NAME_LENGTH , GL_TYPE };
+				std::vector<GLint> values(properties.size());
+
+				glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &count);
 				for (GLuint i = 0; i < count; i++)
 				{
-					GLchar buffer[1024];
-					GLsizei length = 0;
-					GLsizei size = 0;
-					GLenum type = 0;
-					glGetActiveUniform(id, i, 1024,&length,&size,&type,buffer);
-					uniforms.emplace_back(type,std::string(buffer,length));
+					glGetProgramResourceiv(id, GL_UNIFORM, i, properties.size(),
+						&properties[0], values.size(), NULL, &values[0]);
+
+					nameData.resize(values[0]);
+					GLenum type = values[1];
+
+					glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), NULL, &nameData[0]);
+					uniforms.emplace_back(type, std::string(nameData.data(), nameData.size()));
 				}
 			}
 
@@ -67,7 +95,7 @@ namespace eversim {
 				LOG(INFO) << "attributes of " << name;
 				for (const auto& attribute : attributes)
 				{
-					LOG(INFO) << attribute.first << " " << attribute.second;
+					LOG(INFO) << std::get<0>(attribute) << " " << std::get<1>(attribute);
 				}
 			}
 
