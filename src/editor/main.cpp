@@ -126,22 +126,9 @@ int main(int argc, char* argv[]) {
 		nullptr
 		);
 
-	/*eversim::core::rendering::canvas canvas;
-	canvas.init(resolution,
-		glm::ivec2(0,0));
-
-	std::string path("..\\resources\\sprites\\brick_gray0\\brick_gray0.png");
-	eversim::core::rendering::canvas texture;
-	texture.init(path);
-
-	std::string conjuration("..\\resources\\sprites\\brick_gray0\\conjuration.png");
-	eversim::core::rendering::canvas conjuration_texture;
-	conjuration_texture.init(conjuration);*/
-
 	eversim::core::rendering::Camera cam("default_cam",
 										glm::fvec2(0,resolution[0]),
-										glm::fvec2(0,resolution[1]),
-										glm::fvec2(0.1f,100.f));
+										glm::fvec2(0,resolution[1]));
 
 	eversim::core::rendering::Multibuffer data("testbuffer");
 	data.attach(
@@ -149,7 +136,12 @@ int main(int argc, char* argv[]) {
 		{ 200,200}, 
 		{ 0,200 },
 		{ 0,0 },
-		{ 200,0 }
+		{ 200,0 },
+
+		{ 700,700 },
+		{ 500,700 },
+		{ 500,500 },
+		{ 700,500 }
 	}
 	);
 
@@ -158,10 +150,15 @@ int main(int argc, char* argv[]) {
 		{ 1,1,1},
 		{ 0,0,0 },
 		{ 1,1,1 },
+		{ 0,0,0 },
+
+		{ 1,1,1 },
+		{ 0,0,0 },
+		{ 1,1,1 },
 		{ 0,0,0 }
 	}
 	);
-	data.set_draw_mode(GL_QUADS, 0, 4);
+	data.set_draw_mode(GL_QUADS, 0, 8);
 	data.create_and_upload();
 
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
@@ -197,10 +194,15 @@ int main(int argc, char* argv[]) {
 	vertex_only_shaderprogram.link();
 
 	glm::fmat3 M = glm::fmat3(1.f);
+	
+
 
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
+
+		cam.rotate(0.1);
+
 		ImGui_ImplSdlGL3_NewFrame(window);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,7 +219,7 @@ int main(int argc, char* argv[]) {
 
 		vertex_only_shaderprogram.use();
 
-		//M = glm::translate(M, glm::fvec3(-10, 0, 0));
+		//M = glm::translate(M, glm::fvec2(-10, 0, 0));
 
 		GLint location = glGetUniformLocation(vertex_only_shaderprogram.getID(), "M");
 		if (location == -1)
