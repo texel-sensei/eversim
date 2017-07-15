@@ -22,16 +22,34 @@ INITIALIZE_EASYLOGGINGPP
 using namespace eversim::core;
 using namespace std;
 
-bool handle_keypress(SDL_Keysym sym, bool /*down*/)
+function<void(glm::ivec2, int)> mouse_click;
+
+bool direction_pressed[4];
+
+bool handle_keypress(SDL_Keysym sym, bool down)
 {
-	if (sym.sym == SDLK_q || sym.sym == SDLK_ESCAPE)
+	switch(sym.sym)
 	{
+	case SDLK_q:
+	case SDLK_ESCAPE:
 		return false;
+	case SDLK_w:
+		direction_pressed[0] = down;
+		break;
+	case SDLK_a:
+		direction_pressed[1] = down;
+		break;
+	case SDLK_s:
+		direction_pressed[2] = down;
+		break;
+	case SDLK_d:
+		direction_pressed[3] = down;
+		break;
 	}
 	return true;
 }
 
-function<void(glm::ivec2, int)> mouse_click;
+
 
 bool handle_sdl_events()
 {
@@ -134,7 +152,8 @@ int main(int argc, char* argv[])
 		}
 	};
 
-	add_floor_constraint(physics.add_body(*boulder_templ, {  0.f, 0.1f }, 0.1f));
+	physics::body* player;
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.f, 0.1f }, 0.1f));
 	add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
 	add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
 
@@ -160,9 +179,16 @@ int main(int argc, char* argv[])
 		// do rendering stuff
 		ImGui::ShowTestWindow();
 
-
+		static float dt = 1 / 60.f;
 		static bool autostep = false;
 
+		auto vel = glm::vec2{};
+		if (direction_pressed[0]) vel += glm::vec2{0.f, 3.f};
+		if (direction_pressed[1]) vel += glm::vec2{ -1.f, 0.f };
+		if (direction_pressed[2]) vel += glm::vec2{ 0.f, -1.f };
+		if (direction_pressed[3]) vel += glm::vec2{ 1.f, 0.f };
+		player->velocity += vel * dt;
+		rendering::draw_point(player->position);
 
 		static bool render_all = true;
 		ImGui::Checkbox("Render all constraints", &render_all);
@@ -171,7 +197,7 @@ int main(int argc, char* argv[])
 			physics.draw_constraints();
 		}
 
-		static float dt = 1 / 60.f;
+		
 		ImGui::InputFloat("dt", &dt);
 
 		static bool atomic_steps = false;
