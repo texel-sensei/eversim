@@ -161,7 +161,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto const& c : constraints)
 		{
-			if (!to_render[c->get_arity()])
+			if (!to_render[c->get_arity()-1])
 				continue;
 			for (int i = 0; i < c->get_arity(); ++i)
 			{

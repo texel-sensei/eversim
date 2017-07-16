@@ -49,8 +49,6 @@ bool handle_keypress(SDL_Keysym sym, bool down)
 	return true;
 }
 
-
-
 bool handle_sdl_events()
 {
 	SDL_Event event;
@@ -112,6 +110,33 @@ public:
 private:
 	float height;
 };
+class wall_constraint : public physics::constraint {
+public:
+
+	explicit wall_constraint(physics::body_offset_ptr p, float X)
+		: constraint(1), X(X)
+	{
+		type = physics::constraint_type::inequality;
+		particles[0] = p;
+	}
+
+	float operator()() const override
+	{
+		assert(particles.size() == get_arity());
+		if (X > 0)
+			return X - particles[0]->projected_position.x;
+		else
+			return particles[0]->projected_position.x - X;
+	}
+
+	vector<glm::vec2> grad() const override
+	{
+		return { glm::vec2{ -glm::sign(particles[0]->projected_position.x),0.f } };
+	}
+
+private:
+	float X;
+};
 
 int main(int argc, char* argv[])
 {
@@ -137,6 +162,7 @@ int main(int argc, char* argv[])
 	physics::body_template_loader loader;
 
 	loader.register_factory("distance", make_unique<physics::distance_constraint_factory>());
+	loader.register_factory("angle", make_unique<physics::angle_constraint_factory>());
 	loader.add_search_directory("../resources/physics");
 
 	auto boulder_templ = loader.load("boulder.bdy");
@@ -145,10 +171,15 @@ int main(int argc, char* argv[])
 	{
 		for(auto& p : b->particles)
 		{
-			size_t offset = &p - b->particles.data();
 			physics.add_constraint(make_unique<floor_constraint>(
-				physics::body_offset_ptr{ b,offset }, floor_height)
+				&p, floor_height)
 			);
+			physics.add_constraint(make_unique<wall_constraint>(
+				&p, -1.f
+			));
+			physics.add_constraint(make_unique<wall_constraint>(
+				&p, 1.f
+			));
 		}
 	};
 

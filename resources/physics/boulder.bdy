@@ -16,7 +16,7 @@
 
 	 
 # constraints
-14
+23
 
 # outer ring
 2  0  1 0.9 distance
@@ -32,6 +32,18 @@
 2 10 11 0.9 distance
 2 11  0 0.9 distance
 
+3  0  1  2 0.7 angle
+3  1  2  3 0.7 angle
+3  2  3  4 0.7 angle
+3  3  4  5 0.7 angle
+3  4  5  6 0.7 angle
+3  5  6  7 0.7 angle
+3  6  7  8 0.7 angle
+3  7  8  9 0.7 angle
+3  8  9 10 0.7 angle
+3  9 10 11 0.7 angle
+3 10 11  0 0.7 angle
+
 # cross constraints
-2  0  6 0.5 distance
-2  3  9 0.5 distance
+#2  0  6 0.5 distance
+#2  3  9 0.5 distance
