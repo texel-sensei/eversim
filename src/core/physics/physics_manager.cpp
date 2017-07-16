@@ -6,6 +6,7 @@
 #include "core/physics/body_template.h"
 #include <easylogging++.h>
 #include <glm/detail/type_mat.hpp>
+#include "core/utility/spatial_hashmap.h"
 
 using namespace std;
 
@@ -23,7 +24,8 @@ namespace eversim { namespace core { namespace physics {
 		bdy->position = bdy->old_position = pos;
 
 		transform(
-			p_tmpl.begin(), p_tmpl.end(), bdy->particles.begin(),
+			p_tmpl.begin(), p_tmpl.end(),
+			bdy->particles.begin(),
 			[&](particle_descriptor const& desc)
 		{
 			particle p;
@@ -57,6 +59,8 @@ namespace eversim { namespace core { namespace physics {
 		{
 			p.projected_position = p.pos + dt * p.vel;
 		}
+
+		check_collisions();
 
 		for (auto i = 0; i < solver_iterations; ++i)
 		{
@@ -102,6 +106,40 @@ namespace eversim { namespace core { namespace physics {
 			break;
 		default: ;
 			assert(!"unknown state!");
+		}
+	}
+
+	void physics_manager::check_collisions()
+	{
+		collision_constraints.clear();
+		utility::spatial_hashmap<particle*> possible_collisions{0.1f};
+		for(auto& p : particles)
+		{
+			possible_collisions.insert(p.pos, &p);
+		}
+		for (auto& p : particles)
+		{
+			auto index = possible_collisions.get_index(p.pos);
+			for(int dx = -1; dx <=1; ++dx)
+			{
+				for(int dy = -1; dy <= 1; ++dy)
+				{
+					for(auto* other : possible_collisions.get_cell(index + glm::ivec2(dx,dy)))
+					{
+						if (other >= &p || other->owner == p.owner)
+							continue;
+						if(length(p.pos - other->pos) < 0.05f)
+						{
+							rendering::draw_line(p.pos, other->pos, 1);
+							auto c = distance_constraint{0.05f};
+							c.set_type(constraint_type::inequality);
+							c.particles = {&p, other};
+							collision_constraints.emplace_back(c);
+							
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -247,6 +285,10 @@ namespace eversim { namespace core { namespace physics {
 		for (auto const& c : constraints)
 		{
 			project_single_constraint(*c, solver_iterations);
+		}
+		for(auto const& c : collision_constraints)
+		{
+			project_single_constraint(c, solver_iterations);
 		}
 	}
 

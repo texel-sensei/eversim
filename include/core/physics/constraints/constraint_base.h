@@ -19,6 +19,10 @@ namespace eversim { namespace core { namespace physics {
 		body const* base;
 		size_t offset;
 
+		body_offset_ptr() = default;
+		body_offset_ptr(body const* b, size_t o) : base(b), offset(o){}
+		body_offset_ptr(particle const* p);
+
 		particle* resolve() const;
 		particle* operator->() const;
 		particle& operator*() const;
@@ -44,9 +48,6 @@ namespace eversim { namespace core { namespace physics {
 		explicit constraint(size_t N) : arity(N) { particles.resize(N); }
 		virtual ~constraint(){};
 
-		constraint(constraint const&) = delete;
-		constraint& operator=(constraint const&) = delete;
-
 		virtual float operator()() const = 0;
 		virtual std::vector<glm::vec2> grad() const = 0;
 
@@ -58,6 +59,9 @@ namespace eversim { namespace core { namespace physics {
 	protected:
 		constraint_type type = constraint_type::equality;
 		size_t arity;
+
+		constraint(constraint const&) = default;
+		constraint& operator=(constraint const&) = default;
 	};
 
 	class constraint_factory {

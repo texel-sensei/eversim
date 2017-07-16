@@ -1,6 +1,7 @@
 #pragma once
 #include "core/physics/particle.h"
 #include "core/physics/constraints/constraint_base.h"
+#include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/body.h"
 
 #include "core/utility/object_pool.h"
@@ -36,6 +37,7 @@ namespace eversim { namespace core { namespace physics {
 	private:
 		int solver_iterations = 5;
 		std::vector<particle> particles;
+		std::vector<distance_constraint> collision_constraints;
 		utility::object_pool<body> bodies;
 		
 		std::vector<std::unique_ptr<constraint>> constraints;
@@ -53,6 +55,7 @@ namespace eversim { namespace core { namespace physics {
 		int current_iteration = 0;
 
 		void apply_external_forces(float dt);
+		void check_collisions();
 		void damp_velocities();
 		void project_constraints();
 		void finalize_changes(float dt);
