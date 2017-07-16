@@ -14,6 +14,11 @@ namespace eversim { namespace core { namespace physics {
 			type = physics::constraint_type::equality;
 		}
 
+		void set_type(constraint_type t)
+		{
+			type = t;
+		}
+
 		float operator()() const override
 		{
 			return length(particles[0]->projected_position - particles[1]->projected_position) - distance;
