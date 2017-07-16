@@ -79,6 +79,13 @@ set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 
+#boost
+set(Boost_USE_STATIC_LIBS ON) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.64.0)
+include_directories(${Boost_INCLUDE_DIRS})
+
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
