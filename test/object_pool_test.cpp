@@ -135,6 +135,16 @@ TEST_CASE("Iterating object_pool", "[utility][object_pool]")
 		{
 			REQUIRE(e == 5);
 		}
+
+		SECTION("iterate const")
+		{
+			auto const& cpool = the_pool;
+			REQUIRE(cpool.size() == 1);
+			for (auto&& e : cpool)
+			{
+				REQUIRE(e == 5);
+			}
+		}
 	}
 	SECTION("iterate many objects")
 	{

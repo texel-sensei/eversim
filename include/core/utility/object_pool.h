@@ -61,11 +61,11 @@ namespace eversim { namespace core { namespace utility {
 
 		template <typename U>
 		struct base_iterator {
-			using difference_type = void;
+			using difference_type = ptrdiff_t;
 			using value_type = U;
 			using pointer = U*;
 			using reference = U&;
-			using iterator_category = std::bidirectional_iterator_tag;
+			using iterator_category = std::forward_iterator_tag;
 			
 			base_iterator() = default;
 
@@ -110,7 +110,11 @@ namespace eversim { namespace core { namespace utility {
 
 		private:
 			friend class object_pool;
-			using node_iterator = typename std::list<node>::iterator;
+			using node_iterator = std::conditional_t<
+				std::is_const_v<U>,
+				typename std::list<node>::const_iterator,
+				typename std::list<node>::iterator
+			>;
 			node_iterator current_node;
 			pointer last_pos;
 			pointer pos = nullptr;
@@ -202,7 +206,7 @@ namespace eversim { namespace core { namespace utility {
 		{
 			auto* ptr = const_cast<T*>(pos.pos);
 			ptr->~T();
-			deallocate(ptr, *pos.current_node);
+			deallocate(ptr, const_cast<node&>(*pos.current_node));
 			return ++pos;
 		}
 
