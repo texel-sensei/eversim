@@ -10,6 +10,8 @@ namespace eversim { namespace core { namespace physics {
 		glm::vec2 position;
 		glm::vec2 velocity;
 
+		float gravity_scale = 1.f;
+
 		glm::vec2 old_position;
 		glm::vec2 old_velocity;
 

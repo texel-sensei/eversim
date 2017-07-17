@@ -219,7 +219,7 @@ namespace eversim { namespace core { namespace physics {
 			if (p.inv_mass == 0.f)
 				continue;
 
-			p.vel += dt * glm::vec2{0,-1}; // TODO: don't hardcode, support for other forces
+			p.vel += dt * gravity * p.owner->gravity_scale;
 		}
 		for(auto& b : bodies)
 		{
