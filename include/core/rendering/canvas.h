@@ -30,11 +30,11 @@ namespace eversim {
 				/*
 				Draw texture on canvas
 				*/
-				void place_texture(const ShaderProgram& program,
-								Texture& texture,
-								const glm::vec2 translation = glm::vec2(0, 0),
-					const glm::vec2 scale = glm::vec2(0, 0)
-				);
+				void place_texture(
+					const ShaderProgram& program,
+					Texture& texture,
+					const glm::vec2 translation = glm::vec2(0, 0),
+					const glm::vec2 scale = glm::vec2(1, 1));
 				/*
 				Clear the framebuffer
 				*/
@@ -45,7 +45,7 @@ namespace eversim {
 				void draw(const ShaderProgram& program, 
 					const glm::ivec2& target_resolution,
 					const glm::vec2 translation = glm::vec2(0,0),
-					const glm::vec2 scale = glm::vec2(0, 0));
+					const glm::vec2 scale = glm::vec2(1, 1));
 
 				GLuint get_texture_id() const { return fbo.get_tex_id(); }
 				glm::ivec2 get_fbo_viewport() const { return fbo.viewport(); }

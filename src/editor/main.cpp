@@ -8,6 +8,7 @@
 #include "core/rendering/renderable_entity.h"
 #include "core/rendering/multibuffer.h"
 #include "core/rendering/camera.h"
+#include "core/rendering/spritemap.h"
 
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
@@ -16,6 +17,8 @@
 #include <imgui/imgui.h>
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <random>
 
 #undef main
 
@@ -164,6 +167,7 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
 	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
+	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
 	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -197,7 +201,22 @@ int main(int argc, char* argv[]) {
 
 	glm::fmat3 M = glm::fmat3(1.f);
 	
+	eversim::core::rendering::Spritemap sm;
+	std::default_random_engine generator;
+	
+	std::vector<eversim::core::rendering::Texture*> texes;
+	texes.push_back(&brickwall);
+	texes.push_back(&conjuration);
+	texes.push_back(&divination);
 
+	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
+	for (size_t i = 0; i < 256; ++i) {
+		int dice_roll = distribution(generator);
+		sm.add_texture(program, *(texes.at(dice_roll)));
+		//sm.add_texture(program, conjuration);
+		//sm.add_texture(program, divination);
+	}
+		LOG(INFO) << "sm texture id = " << sm.get_texture_id();
 
 	int cnt = 0;
 	while(handle_sdl_events())
@@ -210,6 +229,8 @@ int main(int argc, char* argv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
+
+		
 
 		empty_canvas.clear();
 		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
@@ -234,7 +255,7 @@ int main(int argc, char* argv[]) {
 
 		//render
 		ImGui::ShowTestWindow();
-		ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
+		/*ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiSetCond_Once);
 		ImGui::Begin("Game");
 		ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -249,6 +270,24 @@ int main(int argc, char* argv[]) {
 				, 
 				ImVec2(pos.x + size.x, pos.y + size.y)
 			);
+*/
+		//spritemap
+		ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiSetCond_Once);
+		ImGui::Begin("Spritemap");
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		ImVec2 size = ImGui::GetWindowSize();
+		//cout << size.x << "/" << size.y << endl;
+		ImGui::GetWindowDrawList()->AddImage(
+			(void*)(sm.get_texture_id()),
+			ImVec2(
+				pos.x,
+				pos.y
+			)
+			,
+			ImVec2(pos.x + size.x, pos.y + size.y)
+		);
+
 
 		ImGui::End();
 
