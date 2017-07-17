@@ -6,6 +6,8 @@
 
 #include "core/utility/object_pool.h"
 
+#include <boost/range.hpp>
+
 #include <bitset>
 #include <vector>
 #include <memory>
@@ -18,10 +20,14 @@ namespace eversim { namespace core { namespace physics {
 	class physics_manager {
 	public:
 		constexpr static size_t max_constraint_arity = 3;
+		using body_container = utility::object_pool<body>;
 
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void add_particle(particle const& p);
 		void add_constraint(std::unique_ptr<constraint> c);
+
+		boost::iterator_range<body_container::iterator> get_bodies();
+		boost::iterator_range<body_container::const_iterator> get_bodies() const;
 
 		void integrate(float dt);
 
@@ -42,7 +48,7 @@ namespace eversim { namespace core { namespace physics {
 		int solver_iterations = 5;
 		std::vector<particle> particles;
 		std::vector<distance_constraint> collision_constraints;
-		utility::object_pool<body> bodies;
+		body_container bodies;
 		glm::vec2 gravity = {0.f,-1.f};
 		
 		std::vector<std::unique_ptr<constraint>> constraints;

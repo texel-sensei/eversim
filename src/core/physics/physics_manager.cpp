@@ -185,6 +185,17 @@ namespace eversim { namespace core { namespace physics {
 		constraints.push_back(move(c));
 	}
 
+	boost::iterator_range<physics_manager::body_container::iterator> physics_manager::get_bodies()
+	{
+		return { bodies.begin(), bodies.end() };
+	}
+
+	boost::iterator_range<physics_manager::body_container::const_iterator> physics_manager::get_bodies() const
+	{
+		return boost::iterator_range<body_container::const_iterator>( bodies.begin(), bodies.end() );
+	}
+	
+
 	utility::array_view<particle> physics_manager::allocate_particles(size_t num)
 	{
 		const auto oldsize = particles.size();
