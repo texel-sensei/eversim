@@ -22,7 +22,7 @@ namespace eversim {
 				//x coord
 				auto o = offset;
 				auto& tr = tex.get_resolution();
-				if (offset[0] + tr[0] >= resolution[0]) {
+				if (offset[0] + tr[0] > resolution[0]) {
 					offset[1] += ymax;
 					offset[0] = 0;
 					ymax = 0;

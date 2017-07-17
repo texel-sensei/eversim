@@ -19,6 +19,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <random>
+#include <chrono>
 
 #undef main
 
@@ -202,7 +203,8 @@ int main(int argc, char* argv[]) {
 	glm::fmat3 M = glm::fmat3(1.f);
 	
 	eversim::core::rendering::Spritemap sm;
-	std::default_random_engine generator;
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::default_random_engine generator(seed);
 	
 	std::vector<eversim::core::rendering::Texture*> texes;
 	texes.push_back(&brickwall);
@@ -210,7 +212,7 @@ int main(int argc, char* argv[]) {
 	texes.push_back(&divination);
 
 	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
-	for (size_t i = 0; i < 256; ++i) {
+	for (size_t i = 0; i < 10; ++i) {
 		int dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));
 		//sm.add_texture(program, conjuration);
@@ -230,7 +232,8 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		
+		int dice_roll = distribution(generator);
+		sm.add_texture(program, *(texes.at(dice_roll)));
 
 		empty_canvas.clear();
 		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
@@ -285,7 +288,7 @@ int main(int argc, char* argv[]) {
 				pos.y
 			)
 			,
-			ImVec2(pos.x + size.x, pos.y + size.y)
+			ImVec2(pos.x + size.x - 32, pos.y + size.y - 32)
 		);
 
 
