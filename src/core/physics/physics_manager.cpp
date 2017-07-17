@@ -87,6 +87,10 @@ namespace eversim { namespace core { namespace physics {
 			{
 				p.projected_position = p.pos + dt * p.vel;
 			}
+			current_state = simulation_state::check_collisions;
+			break;
+		case simulation_state::check_collisions:
+			check_collisions();
 			current_state = simulation_state::constraint_iteration;
 			break;
 		case simulation_state::constraint_iteration:
@@ -153,6 +157,7 @@ namespace eversim { namespace core { namespace physics {
 		case simulation_state::constraint_iteration:
 			return "Constraint solver " + to_string(current_iteration) + "/" + to_string(solver_iterations);
 		case simulation_state::apply_changes: return "Moving particles to projected pos";
+		case simulation_state::check_collisions: return "Checking collisions";
 		default: return "Invalid state!";
 		}
 	}

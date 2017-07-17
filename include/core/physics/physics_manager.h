@@ -48,6 +48,7 @@ namespace eversim { namespace core { namespace physics {
 			external,
 			damp,
 			apply_velocity,
+			check_collisions,
 			constraint_iteration,
 			apply_changes
 		};
