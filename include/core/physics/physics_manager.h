@@ -32,8 +32,10 @@ namespace eversim { namespace core { namespace physics {
 		void integrate(float dt);
 
 		void set_gravity(glm::vec2 const& g) { gravity = g; }
-		
 		glm::vec2 get_gravity() const { return gravity; }
+
+		void set_damping_coefficient(float f) { damping = 1-f; }
+		float get_damping_coefficient() const { return 1-damping; }
 
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle>& get_particles() { return particles; }
@@ -50,6 +52,7 @@ namespace eversim { namespace core { namespace physics {
 		std::vector<distance_constraint> collision_constraints;
 		body_container bodies;
 		glm::vec2 gravity = {0.f,-1.f};
+		float damping = 0.99;
 		
 		std::vector<std::unique_ptr<constraint>> constraints;
 

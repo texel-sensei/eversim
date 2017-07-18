@@ -243,7 +243,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto& p : particles)
 		{
-			p.vel *= 0.99; // TODO: improve
+			p.vel *= damping; // TODO: improve
 		}
 	}
 
