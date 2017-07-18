@@ -15,13 +15,13 @@ namespace eversim { namespace core { namespace physics {
 	
 	struct particle_descriptor {
 		glm::vec2 pos;
-		float mass;
+		float mass = 1.f;
 
 		static particle_descriptor parse(std::string const& str);
 	};
 	struct constraint_descriptor {
 		int arity;
-		float stiffness;
+		float stiffness = 1.f;
 		std::vector<size_t> particles;
 		std::string type;
 		constraint_factory const* factory;
