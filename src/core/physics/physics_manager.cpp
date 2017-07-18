@@ -46,6 +46,16 @@ namespace eversim { namespace core { namespace physics {
 		return bdy;
 	}
 
+	void physics_manager::remove_body(body* b)
+	{
+		if (!b) return;
+		for(auto& p : b->particles)
+		{
+			if (p.owner == b) p.owner = nullptr;
+		}
+		bodies.erase(bodies.locate(b));
+	}
+
 	void physics_manager::add_particle(particle const& p)
 	{
 		particles.push_back(p);
@@ -57,6 +67,7 @@ namespace eversim { namespace core { namespace physics {
 		damp_velocities();
 		for (auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			p.projected_position = p.pos + dt * p.vel;
 		}
 
@@ -119,10 +130,12 @@ namespace eversim { namespace core { namespace physics {
 		utility::spatial_hashmap<particle*> possible_collisions{0.1f};
 		for(auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			possible_collisions.insert(p.pos, &p);
 		}
 		for (auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			auto index = possible_collisions.get_index(p.pos);
 			for(int dx = -1; dx <=1; ++dx)
 			{
@@ -220,6 +233,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			const auto* bdy = p.owner;
 			const auto body_movement = bdy->position - bdy->old_position;
 			p.pos += body_movement;
@@ -243,6 +257,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			p.vel *= damping; // TODO: improve
 		}
 	}
@@ -312,6 +327,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto& p : particles)
 		{
+			if (!p.is_alive()) continue;
 			p.vel = (p.projected_position - p.pos) / dt;
 			p.pos = p.projected_position;
 

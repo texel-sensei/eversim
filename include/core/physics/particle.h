@@ -14,6 +14,8 @@ namespace eversim { namespace core { namespace physics {
 
 		glm::vec2 projected_position;
 		body* owner;
+
+		bool is_alive() const { return owner; }
 	};
 
 }}}

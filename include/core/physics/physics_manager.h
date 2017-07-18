@@ -23,6 +23,7 @@ namespace eversim { namespace core { namespace physics {
 		using body_container = utility::object_pool<body>;
 
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
+		void remove_body(body* b);
 		void add_particle(particle const& p);
 		void add_constraint(std::unique_ptr<constraint> c);
 
@@ -40,12 +41,15 @@ namespace eversim { namespace core { namespace physics {
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle>& get_particles() { return particles; }
 
+		size_t get_num_bodies() const { return bodies.size(); }
+
 		// debug functions
 		void atomic_step(float dt);
 		std::string get_step_name() const;
 		bool finished_frame() const { return current_state == simulation_state::external; }
 		void draw_constraints(std::bitset<max_constraint_arity> to_render = ~0UL);
 		
+
 	private:
 		int solver_iterations = 5;
 		std::vector<particle> particles;
