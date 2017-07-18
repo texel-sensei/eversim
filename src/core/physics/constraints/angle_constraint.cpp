@@ -17,14 +17,14 @@ namespace eversim {
 				{
 					target_angle = -2;
 				}
-				return make_shared<float>(target_angle);
+				return target_angle;
 			}
 
 			std::unique_ptr<constraint> angle_constraint_factory::build(
 				constraint_descriptor const& desc, body const* bdy
 			) const {
 				assert(desc.arity == 3);
-				auto target = *reinterpret_cast<float*>(desc.extra_data.get());
+				auto target = boost::any_cast<float>(desc.extra_data);
 				auto c = make_unique<angle_constraint>(target);
 				c->stiffness = desc.stiffness;
 

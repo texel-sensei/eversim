@@ -15,14 +15,14 @@ namespace eversim { namespace core { namespace physics {
 		{
 			target_distance = -1;
 		}
-		return make_shared<float>(target_distance);
+		return target_distance;
 	}
 
 	std::unique_ptr<constraint> distance_constraint_factory::build(
 		constraint_descriptor const& desc, body const* bdy
 	) const {
 		assert(desc.arity == 2);
-		auto target = *reinterpret_cast<float*>(desc.extra_data.get());
+		auto target = boost::any_cast<float>(desc.extra_data);
 		auto c = make_unique<distance_constraint>(target);
 		c->stiffness = desc.stiffness;
 

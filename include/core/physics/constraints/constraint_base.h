@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <boost/any.hpp>
+
 #include <vector>
 #include <memory>
 
@@ -68,7 +70,7 @@ namespace eversim { namespace core { namespace physics {
 	public:
 		virtual ~constraint_factory(){}
 
-		using data_container = std::shared_ptr<void>;
+		using data_container = boost::any;
 		virtual data_container parse(std::istream&) const = 0;
 		virtual std::unique_ptr<constraint> build(constraint_descriptor const&, body const*) const = 0;
 	};

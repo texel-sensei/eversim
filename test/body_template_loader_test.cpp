@@ -173,7 +173,8 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 			)";
 			auto data = istringstream(txt);
 			auto templ = loader.parse(data);
-			auto fl = *reinterpret_cast<float*>(templ.constraints[0].extra_data.get());
+			auto fl = boost::any_cast<float>(templ.constraints[0].extra_data);
+
 			REQUIRE(fl == Approx(17.8));
 		}
 		SECTION("with whitespace")
