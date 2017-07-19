@@ -10,7 +10,7 @@
 #include <glm/detail/type_mat.hpp>
 #include <glm/gtx/norm.hpp>
 
-
+#include <algorithm>
 #include <bitset>
 
 
@@ -206,18 +206,23 @@ namespace eversim { namespace core { namespace physics {
 		const auto old_capacity = particles.capacity();
 
 		const auto* old_begin = particles.data();
-		particles.resize(oldsize + num);
 
 		if (oldsize + num > old_capacity)
 		{
-			auto* base = particles.data();
+			auto newvec = vector<particle>();
+			newvec.reserve(max(particles.capacity() * 2, oldsize + num));
+
+			auto* ptr = newvec.data();
 			for (auto& b : bodies)
 			{
-				const auto offset = b.particles.data() - old_begin;
+				newvec.insert(newvec.end(), b.particles.begin(), b.particles.end());
 				const auto s = b.particles.size();
-				b.particles = utility::make_array_view(base + offset, s);
+				b.particles = utility::make_array_view(ptr, s);
+				ptr += s;
 			}
+			particles.swap(newvec);
 		}
+		particles.resize(oldsize + num);
 		return utility::make_array_view(particles).slice(oldsize, 0);
 	}
 
