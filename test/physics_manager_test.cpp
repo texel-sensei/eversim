@@ -75,6 +75,7 @@ namespace {
 		{
 			for(auto const& p : man.get_particles())
 			{
+				if (!p.is_alive()) continue;
 				auto owner = p.owner;
 				REQUIRE(owner->get_particles().begin() <= &p);
 				REQUIRE(&p < owner->get_particles().end());
@@ -191,6 +192,7 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 			{
 				REQUIRE(!p.is_alive());
 			}
+			man.cleanup_dead_bodies();
 			man.integrate(1.f);
 		}
 	}
@@ -216,7 +218,7 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		}
 		
 		const auto remove_random = [&] {
-			auto dist = uniform_int_distribution<>(0, man.get_num_bodies());
+			auto dist = uniform_int_distribution<>(0, man.get_num_bodies()-1);
 			auto it = man.get_bodies().begin();
 			advance(it, dist(rng));
 			man.remove_body(&*it);
