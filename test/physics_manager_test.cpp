@@ -201,8 +201,9 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		const int N = 20;
 
 		mt19937 rng{42}; // the one and only seed
+
 		const auto insert_random = [&] {
-			auto dist = uniform_int_distribution<>(3, 12);
+			auto dist = uniform_int_distribution<>(3, 36);
 			rand_body.particles.resize(dist(rng));
 			return man.add_body(rand_body, {});
 		};
@@ -244,6 +245,17 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		{
 			REQUIRE(man.get_num_bodies() == N);
 			auto coinflip = bernoulli_distribution(0.5);
+			
+			for(auto& b : man.get_bodies())
+			{
+				man.remove_body(&b);
+			}
+
+			for(int i = 0; i < N; i++)
+			{
+				insert_random();
+			}
+
 			for(int i = 0; i < N; ++i)
 			{
 				auto remove = coinflip(rng);
