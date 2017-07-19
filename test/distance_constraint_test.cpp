@@ -11,8 +11,7 @@ TEST_CASE("distance constraint loading", "[physics][constraints]")
 	particle ps[] = {{},{}};
 	ps[0].pos = {0.f, 0.f};
 	ps[1].pos = {0.f,1.5f};
-	body bdy;
-	bdy.particles = ps;
+	body bdy{ps};
 
 	distance_constraint_factory f;
 	auto get_f = [&](string const&) -> distance_constraint_factory const& { return f; };

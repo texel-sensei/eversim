@@ -74,8 +74,8 @@ namespace {
 			for(auto const& p : man.get_particles())
 			{
 				auto owner = p.owner;
-				REQUIRE(owner->particles.begin() <= &p);
-				REQUIRE(&p < owner->particles.end());
+				REQUIRE(owner->get_particles().begin() <= &p);
+				REQUIRE(&p < owner->get_particles().end());
 			}
 		}
 	};
@@ -177,8 +177,14 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		}
 		SECTION("remove")
 		{
-			auto const& ps = b->particles;
+			REQUIRE(man.get_num_bodies() == 1);
+			auto const& ps = b->get_particles();
 			man.remove_body(b);
+			REQUIRE(man.get_num_bodies() == 0);
+			for(auto const& _ : man.get_bodies())
+			{
+				FAIL("Found body where nobody was expected! " << &_);
+			}
 			for(auto const& p : ps)
 			{
 				REQUIRE(!p.is_alive());

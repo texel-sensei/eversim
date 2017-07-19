@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 
 	auto add_floor_constraint = [&](physics::body* b)
 	{
-		for(auto& p : b->particles)
+		for(auto& p : b->get_particles())
 		{
 			physics.add_constraint(make_unique<floor_constraint>(
 				&p, floor_height)
