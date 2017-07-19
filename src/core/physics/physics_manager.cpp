@@ -147,7 +147,6 @@ namespace eversim { namespace core { namespace physics {
 							continue;
 						if(length(p.pos - other->pos) < 0.05f)
 						{
-							rendering::draw_line(p.pos, other->pos, 1);
 							auto c = distance_constraint{0.05f};
 							c.set_type(constraint_type::inequality);
 							c.particles = {&p, other};
@@ -305,7 +304,6 @@ namespace eversim { namespace core { namespace physics {
 			{
 				auto& p = c.particles[i];
 				const auto correction = -scale * p->inv_mass * grad[i] * k;
-				rendering::draw_line(p->projected_position, p->projected_position + correction, 60);
 				p->projected_position += correction;
 			}
 		}
