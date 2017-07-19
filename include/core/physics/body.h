@@ -20,9 +20,17 @@ namespace eversim { namespace core { namespace physics {
 		particle& get_particle(size_t idx) const;
 		utility::array_view<particle> get_particles() const { return particles; }
 
+		bool is_alive() const
+		{
+			return alive;
+		}
+
+		void kill() { alive = false; }
+
 	private:
 		glm::vec2 old_position;
 		glm::vec2 old_velocity;
+		bool alive = true;
 
 		utility::array_view<particle> particles;
 	};

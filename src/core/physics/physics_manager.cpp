@@ -49,11 +49,7 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::remove_body(body* b)
 	{
 		if (!b) return;
-		for(auto& p : b->particles)
-		{
-			if (p.owner == b) p.owner = nullptr;
-		}
-		bodies.erase(bodies.locate(b));
+		b->kill();
 	}
 
 	void physics_manager::add_particle(particle const& p)
@@ -151,7 +147,6 @@ namespace eversim { namespace core { namespace physics {
 							c.set_type(constraint_type::inequality);
 							c.particles = {&p, other};
 							collision_constraints.emplace_back(c);
-							
 						}
 					}
 				}
@@ -226,6 +221,26 @@ namespace eversim { namespace core { namespace physics {
 			}
 		}
 		return utility::make_array_view(particles).slice(oldsize, 0);
+	}
+
+	void physics_manager::remove_dead_bodies()
+	{
+		for(auto& cptr : constraints)
+		{
+			if (!cptr->is_alive())
+				cptr = nullptr;
+		}
+		for(auto& b : bodies)
+		{
+			if(b.is_alive())
+			{
+				for(auto& p : b.particles)
+				{
+					p.owner = nullptr;
+				}
+				bodies.erase(bodies.locate(&b));
+			}
+		}
 	}
 
 	void physics_manager::apply_external_forces(float dt)

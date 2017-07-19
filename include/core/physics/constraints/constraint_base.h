@@ -56,6 +56,8 @@ namespace eversim { namespace core { namespace physics {
 		constraint_type get_type() const noexcept { return type; }
 		size_t get_arity() const noexcept { return arity;}
 
+		bool is_alive() const;
+
 		std::vector<pointer> particles;
 		float stiffness = 1.f;
 	protected:

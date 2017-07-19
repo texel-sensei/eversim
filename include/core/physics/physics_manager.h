@@ -62,6 +62,8 @@ namespace eversim { namespace core { namespace physics {
 
 		utility::array_view<particle> allocate_particles(size_t num);
 
+		void remove_dead_bodies();
+
 		enum class simulation_state {
 			external,
 			damp,
