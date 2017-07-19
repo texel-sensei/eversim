@@ -56,7 +56,7 @@ namespace eversim { namespace core { namespace physics {
 		std::vector<distance_constraint> collision_constraints;
 		body_container bodies;
 		glm::vec2 gravity = {0.f,-1.f};
-		float damping = 0.99;
+		float damping = 0.99f;
 		
 		std::vector<std::unique_ptr<constraint>> constraints;
 
