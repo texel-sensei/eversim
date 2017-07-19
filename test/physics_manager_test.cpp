@@ -2,6 +2,7 @@
 #include <catch.hpp>
 #include "core/physics/body_template.h"
 #include <SDL2/SDL_stdinc.h>
+#include <random>
 
 using namespace std;
 using namespace glm;
@@ -68,6 +69,7 @@ namespace {
 		body_template_loader loader;
 		body_template single_particle;
 		body_template boulder;
+		body_template rand_body;
 
 		void check_particle_pointer_integrity()
 		{
@@ -194,12 +196,73 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 	}
 	SECTION("multiple bodies")
 	{
-		for(int i = 0; i < 100; ++i) {
-			man.add_body(boulder, {});
+		const int N = 20;
+
+		mt19937 rng{42}; // the one and only seed
+		const auto insert_random = [&] {
+			auto dist = uniform_int_distribution<>(3, 12);
+			rand_body.particles.resize(dist(rng));
+			return man.add_body(rand_body, {});
+		};
+
+		for(int i = 0; i < N; ++i) {
+			auto old_num_particles = man.get_particles().size();
+			auto b = insert_random();
 			REQUIRE(man.get_num_bodies() == i+1);
-			REQUIRE(man.get_particles().size() == (i+1) * boulder.particles.size());
+			REQUIRE(man.get_particles().size() == old_num_particles + b->get_particles().size());
 		}
-		check_particle_pointer_integrity();
-		man.integrate(1.f);
+		SECTION("insert only") {
+			check_particle_pointer_integrity();
+		}
+		
+		const auto remove_random = [&] {
+			auto dist = uniform_int_distribution<>(0, man.get_num_bodies());
+			auto it = man.get_bodies().begin();
+			advance(it, dist(rng));
+			man.remove_body(&*it);
+		};
+
+		SECTION("remove only")
+		{
+			REQUIRE(man.get_num_bodies() == N);
+			
+			while(man.get_num_bodies() > 0)
+			{
+				auto oldsize = man.get_num_bodies();
+				remove_random();
+				man.cleanup_dead_bodies();
+				REQUIRE(man.get_num_bodies() == oldsize - 1);
+			}
+			check_particle_pointer_integrity();
+			man.integrate(1);
+			check_particle_pointer_integrity();
+		}
+
+		SECTION("insert & remove")
+		{
+			REQUIRE(man.get_num_bodies() == N);
+			auto coinflip = bernoulli_distribution(0.5);
+			for(int i = 0; i < N; ++i)
+			{
+				auto remove = coinflip(rng);
+				auto old_num_bodies = man.get_num_bodies();
+				if(remove)
+				{
+					remove_random();
+					REQUIRE(man.get_num_bodies() == old_num_bodies - 1);
+				}
+				else
+				{
+					insert_random();
+					REQUIRE(man.get_num_bodies() == old_num_bodies + 1);
+				}
+				if(coinflip(rng))
+				{
+					man.cleanup_dead_bodies();
+				}
+				man.integrate(1.f);
+			}
+			check_particle_pointer_integrity();
+		}
 	}
 }
