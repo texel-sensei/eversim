@@ -6,6 +6,7 @@
 
 #include "core/utility/object_pool.h"
 
+#include <boost/range/adaptor/filtered.hpp>
 #include <boost/range.hpp>
 
 #include <bitset>
@@ -27,8 +28,18 @@ namespace eversim { namespace core { namespace physics {
 		void add_particle(particle const& p);
 		void add_constraint(std::unique_ptr<constraint> c);
 
-		boost::iterator_range<body_container::iterator> get_bodies();
-		boost::iterator_range<body_container::const_iterator> get_bodies() const;
+		auto get_bodies()
+		{
+			const auto range = boost::iterator_range<body_container::iterator>{ bodies.begin(), bodies.end() };
+			const auto is_alive = [](auto const& b) {return b.is_alive(); };
+			return range | boost::adaptors::filtered(is_alive);
+		}
+		auto get_bodies() const
+		{
+			auto range = boost::iterator_range<body_container::const_iterator>{ bodies.begin(), bodies.end() };
+			const auto is_alive = [](auto const& b) {return b.is_alive(); };
+			return range | boost::adaptors::filtered(is_alive);
+		}
 
 		void integrate(float dt);
 
@@ -41,7 +52,7 @@ namespace eversim { namespace core { namespace physics {
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle>& get_particles() { return particles; }
 
-		size_t get_num_bodies() const { return bodies.size(); }
+		size_t get_num_bodies() const { return bodies.size() - num_dead_bodies; }
 
 		// debug functions
 		void atomic_step(float dt);
@@ -49,6 +60,7 @@ namespace eversim { namespace core { namespace physics {
 		bool finished_frame() const { return current_state == simulation_state::external; }
 		void draw_constraints(std::bitset<max_constraint_arity> to_render = ~0UL);
 		
+		void cleanup_dead_bodies();
 
 	private:
 		int solver_iterations = 5;
@@ -58,11 +70,13 @@ namespace eversim { namespace core { namespace physics {
 		glm::vec2 gravity = {0.f,-1.f};
 		float damping = 0.99f;
 		
+		int num_dead_bodies = 0;
+
 		std::vector<std::unique_ptr<constraint>> constraints;
 
 		utility::array_view<particle> allocate_particles(size_t num);
 
-		void remove_dead_bodies();
+		
 
 		enum class simulation_state {
 			external,

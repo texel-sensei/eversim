@@ -1,12 +1,18 @@
 #include "core/physics/physics_manager.h"
 #include "core/physics/constraints/constraint_base.h"
-#include "core/rendering/render_manager.h"
-#include <glm/gtx/norm.hpp>
-#include <bitset>
 #include "core/physics/body_template.h"
-#include <easylogging++.h>
-#include <glm/detail/type_mat.hpp>
+
+#include "core/rendering/render_manager.h"
 #include "core/utility/spatial_hashmap.h"
+
+#include <easylogging++.h>
+
+#include <glm/detail/type_mat.hpp>
+#include <glm/gtx/norm.hpp>
+
+
+#include <bitset>
+
 
 using namespace std;
 
@@ -50,6 +56,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		if (!b) return;
 		b->kill();
+		num_dead_bodies++;
 	}
 
 	void physics_manager::add_particle(particle const& p)
@@ -191,16 +198,6 @@ namespace eversim { namespace core { namespace physics {
 	{
 		constraints.push_back(move(c));
 	}
-
-	boost::iterator_range<physics_manager::body_container::iterator> physics_manager::get_bodies()
-	{
-		return { bodies.begin(), bodies.end() };
-	}
-
-	boost::iterator_range<physics_manager::body_container::const_iterator> physics_manager::get_bodies() const
-	{
-		return boost::iterator_range<body_container::const_iterator>( bodies.begin(), bodies.end() );
-	}
 	
 
 	utility::array_view<particle> physics_manager::allocate_particles(size_t num)
@@ -208,22 +205,23 @@ namespace eversim { namespace core { namespace physics {
 		const auto oldsize = particles.size();
 		const auto old_capacity = particles.capacity();
 
+		const auto* old_begin = particles.data();
 		particles.resize(oldsize + num);
 
 		if (oldsize + num > old_capacity)
 		{
-			auto* ptr = particles.data();
+			auto* base = particles.data();
 			for (auto& b : bodies)
 			{
-				auto s = b.particles.size();
-				b.particles = utility::make_array_view(ptr, s);
-				ptr += s;
+				const auto offset = b.particles.data() - old_begin;
+				const auto s = b.particles.size();
+				b.particles = utility::make_array_view(base + offset, s);
 			}
 		}
 		return utility::make_array_view(particles).slice(oldsize, 0);
 	}
 
-	void physics_manager::remove_dead_bodies()
+	void physics_manager::cleanup_dead_bodies()
 	{
 		for(auto& cptr : constraints)
 		{
@@ -232,7 +230,7 @@ namespace eversim { namespace core { namespace physics {
 		}
 		for(auto& b : bodies)
 		{
-			if(b.is_alive())
+			if(!b.is_alive())
 			{
 				for(auto& p : b.particles)
 				{
@@ -241,6 +239,7 @@ namespace eversim { namespace core { namespace physics {
 				bodies.erase(bodies.locate(&b));
 			}
 		}
+		num_dead_bodies = 0;
 	}
 
 	void physics_manager::apply_external_forces(float dt)
@@ -260,7 +259,7 @@ namespace eversim { namespace core { namespace physics {
 
 			p.vel += dt * gravity * p.owner->gravity_scale;
 		}
-		for(auto& b : bodies)
+		for(auto& b : get_bodies())
 		{
 			b.position = {};
 			b.velocity = {};
@@ -348,7 +347,7 @@ namespace eversim { namespace core { namespace physics {
 			b->velocity += p.vel;
 			b->position += p.pos;
 		}
-		for(auto& b : bodies)
+		for(auto& b : get_bodies())
 		{
 			b.old_position = b.position = b.position/float(b.particles.size());
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
