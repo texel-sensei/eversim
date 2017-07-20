@@ -86,6 +86,9 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.64.0)
 include_directories(${Boost_INCLUDE_DIRS})
 
+#boost poly collection
+include_directories(${EXTERNALS}/poly_collection/include)
+
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_definitions(-DELPP_FEATURE_ALL)
