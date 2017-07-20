@@ -27,6 +27,9 @@ namespace eversim { namespace core { namespace physics {
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void remove_body(body* b);
 
+		void set_particle_size(float f) { particle_radius = f; }
+		float get_particle_size() const { return particle_radius; }
+
 		template<typename C>
 		void insert_constraint(C const& c)
 		{
@@ -82,6 +85,7 @@ namespace eversim { namespace core { namespace physics {
 		body_container bodies;
 		glm::vec2 gravity = {0.f,-1.f};
 		float damping = 0.99f;
+		float particle_radius = 0.02f;
 		
 		int num_dead_bodies = 0;
 
@@ -89,7 +93,6 @@ namespace eversim { namespace core { namespace physics {
 
 		utility::array_view<particle> allocate_particles(size_t num);
 
-		
 
 		enum class simulation_state {
 			external,

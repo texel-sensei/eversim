@@ -125,7 +125,7 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::check_collisions()
 	{
 		collision_constraints.clear();
-		utility::spatial_hashmap<particle*> possible_collisions{0.1f};
+		utility::spatial_hashmap<particle*> possible_collisions{2*particle_radius};
 		for(auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
@@ -143,9 +143,9 @@ namespace eversim { namespace core { namespace physics {
 					{
 						if (other >= &p || other->owner == p.owner)
 							continue;
-						if(length(p.pos - other->pos) < 0.05f)
+						if(length(p.pos - other->pos) < 2*particle_radius)
 						{
-							auto c = distance_constraint{0.05f};
+							auto c = distance_constraint{2*particle_radius};
 							c.set_type(constraint_type::inequality);
 							c.particles = {&p, other};
 							collision_constraints.emplace_back(c);
