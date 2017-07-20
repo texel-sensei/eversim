@@ -59,11 +59,6 @@ namespace eversim { namespace core { namespace physics {
 		num_dead_bodies++;
 	}
 
-	void physics_manager::add_particle(particle const& p)
-	{
-		particles.push_back(p);
-	}
-
 	void physics_manager::integrate(float dt)
 	{
 		apply_external_forces(dt);

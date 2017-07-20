@@ -26,7 +26,6 @@ namespace eversim { namespace core { namespace physics {
 
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void remove_body(body* b);
-		void add_particle(particle const& p);
 
 		template<typename C>
 		void insert_constraint(C const& c)
@@ -87,7 +86,6 @@ namespace eversim { namespace core { namespace physics {
 		int num_dead_bodies = 0;
 
 		boost::base_collection<constraint> constraints;
-		//std::vector<std::unique_ptr<constraint>> constraints;
 
 		utility::array_view<particle> allocate_particles(size_t num);
 
