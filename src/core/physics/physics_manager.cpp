@@ -180,14 +180,14 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto const& c : constraints)
 		{
-			if (!to_render[c->get_arity()-1])
+			if (!to_render[c.get_arity()-1])
 				continue;
-			for (int i = 0; i < c->get_arity(); ++i)
+			for (int i = 0; i < c.get_arity(); ++i)
 			{
 				for (int j = 0; j < i; ++j)
 				{
-					auto p1 = c->particles[i];
-					auto p2 = c->particles[j];
+					auto p1 = c.particles[i];
+					auto p2 = c.particles[j];
 					rendering::draw_line(p1->projected_position, p2->projected_position);
 				}
 			}
@@ -196,7 +196,7 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::add_constraint(unique_ptr<constraint> c)
 	{
-		constraints.push_back(move(c));
+		constraints.insert(*c);
 	}
 	
 
@@ -228,10 +228,12 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::cleanup_dead_bodies()
 	{
-		for(auto& cptr : constraints)
+		for(auto it = constraints.begin(); it != constraints.end(); ++it)
 		{
-			if (!cptr->is_alive())
-				cptr = nullptr;
+			if(!it->is_alive())
+			{
+				it = constraints.erase(it);
+			}
 		}
 		for(auto& b : bodies)
 		{
@@ -332,7 +334,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		for (auto const& c : constraints)
 		{
-			project_single_constraint(*c, solver_iterations);
+			project_single_constraint(c, solver_iterations);
 		}
 		for(auto const& c : collision_constraints)
 		{

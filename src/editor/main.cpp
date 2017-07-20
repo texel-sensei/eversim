@@ -165,19 +165,23 @@ int main(int argc, char* argv[])
 	loader.register_factory("angle", make_unique<physics::angle_constraint_factory>());
 	loader.add_search_directory("../resources/physics");
 
+	physics.register_constraint_types<
+		physics::distance_constraint, physics::angle_constraint
+	>();
+
 	auto boulder_templ = loader.load("boulder.bdy");
 
 	auto add_floor_constraint = [&](physics::body* b)
 	{
 		for(auto& p : b->get_particles())
 		{
-			physics.add_constraint(make_unique<floor_constraint>(
-				&p, floor_height)
-			);
-			physics.add_constraint(make_unique<wall_constraint>(
+			physics.insert_constraint(floor_constraint(
+				&p, floor_height
+			));
+			physics.insert_constraint(wall_constraint(
 				&p, -1.f
 			));
-			physics.add_constraint(make_unique<wall_constraint>(
+			physics.insert_constraint(wall_constraint(
 				&p, 1.f
 			));
 		}

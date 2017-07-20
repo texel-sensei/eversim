@@ -52,6 +52,7 @@ namespace {
 		physics_test_fixture()
 		{
 			loader.register_factory("mock", make_unique<mock_constraint_factory>());
+			man.register_constraint_types<mock_constraint>();
 			single_particle.particles = {{}};
 
 			auto N = 25;

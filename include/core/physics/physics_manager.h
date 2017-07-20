@@ -7,6 +7,7 @@
 #include "core/utility/object_pool.h"
 
 #include <boost/range/adaptor/filtered.hpp>
+#include <boost/poly_collection/base_collection.hpp>
 #include <boost/range.hpp>
 
 #include <bitset>
@@ -26,7 +27,20 @@ namespace eversim { namespace core { namespace physics {
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void remove_body(body* b);
 		void add_particle(particle const& p);
+
+		template<typename C>
+		void insert_constraint(C const& c)
+		{
+			constraints.insert(c);
+		}
+
 		void add_constraint(std::unique_ptr<constraint> c);
+
+		template<typename... Cs>
+		void register_constraint_types()
+		{
+			constraints.register_types<Cs...>();
+		}
 
 		auto get_bodies()
 		{
@@ -72,7 +86,8 @@ namespace eversim { namespace core { namespace physics {
 		
 		int num_dead_bodies = 0;
 
-		std::vector<std::unique_ptr<constraint>> constraints;
+		boost::base_collection<constraint> constraints;
+		//std::vector<std::unique_ptr<constraint>> constraints;
 
 		utility::array_view<particle> allocate_particles(size_t num);
 
