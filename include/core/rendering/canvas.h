@@ -39,6 +39,7 @@ namespace eversim {
 				Clear the framebuffer
 				*/
 				void clear();
+				void clear(const glm::fvec4& col);
 				/*
 				Draw the canvas without binding the framebuffer
 				*/

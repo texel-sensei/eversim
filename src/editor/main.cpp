@@ -167,7 +167,9 @@ int main(int argc, char* argv[]) {
 
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
 	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
+	eversim::core::rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
 	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
 	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
@@ -206,18 +208,35 @@ int main(int argc, char* argv[]) {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine generator(seed);
 	
-	std::vector<eversim::core::rendering::Texture*> texes;
-	texes.push_back(&brickwall);
-	texes.push_back(&conjuration);
-	texes.push_back(&divination);
+	std::vector<eversim::core::rendering::Texture*> texes({
+		&brickwall,
+		&conjuration,
+		&conjuration_big,
+		&divination,
+		&brickwall_big
+	});
+
+//	sm.add_texture(program, brickwall);
+	//sm.add_texture(program, conjuration_big);
+
+//	sm.add_texture(program, brickwall);
+	//sm.add_texture(program, brickwall_big);
+	//sm.add_texture(program, brickwall_big);
+	//sm.add_texture(program, brickwall_big);
+	/*for(size_t i = 0; i < 150; ++i)
+	{
+		sm.add_texture(program, conjuration);
+		sm.add_texture(program, brickwall);
+	}*/
+
+	LOG(INFO) << "17. texture";
+	sm.add_texture(program, conjuration);
 
 	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
-	for (size_t i = 0; i < 10; ++i) {
+	/*for (size_t i = 0; i < 10; ++i) {
 		int dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));
-		//sm.add_texture(program, conjuration);
-		//sm.add_texture(program, divination);
-	}
+	}*/
 		LOG(INFO) << "sm texture id = " << sm.get_texture_id();
 
 	int cnt = 0;
