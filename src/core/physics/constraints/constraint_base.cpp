@@ -12,21 +12,6 @@ namespace eversim { namespace core { namespace physics {
 		offset = p - base->get_particles().data();
 	}
 
-	particle* body_offset_ptr::resolve() const
-	{
-		return &base->get_particle(offset);
-	}
-
-	particle* body_offset_ptr::operator->() const
-	{
-		return resolve();
-	}
-
-	particle& body_offset_ptr::operator*() const
-	{
-		return *resolve();
-	}
-
 	bool constraint::is_alive() const
 	{
 		return std::all_of(

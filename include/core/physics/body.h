@@ -1,4 +1,5 @@
 #pragma once
+#include "core/physics/particle.h"
 #include "core/utility/array_view.h"
 #include <glm/glm.hpp>
 
@@ -17,7 +18,11 @@ namespace eversim { namespace core { namespace physics {
 
 		float gravity_scale = 1.f;
 
-		particle& get_particle(size_t idx) const;
+		particle& get_particle(size_t idx) const
+		{
+			assert(idx < particles.size());
+			return particles[idx];
+		}
 		utility::array_view<particle> get_particles() const { return particles; }
 
 		bool is_alive() const

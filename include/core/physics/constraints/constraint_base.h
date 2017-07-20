@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/physics/particle.h"
+#include "core/physics/body.h"
+
 #include <glm/glm.hpp>
 #include <boost/any.hpp>
 
@@ -10,7 +13,6 @@
 namespace eversim { namespace core { namespace physics {
 	struct constraint_descriptor;
 	struct body;
-	struct particle;
 
 	enum class constraint_type {
 		equality,
@@ -25,9 +27,12 @@ namespace eversim { namespace core { namespace physics {
 		body_offset_ptr(body const* b, size_t o) : base(b), offset(o){}
 		body_offset_ptr(particle const* p);
 
-		particle* resolve() const;
-		particle* operator->() const;
-		particle& operator*() const;
+		particle* resolve() const
+		{
+			return &base->get_particle(offset);
+		}
+		particle* operator->() const { return resolve(); }
+		particle& operator*() const { return *resolve(); }
 
 		friend bool operator==(body_offset_ptr const& a, particle const* b) {
 			return a.resolve() == b;
