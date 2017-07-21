@@ -118,6 +118,7 @@ source_group("utility" REGULAR_EXPRESSION /utility/)
 source_group("rendering" REGULAR_EXPRESSION /rendering/)
 source_group("physics" REGULAR_EXPRESSION /physics/)
 source_group("physics\\constraints" REGULAR_EXPRESSION /physics/constraints/)
+source_group("world" REGULAR_EXPRESSION /world/)
 
 add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
