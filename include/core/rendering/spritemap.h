@@ -20,12 +20,25 @@ namespace eversim {
 			private:
 				glm::ivec2 resolution;
 				canvas canvas_tex;
-				glm::ivec2 offset;
-				size_t ymax = 0;
 
-				std::vector<utility::Area> free_areas;
+				utility::Areadivider divider;
+				void init();
+
 			public:
+				/*
+				 * Creates a Spritemap with the maximum supported resolution
+				 * bound by the hardcoded maximum of 512x512
+				 */
 				Spritemap();
+				/*
+				 * Creates a quadratic Spritemap with the resolution being
+				 * size x size
+				 */
+				explicit Spritemap(const size_t res);
+				/*
+				 * Add a texture to the best fitting area
+				 * returns false if the spritemap has no empty space left 
+				 */
 				bool add_texture(ShaderProgram& program, Texture& tex);
 				GLuint get_texture_id() const { return canvas_tex.get_texture_id(); }
 			};

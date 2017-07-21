@@ -14,7 +14,7 @@ namespace eversim {
 				glm::ivec2 min, max;
 				float size_area;
 
-				Area() = delete;
+				explicit Area(const glm::ivec2& size);
 				explicit Area(const glm::ivec2& min_pos, const glm::ivec2& max_pos);
 
 				bool operator==(const Area& other) const;
@@ -24,6 +24,17 @@ namespace eversim {
 			};
 
 			std::ostream& operator<<(std::ostream& out, const Area& a);
+
+			class Areadivider
+			{
+			private:
+				std::vector<Area> areas;
+			public:
+				Areadivider(){}
+				explicit Areadivider(const Area& a);
+				explicit Areadivider(const glm::ivec2& size);
+				glm::ivec2 place_rectangle(const glm::ivec2& size);
+			};
 
 		}
 	}

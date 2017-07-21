@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
 
 	glm::fmat3 M = glm::fmat3(1.f);
 	
-	eversim::core::rendering::Spritemap sm;
+	eversim::core::rendering::Spritemap sm(1024);
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine generator(seed);
 	
