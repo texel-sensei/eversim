@@ -31,6 +31,12 @@ namespace eversim { namespace core { namespace world {
 			return descriptor;
 		}
 
+		void set_descriptor(tile_descriptor const* desc)
+		{
+			assert(desc);
+			descriptor = desc;
+		}
+
 	private:
 		friend class level;
 		glm::ivec2 idx;

@@ -3,6 +3,6 @@
 
 namespace eversim { namespace core { namespace world {
 	tile_descriptor blank_tile = {
-		"air"
+		"blank"
 	};
 }}}
