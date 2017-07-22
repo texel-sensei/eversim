@@ -7,6 +7,7 @@
 
 using std::string;
 using std::vector;
+using std::swap;
 using glm::ivec2;
 
 namespace eversim {
@@ -45,8 +46,8 @@ namespace eversim {
 				//Let the loader create a texture with immutable storage
 				//this needs opengl 4.2
 				tex_ptr = loader.load(path);
-				utility::texture_packet& tp = *tex_ptr;
-				GLuint base_tex_id = tp.tex_id;
+				auto& tp = *tex_ptr;
+				auto base_tex_id = tp.tex_id;
 				resolution = tp.resolution;
 
 				LOG(INFO) << "Create texture with size " << resolution[0] << "/" <<
@@ -67,10 +68,10 @@ namespace eversim {
 
 			Texture::Texture(Texture&& other)
 			{
-				std::swap(valid, other.valid);
-				std::swap(tex_id, other.tex_id);
-				std::swap(resolution, other.resolution);
-				std::swap(tex_ptr, other.tex_ptr);
+				swap(valid, other.valid);
+				swap(tex_id, other.tex_id);
+				swap(resolution, other.resolution);
+				swap(tex_ptr, other.tex_ptr);
 			}
 
 			Texture::~Texture()
@@ -83,24 +84,24 @@ namespace eversim {
 
 			Texture& Texture::operator=(Texture&& other)
 			{
-				std::swap(valid,other.valid);
-				std::swap(tex_id, other.tex_id);
-				std::swap(resolution, other.resolution);
-				std::swap(tex_ptr, other.tex_ptr);
+				swap(valid,other.valid);
+				swap(tex_id, other.tex_id);
+				swap(resolution, other.resolution);
+				swap(tex_ptr, other.tex_ptr);
 				return *this;
 			}
 
-			const GLuint Texture::get_tex_id() const
+			GLuint Texture::get_tex_id() const
 			{
 				return tex_id;
 			}
 
-			const glm::ivec2 Texture::get_resolution() const
+			glm::ivec2 Texture::get_resolution() const
 			{
 				return resolution;
 			}
 
-			void Texture::bind()
+			void Texture::bind() const
 			{
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 			}

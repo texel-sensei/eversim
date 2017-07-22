@@ -10,6 +10,7 @@
 #include "core/rendering/camera.h"
 #include "core/rendering/spritemap.h"
 
+
 #include "imgui/imgui_impl_sdl_gl3.h"
 #include <soil/SOIL.h>
 
@@ -239,6 +240,8 @@ int main(int argc, char* argv[]) {
 	}*/
 		LOG(INFO) << "sm texture id = " << sm.get_texture_id();
 
+	auto entity_ptr = renderer.register_entity();
+
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
@@ -250,6 +253,8 @@ int main(int argc, char* argv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
+
+		renderer.draw();
 
 		int dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));

@@ -5,8 +5,12 @@
 
 #include <GL/glew.h>
 #include <iostream>
+#include <tuple>
+#include <limits>
 
 using namespace std;
+
+#undef max
 
 namespace eversim { namespace core { namespace rendering {
 
@@ -59,6 +63,89 @@ namespace eversim { namespace core { namespace rendering {
 			throw sdl::sdl_error{ "Failed to init GLEW!" };
 		}
 
+	}
+
+	std::shared_ptr<RenderableEntity> render_manager::register_entity()
+	{
+		auto ptr = std::shared_ptr<RenderableEntity>(new RenderableEntity);
+		entities.push_back(ptr);
+		return ptr;
+	}
+
+	void render_manager::draw()
+	{
+		auto& deref = [](std::weak_ptr<RenderableEntity>& wkptr)
+		{
+			auto sptr = wkptr.lock();
+			return *sptr;
+		};
+
+		auto end_ptr = std::remove_if(begin(entities), end(entities), 
+			[](std::weak_ptr<RenderableEntity>& wptr)
+		{
+			return wptr.expired();
+		});
+
+		std::sort(begin(entities), end_ptr, 
+			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
+		{
+			auto& ra = deref(a);
+			auto& rb = deref(b);
+
+			if (ra.program == nullptr || rb.program == nullptr)
+				return false;
+
+			return ra.program->getID() < rb.program->getID();
+		});
+
+		entities = std::vector<std::weak_ptr<RenderableEntity>>(begin(entities),end_ptr);
+
+		//shader id, start idx, num elems
+		std::vector<std::tuple<GLuint, size_t, size_t>> blocks;
+
+		size_t cnt = 0;
+		for (auto& wkptr : entities)
+		{
+			auto& entity = deref(wkptr);
+
+			if (entity.program == nullptr)
+				break;
+
+			auto id = entity.program->getID();
+
+			if (blocks.size() == 0)
+			{
+				blocks.emplace_back(id,cnt,1);
+			} else
+			{
+				auto& block = blocks.back();
+
+				if (std::get<0>(block) == id)
+					std::get<2>(block)++;
+				else
+					blocks.emplace_back(id,cnt,1);
+			}
+			cnt++;
+		}
+
+		for(auto& block : blocks)
+		{
+			auto& fbe = deref(entities.at(std::get<1>(block)));
+			ShaderProgram& program = *(fbe.program);
+			program.use();
+
+			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
+			{
+				auto& entity = deref(entities.at(i));
+
+				entity.bind();
+				//TODO
+				//entity.draw();
+			}
+
+			glUseProgram(0);
+
+		}
 	}
 
 } /* rendering */ } /* core */ } /* eversim */

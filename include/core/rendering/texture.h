@@ -25,7 +25,7 @@ namespace eversim {
 			private:
 
 				bool valid = false;
-				GLuint tex_id;	
+				GLuint tex_id = 0;	
 				std::shared_ptr<utility::texture_packet> tex_ptr;
 				glm::ivec2 resolution;
 
@@ -46,11 +46,11 @@ namespace eversim {
 				Texture& operator=(const Texture& other) = delete;
 				Texture& operator=(Texture&& other);
 
-				const GLuint get_tex_id() const;
-				const glm::ivec2 get_resolution() const;
+				GLuint get_tex_id() const;
+				glm::ivec2 get_resolution() const;
 
-				void bind();
-				void unbind();
+				void bind() const;
+				static void unbind();
 			};
 		}
 	}
