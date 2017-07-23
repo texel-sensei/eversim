@@ -1,5 +1,5 @@
 #pragma once
-#include "core\rendering\attachable_shader.h"
+#include "core/rendering/attachable_shader.h"
 
 namespace eversim {
 	namespace core {
@@ -8,7 +8,7 @@ namespace eversim {
 				public AttachableShader
 			{
 			public:
-				FragmentShader(const std::string& name);
+				explicit FragmentShader(const std::string& name);
 				~FragmentShader();
 
 				void create(const std::string& filename) override;

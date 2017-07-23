@@ -141,6 +141,7 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
 	eversim::core::rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
 	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
+	eversim::core::rendering::Texture kobold("brick_gray0\\big_kobold.png");
 	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -183,7 +184,8 @@ int main(int argc, char* argv[]) {
 		&conjuration,
 		&conjuration_big,
 		&divination,
-		&brickwall_big
+		&brickwall_big,
+		&kobold
 	});
 
 

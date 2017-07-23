@@ -25,13 +25,17 @@ namespace eversim {
 				glGenTextures(1, &tex_id);
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 
-				vector<float> image(resolution[0] * resolution[1] * 3, 0.f);
+				vector<float> image(resolution[0] * resolution[1] * 4, 0.f);
+				for(size_t i = 3; i < image.size(); i+=4)
+				{
+					image.at(i) = 1.f;
+				}
 
 				LOG(INFO) << "Create empty texture with size " << resolution[0] << "/" <<
 					resolution[1];
 
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-					resolution[0], resolution[1], 0, GL_RGB, GL_FLOAT, image.data());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+					resolution[0], resolution[1], 0, GL_RGBA, GL_FLOAT, image.data());
 
 				filtering();
 
@@ -56,7 +60,7 @@ namespace eversim {
 				//Generate the texture we want to use for the view
 				glGenTextures(1, &tex_id);
 				//Let opengl create a texture with the data from the immutable storage
-				glTextureView(tex_id, GL_TEXTURE_2D, base_tex_id, GL_RGB8, 0, 1, 0, 1);
+				glTextureView(tex_id, GL_TEXTURE_2D, base_tex_id, GL_RGBA12, 0, 1, 0, 1);
 
 				//Bind for setting the filter
 				glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -66,7 +70,7 @@ namespace eversim {
 				valid = true;
 			}
 
-			Texture::Texture(Texture&& other)
+			Texture::Texture(Texture&& other) noexcept
 			{
 				swap(valid, other.valid);
 				swap(tex_id, other.tex_id);
@@ -82,7 +86,7 @@ namespace eversim {
 				}
 			}
 
-			Texture& Texture::operator=(Texture&& other)
+			Texture& Texture::operator=(Texture&& other) noexcept
 			{
 				swap(valid,other.valid);
 				swap(tex_id, other.tex_id);

@@ -44,12 +44,15 @@ namespace eversim {
 					LOG(INFO) << "Load file " << s << " to GPU";
 
 					glm::ivec2 res;
-					unsigned char* image = SOIL_load_image(s.c_str(),
-						&res[0], &res[1], 0, SOIL_LOAD_RGB);
+					int channels;
+					auto* image = SOIL_load_image(s.c_str(),
+						&res[0], &res[1], &channels, SOIL_LOAD_RGBA);
+					LOG(INFO) << "\twith " << channels << " channels";
 
-					std::vector<float> image_float(res[0] * res[1] * 3);
+					std::vector<float> image_float(res[0] * res[1] * 4);
+
 					for (size_t i = 0; i < image_float.size(); ++i)
-						image_float[i] = static_cast<float>(image[i]) / 255.f;
+						image_float.at(i) = static_cast<float>(image[i]) / 255.f;
 
 					GLuint tex_id = 0;
 				
@@ -57,8 +60,8 @@ namespace eversim {
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, tex_id);
 
-					glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, res[0], res[1]);
-					glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, res[0], res[1], GL_RGB, GL_FLOAT, image_float.data());
+					glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA12, res[0], res[1]);
+					glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, res[0], res[1], GL_RGBA, GL_FLOAT, image_float.data());
 
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

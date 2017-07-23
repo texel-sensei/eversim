@@ -27,6 +27,7 @@ namespace eversim {
 				void draw() const;
 
 				glm::fmat3 get_M() const { return M; };
+				void set_M(const glm::fmat3& m) { M = m; };
 
 				friend class render_manager;
 			};

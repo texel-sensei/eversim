@@ -38,13 +38,13 @@ namespace eversim {
 					std::function<void()> filtering = default_filtering);
 				explicit Texture(const std::string& string,
 					std::function<void()> filtering = default_filtering);
-				Texture(Texture&& other);
+				Texture(Texture&& other) noexcept;
 				Texture(Texture&) = delete;
 
 				~Texture();
 
 				Texture& operator=(const Texture& other) = delete;
-				Texture& operator=(Texture&& other);
+				Texture& operator=(Texture&& other) noexcept;
 
 				GLuint get_tex_id() const;
 				glm::ivec2 get_resolution() const;
