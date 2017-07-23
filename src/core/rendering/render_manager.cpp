@@ -74,10 +74,10 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw()
 	{
-		auto& deref = [](std::weak_ptr<RenderableEntity>& wkptr)
+		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)
 		{
 			auto sptr = wkptr.lock();
-			return *sptr;
+			return sptr;
 		};
 
 		auto end_ptr = std::remove_if(begin(entities), end(entities), 
@@ -89,8 +89,8 @@ namespace eversim { namespace core { namespace rendering {
 		std::sort(begin(entities), end_ptr, 
 			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
 		{
-			auto& ra = deref(a);
-			auto& rb = deref(b);
+			auto raptr = deref(a); auto& ra = *raptr;
+			auto rbptr = deref(b); auto& rb = *rbptr;
 
 			if (ra.program == nullptr || rb.program == nullptr)
 				return false;
@@ -106,7 +106,7 @@ namespace eversim { namespace core { namespace rendering {
 		size_t cnt = 0;
 		for (auto& wkptr : entities)
 		{
-			auto& entity = deref(wkptr);
+			auto entityptr = deref(wkptr); auto& entity = *entityptr;
 
 			if (entity.program == nullptr)
 				break;
@@ -130,17 +130,25 @@ namespace eversim { namespace core { namespace rendering {
 
 		for(auto& block : blocks)
 		{
-			auto& fbe = deref(entities.at(std::get<1>(block)));
+			auto fbeptr = deref(entities.at(std::get<1>(block)));
+			auto& fbe = *fbeptr;
 			ShaderProgram& program = *(fbe.program);
 			program.use();
 
 			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
 			{
-				auto& entity = deref(entities.at(i));
+				auto entityptr = deref(entities.at(i)); auto& entity = *entityptr;
 
+				if (entity.cam == nullptr) continue;
+
+				auto location = glGetUniformLocation(program.getID(), "M");
+				if (location == -1)
+					LOG(INFO) << "Uniform name ""M"" does not exist";
+				glUniformMatrix3fv(location, 1, GL_FALSE, &entity.get_M()[0][0]);
+
+				entity.cam->use(program);
 				entity.bind();
-				//TODO
-				//entity.draw();
+				entity.draw();
 			}
 
 			glUseProgram(0);

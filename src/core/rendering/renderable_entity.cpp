@@ -2,15 +2,19 @@
 
 namespace eversim {	namespace core { namespace rendering {
 
-	RenderableEntity::RenderableEntity()
+	RenderableEntity::RenderableEntity() : data("default_name")
 	{
 		
 	}
 
-	void RenderableEntity::bind()
+	void RenderableEntity::bind() const
 	{
-		
+		data.bind();
 	}
 
+	void RenderableEntity::draw() const
+	{
+		data.draw();
+	}
 
 }}}

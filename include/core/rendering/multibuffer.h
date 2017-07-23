@@ -44,6 +44,8 @@ namespace eversim {
 				void upload();
 				void create_and_upload() { create(); upload(); }
 				void set_draw_mode(GLenum type, GLint first, GLint count);
+				void bind() const;
+				void draw() const;
 				void bind_and_draw() const;
 				void attach(const std::vector<glm::fvec2>&);
 				void attach(std::vector<glm::fvec2>&&);

@@ -135,37 +135,6 @@ int main(int argc, char* argv[]) {
 										glm::fvec2(0,resolution[0]),
 										glm::fvec2(0,resolution[1]));
 
-	eversim::core::rendering::Multibuffer data("testbuffer");
-	data.attach(
-	{ 
-		{ 200,200}, 
-		{ 0,200 },
-		{ 0,0 },
-		{ 200,0 },
-
-		{ 700,700 },
-		{ 500,700 },
-		{ 500,500 },
-		{ 700,500 }
-	}
-	);
-
-	data.attach(
-	{
-		{ 1,1,1},
-		{ 0,0,0 },
-		{ 1,1,1 },
-		{ 0,0,0 },
-
-		{ 1,1,1 },
-		{ 0,0,0 },
-		{ 1,1,1 },
-		{ 0,0,0 }
-	}
-	);
-	data.set_draw_mode(GL_QUADS, 0, 8);
-	data.create_and_upload();
-
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
 	eversim::core::rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
@@ -217,31 +186,48 @@ int main(int argc, char* argv[]) {
 		&brickwall_big
 	});
 
-//	sm.add_texture(program, brickwall);
-	//sm.add_texture(program, conjuration_big);
 
-//	sm.add_texture(program, brickwall);
-	//sm.add_texture(program, brickwall_big);
-	//sm.add_texture(program, brickwall_big);
-	//sm.add_texture(program, brickwall_big);
-	/*for(size_t i = 0; i < 150; ++i)
-	{
-		sm.add_texture(program, conjuration);
-		sm.add_texture(program, brickwall);
-	}*/
-
-	LOG(INFO) << "17. texture";
 	sm.add_texture(program, conjuration);
 
 	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
-	/*for (size_t i = 0; i < 10; ++i) {
-		int dice_roll = distribution(generator);
-		sm.add_texture(program, *(texes.at(dice_roll)));
-	}*/
-		LOG(INFO) << "sm texture id = " << sm.get_texture_id();
 
 	auto entity_ptr = renderer.register_entity();
+	{
+		
+		auto& renderablentity = *entity_ptr;
+		renderablentity.data.attach(
+		{
+			{ 200,200 },
+			{ 0,200 },
+			{ 0,0 },
+			{ 200,0 },
 
+			{ 700,700 },
+			{ 500,700 },
+			{ 500,500 },
+			{ 700,500 }
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 1,1,1 },
+			{ 0,0,0 },
+			{ 1,1,1 },
+			{ 0,0,0 },
+
+			{ 1,1,1 },
+			{ 0,0,0 },
+			{ 1,1,1 },
+			{ 0,0,0 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
@@ -254,7 +240,7 @@ int main(int argc, char* argv[]) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 
-		renderer.draw();
+		
 
 		int dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));
@@ -267,18 +253,7 @@ int main(int argc, char* argv[]) {
 		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
-		vertex_only_shaderprogram.use();
-
-		//M = glm::translate(M, glm::fvec2(-10, 0, 0));
-
-		GLint location = glGetUniformLocation(vertex_only_shaderprogram.getID(), "M");
-		if (location == -1)
-			LOG(INFO) << "Uniform name ""M"" does not exist";
-		glUniformMatrix3fv(location, 1, GL_FALSE, &M[0][0]);
-
-		cam.use(vertex_only_shaderprogram);
-		data.bind_and_draw();
-		glUseProgram(0);
+		renderer.draw();
 
 		//render
 		ImGui::ShowTestWindow();

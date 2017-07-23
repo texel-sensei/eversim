@@ -107,10 +107,19 @@ namespace eversim {
 				this->count = count;
 			}
 
-			void Multibuffer::bind_and_draw() const
+			void Multibuffer::bind() const
 			{
 				glBindVertexArray(VaoId);
+			}
+
+			void Multibuffer::draw() const
+			{
 				glDrawArrays(type, first, count);
+			}
+
+			void Multibuffer::bind_and_draw() const
+			{
+				bind(); draw();
 			}
 
 			void Multibuffer::upload()
