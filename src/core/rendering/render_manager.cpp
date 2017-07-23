@@ -127,7 +127,7 @@ namespace eversim { namespace core { namespace rendering {
 			}
 			cnt++;
 		}
-
+		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
 		for(auto& block : blocks)
 		{
 			auto fbeptr = deref(entities.at(std::get<1>(block)));

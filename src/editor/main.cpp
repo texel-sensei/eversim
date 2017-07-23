@@ -191,6 +191,8 @@ int main(int argc, char* argv[]) {
 
 	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
 
+
+	//Test
 	auto entity_ptr = renderer.register_entity();
 	{
 		
@@ -228,6 +230,35 @@ int main(int argc, char* argv[]) {
 		renderablentity.program = &vertex_only_shaderprogram;
 		renderablentity.cam = &cam;
 	}
+
+	auto entity_ptr_zwo = renderer.register_entity();
+	{
+
+		auto& renderablentity = *entity_ptr_zwo;
+		renderablentity.data.attach(
+		{
+			{ 500,500 },
+			{ 300,500 },
+			{ 300,300 },
+			{ 500,300 },
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 0,0,1 },
+			{ 0,1,0 },
+			{ 0,0,1 },
+			{ 0,1,0 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}
+
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
@@ -257,22 +288,7 @@ int main(int argc, char* argv[]) {
 
 		//render
 		ImGui::ShowTestWindow();
-		/*ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiSetCond_Once);
-		ImGui::Begin("Game");
-		ImVec2 pos = ImGui::GetCursorScreenPos();
-		ImVec2 size = ImGui::GetWindowSize();
-		//cout << size.x << "/" << size.y << endl;
-			ImGui::GetWindowDrawList()->AddImage(
-				(void*)(brickwall.get_tex_id()),
-				ImVec2(
-					pos.x,
-					pos.y  
-				)
-				, 
-				ImVec2(pos.x + size.x, pos.y + size.y)
-			);
-*/
+
 		//spritemap
 		ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiSetCond_Once);
