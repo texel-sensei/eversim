@@ -75,6 +75,9 @@ namespace eversim {
 			void Framebuffer::bind()
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+				glEnable(GL_BLEND); 
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 			const glm::ivec2 Framebuffer::viewport() const
 			{

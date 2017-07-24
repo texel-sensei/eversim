@@ -1,14 +1,14 @@
 #version 440
 
 layout(location=0) in vec2 in_Position;
-layout(location=1) in vec3 in_Color;
+layout(location=1) in vec4 in_Color;
 
 //Uniforms
 uniform mat3 M;
 uniform mat3 V;
 uniform mat3 P;
 
-out vec3 ex_Color;
+out vec4 ex_Color;
 
 void main(void)
 {

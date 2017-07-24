@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
 	eversim::core::rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
 	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
 	eversim::core::rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	eversim::core::rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
 	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -185,7 +186,8 @@ int main(int argc, char* argv[]) {
 		&conjuration_big,
 		&divination,
 		&brickwall_big,
-		&kobold
+		&kobold,
+		&biggerkobold
 	});
 
 
@@ -215,18 +217,44 @@ int main(int argc, char* argv[]) {
 
 		renderablentity.data.attach(
 		{
-			{ 1,1,1 },
-			{ 0,0,0 },
-			{ 1,1,1 },
-			{ 0,0,0 },
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
 
-			{ 1,1,1 },
-			{ 0,0,0 },
-			{ 1,1,1 },
-			{ 0,0,0 }
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
+			{ 1,1,1,1 },
+			{ 0,0,0,1 }
 		}
 		);
 		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}
+
+	auto triangle = renderer.register_entity();
+	{
+
+		auto& renderablentity = *triangle;
+		renderablentity.data.attach(
+		{
+			{ 800,800 },
+			{ 600,800 },
+			{ 600,600 }
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 0,0,1,1 },
+			{ 1,0,0,1 },
+			{ 0,0,1,1 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_TRIANGLES, 0, 3);
 		renderablentity.data.create_and_upload();
 
 		renderablentity.program = &vertex_only_shaderprogram;
@@ -248,10 +276,10 @@ int main(int argc, char* argv[]) {
 
 		renderablentity.data.attach(
 		{
-			{ 0,0,1 },
-			{ 0,1,0 },
-			{ 0,0,1 },
-			{ 0,1,0 }
+			{ 0,0,1,1 },
+			{ 0,1,0,1 },
+			{ 0,0,1,1 },
+			{ 0,1,0,1 }
 		}
 		);
 		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
@@ -272,7 +300,8 @@ int main(int argc, char* argv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 
 		int dice_roll = distribution(generator);
@@ -284,6 +313,9 @@ int main(int argc, char* argv[]) {
 		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
 		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
 		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
+
+		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
+
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		renderer.draw();
