@@ -69,6 +69,13 @@ target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
 SET(LIBS ${LIBS} imgui)
 
+#dear imgui
+file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
+add_library(lodepng ${LODEPNG_SOURCES})
+target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
+include_directories(${EXTERNALS}/lodepng/include/)
+SET(LIBS ${LIBS} lodepng)
+
 #soil
 add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)

@@ -3,7 +3,6 @@
 #include "core/utility/plattform.h"
 #include "core/utility/texture_loader.h"
 
-#include <soil/SOIL.h>
 #include <glm/glm.hpp>
 
 #include <string>

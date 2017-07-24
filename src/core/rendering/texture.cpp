@@ -60,7 +60,7 @@ namespace eversim {
 				//Generate the texture we want to use for the view
 				glGenTextures(1, &tex_id);
 				//Let opengl create a texture with the data from the immutable storage
-				glTextureView(tex_id, GL_TEXTURE_2D, base_tex_id, GL_RGBA12, 0, 1, 0, 1);
+				glTextureView(tex_id, GL_TEXTURE_2D, base_tex_id, GL_RGBA8, 0, 1, 0, 1);
 
 				//Bind for setting the filter
 				glBindTexture(GL_TEXTURE_2D, tex_id);

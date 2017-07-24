@@ -7,7 +7,6 @@
 #include "core/utility/area.h"
 
 #include <easylogging++.h>
-#include <soil/SOIL.h>
 #include <glm/glm.hpp>
 
 #include <iostream>

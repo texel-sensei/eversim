@@ -1,7 +1,6 @@
 #include "core/rendering/canvas.h"
 #include "core/rendering/switch_viewport.h"
 
-#include <soil/SOIL.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>

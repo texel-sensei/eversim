@@ -3,7 +3,7 @@
 #include "core/utility/resource_manager.h"
 #include "core/utility/plattform.h"
 
-#include <soil/SOIL.h>
+#include <lodepng/lodepng.h>
 #include <glm/glm.hpp>
 #include <easylogging++.h>
 
@@ -43,11 +43,15 @@ namespace eversim {
 				{
 					LOG(INFO) << "Load file " << s << " to GPU";
 
-					glm::ivec2 res;
-					int channels;
-					auto* image = SOIL_load_image(s.c_str(),
-						&res[0], &res[1], &channels, SOIL_LOAD_RGBA);
-					LOG(INFO) << "\twith " << channels << " channels";
+					std::vector<unsigned char> image; unsigned w, h;
+					auto error = lodepng::decode( image , w , h, s.c_str(), LCT_RGBA, 8);
+
+					if (error) {
+						LOG(ERROR) << "lodepng decoding error of file " << s;
+						throw std::exception(("lodepng decoding error of file "+s).c_str());
+					}
+
+					glm::ivec2 res = {w,h};
 
 					std::vector<float> image_float(res[0] * res[1] * 4);
 
@@ -60,7 +64,7 @@ namespace eversim {
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, tex_id);
 
-					glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA12, res[0], res[1]);
+					glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, res[0], res[1]);
 					glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, res[0], res[1], GL_RGBA, GL_FLOAT, image_float.data());
 
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -70,8 +74,6 @@ namespace eversim {
 
 					glBindTexture(GL_TEXTURE_2D, 0);
 				
-					SOIL_free_image_data(image);
-
 					return std::make_shared<texture_packet>(tex_id,res);
 				}
 			};
