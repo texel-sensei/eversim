@@ -16,7 +16,7 @@ namespace eversim { namespace core { namespace world {
 
 		std::shared_ptr<value_type> load_file(std::string const& filename) const;
 
-		static std::map<int, std::string> load_id_table(std::istream& data);
+		static std::map<uint32_t, std::string> load_id_table(std::istream& data);
 		void register_tile_descriptor(tile_descriptor const*);
 	private:
 		std::unordered_map<std::string, tile_descriptor const*> descriptors;
