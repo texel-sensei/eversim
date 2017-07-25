@@ -1,4 +1,5 @@
 #include "core/world/level.h"
+#include "test_helper.h"
 #include <catch.hpp>
 
 using namespace eversim::core::world;
@@ -29,6 +30,15 @@ TEST_CASE("tile size", "[world][level]")
 
 	auto& t = l.get_tile_by_index({ 1,0 });
 	REQUIRE(t.size() == Approx(0.75f));
+
+	SECTION("inside/outside test")
+	{
+		const auto p = glm::vec2{ 1,.5f };
+		auto& tile = l.get_tile_by_pos(p);
+		REQUIRE(tile.point_inside(p));
+		REQUIRE(!tile.point_inside(p + glm::vec2(3, 3)));
+		REQUIRE(!tile.point_inside(p - glm::vec2(3, 3)));
+	}
 }
 
 TEST_CASE("index / position conversion", "[world][level]")

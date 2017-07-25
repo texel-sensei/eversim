@@ -18,6 +18,8 @@ namespace eversim { namespace core { namespace world {
 		{
 		}
 
+		bool point_inside(glm::vec2 p) const;
+
 		float x() const { return idx.x*size() + size() / 2.f; }
 		float y() const { return idx.y*size() + size() / 2.f; }
 		glm::vec2 position() const { return {x(), y()}; }
