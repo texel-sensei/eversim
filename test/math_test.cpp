@@ -39,6 +39,33 @@ TEST_CASE("line", "[utility][math]")
 
 		const auto center = l.lerp(0.5);
 		REQUIRE_THAT(center, is_approx(0.5f, 0.5f));
+
+		const auto outside = l.lerp(1.5);
+		REQUIRE_THAT(outside, is_approx(1.5f, 1.5f));
+	}
+
+	SECTION("closest point")
+	{
+		REQUIRE_THAT(l.closest_point(l.start), is_approx(l.start));
+		REQUIRE_THAT(l.closest_point(l.end), is_approx(l.end));
+
+		const auto center = l.lerp(0.5);
+		REQUIRE_THAT(l.closest_point(center), is_approx(center));
+
+		const auto outside = center + 0.8f*l.normal();
+		REQUIRE_THAT(l.closest_point(outside), is_approx(center));
+	}
+
+	SECTION("distance to point")
+	{
+		REQUIRE(l.distance_to_point(l.start) == Approx(0.f));
+		REQUIRE(l.distance_to_point(l.lerp(0.5)) == Approx(0.f));
+		REQUIRE(l.distance_to_point(l.end) == Approx(0.f));
+
+		REQUIRE(l.distance_to_point(l.end + glm::vec2{0.5f,0.f}) == Approx(0.5f));
+
+		const auto p2 = l.start + 0.4f * l.normal();
+		REQUIRE(l.distance_to_point(p2) == Approx(0.4f));
 	}
 }
 

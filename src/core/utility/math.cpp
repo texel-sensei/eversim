@@ -22,4 +22,26 @@ namespace eversim { namespace core { namespace utility {
 		}
 		return sol.x;
 	}
+
+	float line::distance_to_point(glm::vec2 p) const
+	{
+		return glm::length(closest_point(p) - p);
+	}
+
+	glm::vec2 line::closest_point(glm::vec2 p) const
+	{
+		auto ps = p - start;
+		if(dot(ps, delta()) <= 0)
+		{
+			return start;
+		}
+		ps = end - p;
+		if(dot(ps, delta()) <= 0)
+		{
+			return end;
+		}
+		const auto e = p - start;
+		return start + direction() * dot(e, direction());
+		
+	}
 }}}

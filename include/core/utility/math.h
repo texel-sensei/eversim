@@ -48,6 +48,13 @@ namespace eversim { namespace core { namespace utility {
 		 * If the lines do not intersect it returns an empty optional.
 		 */
 		boost::optional<float> intersect(line const& other) const;
+
+		float distance_to_point(glm::vec2 p) const;
+
+		/*
+		 * Returns the point that has the least distance to p and lies on the line
+		 */
+		glm::vec2 closest_point(glm::vec2 p) const;
 	};
 
 
