@@ -2,7 +2,12 @@
 #include "core/physics/constraints/constraint_base.h"
 #include "core/physics/body_template.h"
 
+#include "core/world/level.h"
+#include "core/world/tile.h"
+#include "core/world/tile_descriptor.h"
+
 #include "core/rendering/render_manager.h"
+
 #include "core/utility/spatial_hashmap.h"
 
 #include <easylogging++.h>
@@ -57,6 +62,11 @@ namespace eversim { namespace core { namespace physics {
 		if (!b) return;
 		b->kill();
 		num_dead_bodies++;
+	}
+
+	void physics_manager::set_level(world::level const* l)
+	{
+		level = l;
 	}
 
 	void physics_manager::integrate(float dt)
@@ -125,11 +135,18 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::check_collisions()
 	{
 		collision_constraints.clear();
+		static_collision_constraints.clear();
+
 		utility::spatial_hashmap<particle*> possible_collisions{2*particle_radius};
 		for(auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
 			possible_collisions.insert(p.pos, &p);
+
+			if(level)
+			{
+				particle_tile_collision(p);
+			}
 		}
 		for (auto& p : particles)
 		{
@@ -335,6 +352,10 @@ namespace eversim { namespace core { namespace physics {
 		{
 			project_single_constraint(c, solver_iterations);
 		}
+		for(auto const& c : static_collision_constraints)
+		{
+			project_single_constraint(c, solver_iterations);
+		}
 	}
 
 	void physics_manager::finalize_changes(float dt)
@@ -353,6 +374,28 @@ namespace eversim { namespace core { namespace physics {
 		{
 			b.old_position = b.position = b.position/float(b.particles.size());
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
+		}
+	}
+
+	void physics_manager::particle_tile_collision(particle& p)
+	{
+		assert(level);
+		auto const& t = level->get_tile_by_pos(p.projected_position);
+		switch (t.get_descriptor()->collision)
+		{
+		case world::collision_type::none: return;
+		case world::collision_type::solid: 
+			handle_simple_tile_collision(p, t);
+			break;
+		case world::collision_type::extra: throw runtime_error{"Extra collision not yet implemented!"};
+		default: throw runtime_error{"Invalid tile collision descriptor"};
+		}
+	}
+
+	void physics_manager::handle_simple_tile_collision(particle& p, world::tile const& t)
+	{
+		if(t.point_inside(p.projected_position)) {
+			static_collision_constraints.emplace_back(t, p);
 		}
 	}
 }}}

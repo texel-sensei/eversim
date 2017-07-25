@@ -2,6 +2,7 @@
 #include "core/physics/particle.h"
 #include "core/physics/constraints/constraint_base.h"
 #include "core/physics/constraints/distance_constraint.h"
+#include "core/physics/constraints/static_collision_constraint.h"
 #include "core/physics/body.h"
 
 #include "core/utility/object_pool.h"
@@ -15,6 +16,10 @@
 #include <memory>
 
 
+namespace eversim {namespace core {namespace world {
+	struct tile;
+	class level;
+}}}
 
 namespace eversim { namespace core { namespace physics {
 	class body_template;
@@ -26,6 +31,8 @@ namespace eversim { namespace core { namespace physics {
 
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void remove_body(body* b);
+
+		void set_level(world::level const* l);
 
 		void set_particle_size(float f) { particle_radius = f; }
 		float get_particle_size() const { return particle_radius; }
@@ -82,12 +89,15 @@ namespace eversim { namespace core { namespace physics {
 		int solver_iterations = 5;
 		std::vector<particle> particles;
 		std::vector<distance_constraint> collision_constraints;
+		std::vector<static_collision_constraint> static_collision_constraints;
 		body_container bodies;
 		glm::vec2 gravity = {0.f,-1.f};
 		float damping = 0.99f;
 		float particle_radius = 0.02f;
 		
 		int num_dead_bodies = 0;
+
+		world::level const* level = nullptr;
 
 		boost::base_collection<constraint> constraints;
 
@@ -110,5 +120,8 @@ namespace eversim { namespace core { namespace physics {
 		void damp_velocities();
 		void project_constraints();
 		void finalize_changes(float dt);
+
+		void particle_tile_collision(particle& p);
+		void handle_simple_tile_collision(particle& p, world::tile const& t);
 	};
 }}}
