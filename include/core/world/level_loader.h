@@ -8,7 +8,7 @@
 
 namespace eversim { namespace core { namespace world {
 	class level;
-	class tile_descriptor;
+	struct tile_descriptor;
 
 	class level_loader : public utility::resource_manager<level_loader, std::string, level> {
 	public:
