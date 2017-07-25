@@ -174,6 +174,17 @@ int main(int argc, char* argv[]) {
 
 	vertex_only_shaderprogram.logUnfiformslogAttributes();
 
+	rendering::ShaderProgram textured_quad_shaderprogram("textured quad shader");
+	textured_quad_shaderprogram.create();
+	textured_quad_shaderprogram.attach
+	({
+		{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	textured_quad_shaderprogram.link();
+
+	textured_quad_shaderprogram.logUnfiformslogAttributes();
+
 	glm::fmat3 M = glm::fmat3(1.f);
 	
 	eversim::core::rendering::Spritemap sm(1024);
@@ -261,7 +272,7 @@ int main(int argc, char* argv[]) {
 		renderablentity.cam = &cam;
 	}
 
-	auto entity_ptr_zwo = renderer.register_entity();
+	/*auto entity_ptr_zwo = renderer.register_entity();
 	{
 
 		auto& renderablentity = *entity_ptr_zwo;
@@ -287,6 +298,35 @@ int main(int argc, char* argv[]) {
 
 		renderablentity.program = &vertex_only_shaderprogram;
 		renderablentity.cam = &cam;
+	}*/
+
+	auto textured_quad = renderer.register_entity();
+	{
+
+		auto& renderablentity = *textured_quad;
+		renderablentity.data.attach(
+		{
+			{ 500,500 },
+			{ 300,500 },
+			{ 300,300 },
+			{ 500,300 },
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 1,0 },
+			{ 0,0 },
+			{ 0,1 },
+			{ 1,1 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &textured_quad_shaderprogram;
+		renderablentity.cam = &cam;
+		renderablentity.tex = &kobold;
 	}
 
 	int cnt = 0;
@@ -294,6 +334,7 @@ int main(int argc, char* argv[]) {
 	{
 
 		cam.rotate(0.1);
+		cam.translate({ -0.5,-0.5 });
 
 		ImGui_ImplSdlGL3_NewFrame(window);
 
@@ -331,7 +372,7 @@ int main(int argc, char* argv[]) {
 		ImVec2 size = ImGui::GetWindowSize();
 		//cout << size.x << "/" << size.y << endl;
 		ImGui::GetWindowDrawList()->AddImage(
-			(void*)(sm.get_texture_id()),
+			reinterpret_cast<void*>(sm.get_texture_id()),
 			ImVec2(
 				pos.x,
 				pos.y

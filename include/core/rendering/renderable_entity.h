@@ -4,6 +4,7 @@
 #include "core/rendering/shader_program.h"
 #include "core/rendering/multibuffer.h"
 #include "core/rendering/camera.h"
+#include "core/rendering/texture.h"
 
 #include <easylogging++.h>
 #include <glm/glm.hpp>
@@ -21,6 +22,7 @@ namespace eversim {
 			public:
 				Camera* cam = nullptr;
 				ShaderProgram* program = nullptr;
+				Texture* tex = nullptr;
 				Multibuffer data;
 
 				void bind() const;

@@ -17,15 +17,15 @@ namespace eversim {
 				void swap_members(Framebuffer& other);
 			public:
 				Framebuffer();
-				Framebuffer(const glm::ivec2& resolution,
+				explicit Framebuffer(const glm::ivec2& resolution,
 							const bool with_depth = false);
-				Framebuffer(Framebuffer&& buffer);
+				Framebuffer(Framebuffer&& buffer) noexcept;
 
 				~Framebuffer();
 
-				Framebuffer& operator=(Framebuffer&& buffer);
+				Framebuffer& operator=(Framebuffer&& buffer) noexcept;
 
-				void bind();
+				void bind() const;
 				
 				const glm::ivec2 viewport() const;
 				const GLuint get_fbo_id() const;

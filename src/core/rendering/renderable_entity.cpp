@@ -10,6 +10,7 @@ namespace eversim {	namespace core { namespace rendering {
 	void RenderableEntity::bind() const
 	{
 		data.bind();
+		if (tex != nullptr) tex->bind();
 	}
 
 	void RenderableEntity::draw() const

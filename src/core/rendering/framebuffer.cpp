@@ -50,7 +50,7 @@ namespace eversim {
 				std::swap(color_tex0, buffer.color_tex0);
 			}
 
-			Framebuffer::Framebuffer(Framebuffer&& buffer)
+			Framebuffer::Framebuffer(Framebuffer&& buffer) noexcept
 			{
 				swap_members(buffer);
 			}
@@ -66,13 +66,13 @@ namespace eversim {
 				}
 			}
 
-			Framebuffer& Framebuffer::operator=(Framebuffer&& buffer)
+			Framebuffer& Framebuffer::operator=(Framebuffer&& buffer) noexcept
 			{
 				swap_members(buffer);
 				return *this;
 			}
 
-			void Framebuffer::bind()
+			void Framebuffer::bind() const
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
