@@ -5,6 +5,10 @@
 #include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/constraints/angle_constraint.h"
 
+#include "core/world/level.h"
+#include "core/world/level_loader.h"
+#include "core/world/tile_descriptor.h"
+
 #include "core/utility/helper.h"
 
 #include <imgui/imgui_impl_sdl_gl3.h>
@@ -155,8 +159,18 @@ int main(int argc, char* argv[])
 	io.DisplaySize.y = float(resolution.y);
 
 	rendering::myrenderer = &renderer;
-	auto floor_height = -0.35f;
+	auto floor_height = -0.f;
 	rendering::draw_line({-1.f,floor_height}, {1.f,floor_height}, 99999999);
+
+	world::tile_descriptor dirt;
+	dirt.name = "dirt";
+	dirt.collision = world::collision_type::solid;
+
+	world::level_loader ll;
+	ll.add_search_directory("../resources/levels");
+	ll.register_tile_descriptor(&dirt);
+	auto l = ll.load("example_level");
+	l->set_tile_size(0.2f);
 
 	physics::physics_manager physics;
 	physics::body_template_loader loader;
@@ -169,7 +183,9 @@ int main(int argc, char* argv[])
 		physics::distance_constraint, physics::angle_constraint
 	>();
 
-	auto boulder_templ = loader.load("boulder.bdy");
+	physics.set_level(l.get());
+
+	auto boulder_templ = loader.load("cube.bdy");
 
 	auto add_floor_constraint = [&](physics::body* b)
 	{
@@ -179,18 +195,18 @@ int main(int argc, char* argv[])
 				&p, floor_height
 			));
 			physics.insert_constraint(wall_constraint(
-				&p, -1.f
+				&p, 0.f
 			));
 			physics.insert_constraint(wall_constraint(
-				&p, 1.f
+				&p, 0.9f
 			));
 		}
 	};
 
 	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.f, 0.1f }, 0.1f));
-	add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
-	add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.4f, 0.1f }, 0.1f));
+	//add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
+	//add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
 
 	mouse_click = [&](glm::ivec2 pos, int button)
 	{
