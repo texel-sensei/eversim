@@ -1,9 +1,11 @@
 #pragma once
-#include "core/physics/particle.h"
 #include "core/physics/constraints/constraint_base.h"
 #include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/constraints/static_collision_constraint.h"
+
+#include "core/physics/particle.h"
 #include "core/physics/body.h"
+#include "core/physics/events.h"
 
 #include "core/utility/object_pool.h"
 
@@ -28,6 +30,7 @@ namespace eversim { namespace core { namespace physics {
 	public:
 		constexpr static size_t max_constraint_arity = 3;
 		using body_container = utility::object_pool<body>;
+		using particle_list = std::vector<particle*>;
 
 		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
 		void remove_body(body* b);
@@ -77,32 +80,46 @@ namespace eversim { namespace core { namespace physics {
 
 		size_t get_num_bodies() const { return bodies.size() - num_dead_bodies; }
 
+		void cleanup_dead_bodies();
+
+		auto& body_collisions_events()
+		{
+			return body_body_collision_event;
+		}
+
+		auto& level_collision_events()
+		{
+			return body_level_collision_event;
+		}
+
 		// debug functions
 		void atomic_step(float dt);
 		std::string get_step_name() const;
 		bool finished_frame() const { return current_state == simulation_state::external; }
 		void draw_constraints(std::bitset<max_constraint_arity> to_render = ~0UL);
 		
-		void cleanup_dead_bodies();
-
 	private:
 		int solver_iterations = 5;
+
 		std::vector<particle> particles;
+
+		boost::base_collection<constraint> constraints;
 		std::vector<distance_constraint> collision_constraints;
 		std::vector<static_collision_constraint> static_collision_constraints;
+
 		body_container bodies;
+
 		glm::vec2 gravity = {0.f,-1.f};
 		float damping = 0.99f;
 		float particle_radius = 0.02f;
-		
 		int num_dead_bodies = 0;
 
 		world::level const* level = nullptr;
 
-		boost::base_collection<constraint> constraints;
+		events::body_body body_body_collision_event;
+		events::body_level body_level_collision_event;
 
 		utility::array_view<particle> allocate_particles(size_t num);
-
 
 		enum class simulation_state {
 			external,
@@ -110,7 +127,8 @@ namespace eversim { namespace core { namespace physics {
 			apply_velocity,
 			check_collisions,
 			constraint_iteration,
-			apply_changes
+			apply_changes,
+			call_events
 		};
 		simulation_state current_state = simulation_state::external;
 		int current_iteration = 0;
@@ -120,6 +138,7 @@ namespace eversim { namespace core { namespace physics {
 		void damp_velocities();
 		void project_constraints();
 		void finalize_changes(float dt);
+		void call_events();
 
 		void particle_tile_collision(particle& p);
 		void handle_simple_tile_collision(particle& p, world::tile const& t);

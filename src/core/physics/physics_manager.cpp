@@ -87,6 +87,7 @@ namespace eversim { namespace core { namespace physics {
 		}
 
 		finalize_changes(dt);
+		call_events();
 	}
 
 	void physics_manager::atomic_step(float dt)
@@ -125,9 +126,13 @@ namespace eversim { namespace core { namespace physics {
 			break;
 		case simulation_state::apply_changes:
 			finalize_changes(dt);
+			current_state = simulation_state::call_events;
+			break;
+		case simulation_state::call_events: 
+			call_events();
 			current_state = simulation_state::external;
 			break;
-		default: ;
+		default:;
 			assert(!"unknown state!");
 		}
 	}
@@ -184,6 +189,7 @@ namespace eversim { namespace core { namespace physics {
 			return "Constraint solver " + to_string(current_iteration) + "/" + to_string(solver_iterations);
 		case simulation_state::apply_changes: return "Moving particles to projected pos";
 		case simulation_state::check_collisions: return "Checking collisions";
+		case simulation_state::call_events: return "Calling events";
 		default: return "Invalid state!";
 		}
 	}
@@ -374,6 +380,51 @@ namespace eversim { namespace core { namespace physics {
 		{
 			b.old_position = b.position = b.position/float(b.particles.size());
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
+		}
+	}
+
+	void physics_manager::call_events()
+	{
+		using bodypair = pair<body*, body*>;
+		map<bodypair, events::dyn_col_list> bb_collisions;
+		for(auto& c : collision_constraints)
+		{
+			auto p1 = c.particles[0];
+			auto p2 = c.particles[1];
+
+			assert(p1.base != p2.base && "Collision between particles of the same body is not allowed!");
+
+			if(p1.base > p2.base)
+			{
+				swap(p1, p2);
+			}
+
+			auto key = make_pair( p1->owner, p2->owner );
+			bb_collisions[key].push_back({ p1.resolve(), p2.resolve() });
+		}
+
+		map<body*, events::static_col_list> bl_collisions;
+		for(auto& c : static_collision_constraints)
+		{
+			auto& p = *c.particles[0];
+			auto& l = bl_collisions[p.owner];
+			
+			l.push_back({&p, c.tile(), c.normal()});
+		}
+
+		for(auto& p : bb_collisions)
+		{
+			body* a;
+			body* b;
+			tie(a, b) = p.first;
+
+			auto const& list = p.second;
+			body_body_collision_event(a, b, list);
+		}
+
+		for(auto& p : bl_collisions)
+		{
+			body_level_collision_event(p.first, p.second);
 		}
 	}
 

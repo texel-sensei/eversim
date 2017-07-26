@@ -32,7 +32,7 @@ namespace eversim { namespace core { namespace physics {
 
 	static_collision_constraint::static_collision_constraint(
 		world::tile const& t, particle const& p
-	): constraint(1)
+	): constraint(1), tile_(&t)
 	{
 		type = constraint_type::inequality;
 		particles[0] = &p;
