@@ -2,20 +2,22 @@
 
 namespace eversim {	namespace core { namespace rendering {
 
-	RenderableEntity::RenderableEntity() : data("default_name")
+	Multibuffer quadmesh("default quad mesh");
+
+	RenderableEntity::RenderableEntity() : data(&quadmesh)
 	{
 		
 	}
 
 	void RenderableEntity::bind() const
 	{
-		data.bind();
+		data->bind();
 		if (tex != nullptr) tex->bind();
 	}
 
 	void RenderableEntity::draw() const
 	{
-		data.draw();
+		data->draw();
 	}
 
 }}}

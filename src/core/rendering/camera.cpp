@@ -6,13 +6,19 @@ namespace eversim {	namespace core { namespace rendering {
 
 	void Camera::calc()
 	{
+		left_right = glm::fvec2(0, width_in_meters);
+		bottom_top = glm::fvec2(0, width_in_meters / aspect_ratio);
+		auto pos = position - glm::fvec2(
+			left_right[1] / 2.f,
+			bottom_top[1] / 2.f
+		);
 		P = glm::fmat3(2.f / (left_right[1] - left_right[0]), 0, 0,
 			0, 2.f / (bottom_top[1] - bottom_top[0]), 0,
 			-1, -1, 1);
 		V = glm::fmat3(
 			right_vector[0], right_vector[1], 0,
 			up_vector[0], up_vector[1], 0,
-			-position[0], -position[1], 1
+			-pos[0], -pos[1], 1
 		);
 	}
 
@@ -20,33 +26,26 @@ namespace eversim {	namespace core { namespace rendering {
 	Camera::Camera(const std::string& n,
 		const glm::fvec2 left_right,
 		const glm::fvec2 bottom_top,
+		const float width_in_meters,
 		const glm::fvec2 position) :
 		name(n),
+		aspect_ratio((left_right[1]-left_right[0])/(bottom_top[1]-bottom_top[0])),
 		left_right(left_right),
 		bottom_top(bottom_top),
 		up_vector({ 0,1 }),
 		right_vector({ 1,0 }),
-		position(position)
+		position(position),
+		width_in_meters(width_in_meters)
 	{
 		calc();
-	}
-
-	Camera::Camera(const Camera& c) :
-		name(c.name), P(c.P), V(c.V)
-	{}
-
-	Camera::Camera(Camera&& c) :
-		name(c.name)
-	{
-		std::swap(P, c.P);
-		std::swap(V, c.V);
-	}
+		//LOG(INFO) << "camera with aspect ratio = " << aspect_ratio << "\n" << "screen size in meters = " << width_in_meters << "x" << width_in_meters / aspect_ratio;
+	} 
 
 	void Camera::use(ShaderProgram& program)
 	{
 		calc();
 
-		GLint location = glGetUniformLocation(program.getID(), "V");
+		auto location = glGetUniformLocation(program.getID(), "V");
 		if (location == -1)
 			LOG(INFO) << "Uniform name ""V"" does not exist";
 		glUniformMatrix3fv(location, 1, GL_FALSE, &V[0][0]);
@@ -73,5 +72,15 @@ namespace eversim {	namespace core { namespace rendering {
 
 		right_vector = R * right_vector; 
 		right_vector = glm::normalize(right_vector);
+	}
+
+	void Camera::set_width_in_meters(const float m)
+	{
+		width_in_meters = m;
+	}
+
+	float Camera::get_width_in_meters() const
+	{
+		return width_in_meters;
 	}
 }}}

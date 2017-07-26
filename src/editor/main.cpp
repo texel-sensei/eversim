@@ -202,7 +202,9 @@ int main(int argc, char* argv[])
 
 	rendering::myrenderer = &renderer;
 	auto floor_height = -0.35f;
-	rendering::draw_line({-1.f,floor_height}, {1.f,floor_height}, 99999999);
+
+	//lukitest
+	floor_height = 0;
 
 	physics::physics_manager physics;
 	physics::body_template_loader loader;
@@ -215,7 +217,7 @@ int main(int argc, char* argv[])
 		physics::distance_constraint, physics::angle_constraint
 	>();
 
-	auto boulder_templ = loader.load("boulder.bdy");
+	auto boulder_templ = loader.load("cube.bdy");
 
 	auto add_floor_constraint = [&](physics::body* b)
 	{
@@ -273,7 +275,8 @@ int main(int argc, char* argv[])
 
 	eversim::core::rendering::Camera cam("default_cam",
 										glm::fvec2(0,resolution[0]),
-										glm::fvec2(0,resolution[1]));
+										glm::fvec2(0,resolution[1]),
+										20.f);
 
 	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
@@ -345,146 +348,107 @@ int main(int argc, char* argv[])
 	sm.add_texture(program, conjuration);
 
 	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
+	
+	eversim::core::rendering::Multibuffer quadbuff("quadmesh");
 
-
-	//Test
-	auto entity_ptr = renderer.register_entity();
+	quadbuff.attach
+	(
 	{
-		
-		auto& renderablentity = *entity_ptr;
-		renderablentity.data.attach(
-		{
-			{ 200,200 },
-			{ 0,200 },
-			{ 0,0 },
-			{ 200,0 },
+		{ 500,500 },
+		{ 300,500 },
+		{ 300,300 },
+		{ 500,300 }
+	}
+	);
+	quadbuff.attach
+	(
+	{
+		{ 1,1 },
+		{ 0,1 },
+		{ 0,0 },
+		{ 1,0 }
+	}
+	);
 
-			{ 700,700 },
-			{ 500,700 },
-			{ 500,500 },
-			{ 700,500 }
-		}
-		);
+	quadbuff.set_draw_mode(GL_QUADS, 0, 4);
+	quadbuff.create_and_upload();
 
-		renderablentity.data.attach(
-		{
-			{ 1,1,1,1 },
-			{ 0,0,0,1 },
-			{ 1,1,1,1 },
-			{ 0,0,0,1 },
-
-			{ 1,1,1,1 },
-			{ 0,0,0,1 },
-			{ 1,1,1,1 },
-			{ 0,0,0,1 }
-		}
-		);
-		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
-		renderablentity.data.create_and_upload();
-
-		renderablentity.program = &vertex_only_shaderprogram;
-		renderablentity.cam = &cam;
+	auto textured_quad = renderer.register_entity();
+	{
+		auto& renderablentity = *textured_quad;
+		renderablentity.set_Multibuffer(&quadbuff);
+		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
+		renderablentity.set_Texture(sm.get_texture());
 	}
 
-	auto triangle = renderer.register_entity();
-	{
+	auto player_entity = renderer.register_entity();
 
-		auto& renderablentity = *triangle;
-		renderablentity.data.attach(
+	{
+		auto& renderablentity = *player_entity;
+		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
+		renderablentity.set_Texture(sm.get_texture());
+	}
+
+	auto floor = renderer.register_entity();
+	{
+		auto& renderablentity = *floor;
+		renderablentity.set_ShaderProgram(vertex_only_shaderprogram);
+
+		renderablentity.set_Multibuffer(new eversim::core::rendering::Multibuffer("line"));
+		renderablentity.get_Multibuffer()->attach(
 		{
-			{ 800,800 },
-			{ 600,800 },
-			{ 600,600 }
+			{ -10.f,floor_height },
+			{ 10.f,floor_height }
 		}
 		);
-
-		renderablentity.data.attach(
+		renderablentity.get_Multibuffer()->attach(
 		{
-			{ 0,0,1,1 },
 			{ 1,0,0,1 },
 			{ 0,0,1,1 }
 		}
 		);
-		renderablentity.data.set_draw_mode(GL_TRIANGLES, 0, 3);
-		renderablentity.data.create_and_upload();
-
-		renderablentity.program = &vertex_only_shaderprogram;
-		renderablentity.cam = &cam;
+		renderablentity.get_Multibuffer()->set_draw_mode(GL_LINES, 0, 2);
+		renderablentity.get_Multibuffer()->create_and_upload();
 	}
 
-	/*auto entity_ptr_zwo = renderer.register_entity();
-	{
+	/*eversim::core::rendering::Multibuffer tribuff("trianglemesh");
 
-		auto& renderablentity = *entity_ptr_zwo;
-		renderablentity.data.attach(
-		{
-			{ 500,500 },
-			{ 300,500 },
-			{ 300,300 },
-			{ 500,300 },
-		}
-		);
-
-		renderablentity.data.attach(
-		{
-			{ 0,0,1,1 },
-			{ 0,1,0,1 },
-			{ 0,0,1,1 },
-			{ 0,1,0,1 }
-		}
-		);
-		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
-		renderablentity.data.create_and_upload();
-
-		renderablentity.program = &vertex_only_shaderprogram;
-		renderablentity.cam = &cam;
-	}*/
-
-	auto textured_quad = renderer.register_entity();
-	{
-
-		auto& renderablentity = *textured_quad;
-		renderablentity.data.attach(
-		{
-			{ 500,500 },
-			{ 300,500 },
-			{ 300,300 },
-			{ 500,300 },
-		}
-		);
-
-		renderablentity.data.attach(
-		{
-			{ 1,1 },
-			{ 0,1 },
-			{ 0,0 },
-			{ 1,0 }
-		}
-		);
-		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
-		renderablentity.data.create_and_upload();
-
-		renderablentity.program = &textured_quad_shaderprogram;
-		renderablentity.cam = &cam;
-		renderablentity.tex = &(sm.get_texture());
+	tribuff.attach
+	(
+	{ 
+	{ 400,500 },
+	{ 300,300 },
+	{ 500,300 }
 	}
+	);
+	tribuff.attach
+	(
+	{
+		{ 0.5,0.5 },
+		{ 0,0 },
+		{ 1,0 }
+	}
+	);
+
+	tribuff.set_draw_mode(GL_TRIANGLES, 0, 3);
+	tribuff.create_and_upload();*/
 
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
 
-		cam.rotate(0.1);
-		cam.translate({ -0.5,-0.5 });
-		if(cnt%60 ==  0)
+		//cam.rotate(0.1);
+		//cam.translate({ -0.5,-0.5 });
+		/*if(cnt%60 ==  0)
 		{
-			auto& renderablentity = *textured_quad;
-			renderablentity.tex = &kobold;
+			textured_quad->set_Texture(kobold);
+			textured_quad->set_Multibuffer(quadbuff);
 		}
 		else if(cnt%30 == 0)
 		{
-			auto& renderablentity = *textured_quad;
-			renderablentity.tex = &(sm.get_texture());
-		}
+			textured_quad->set_Texture(sm.get_texture());
+			textured_quad->set_Multibuffer(tribuff);
+		}*/
 
 		ImGui_ImplSdlGL3_NewFrame(window);
 
@@ -495,7 +459,7 @@ int main(int argc, char* argv[])
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 
-		int dice_roll = distribution(generator);
+		auto dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));
 
 		empty_canvas.clear();
@@ -504,12 +468,10 @@ int main(int argc, char* argv[])
 		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
 		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
 		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
-
 		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
-
 		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
-		renderer.draw();
+		renderer.draw(cam);
 
 		//render
 		ImGui::ShowTestWindow();
@@ -555,6 +517,11 @@ int main(int argc, char* argv[])
 				physics.integrate(dt);
 			} 
 		}
+
+		auto& renderablentity = *player_entity;
+		auto PM = renderablentity.get_M();
+		PM[2] = glm::fvec3(player->position,1.f);
+		renderablentity.set_M(PM);
 
 		for (auto&& p : physics.get_particles())
 		{

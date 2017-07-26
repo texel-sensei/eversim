@@ -39,7 +39,7 @@ namespace eversim { namespace core { namespace rendering {
 		 * Sorts entities with the shader id
 		 * draw everything
 		 */
-		void draw();
+		void draw(Camera& cam);
 
 	private:
 		struct line

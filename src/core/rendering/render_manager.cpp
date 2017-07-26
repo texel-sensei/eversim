@@ -4,10 +4,14 @@
 #include "core/utility/helper.h"
 
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <tuple>
 #include <limits>
+
+
 
 using namespace std;
 
@@ -29,6 +33,24 @@ namespace eversim { namespace core { namespace rendering {
 		resolution(resolution)
 	{
 		setup(fullscreen);
+		quadmesh.attach(
+		{
+			{ 1,1 },
+			{ 0,1 },
+			{ 0,0 },
+			{ 1,0 },
+		}
+		);
+		quadmesh.attach(
+		{
+			{ 1,1 },
+			{ 0,1 },
+			{ 0,0 },
+			{ 1,0 }
+		}
+		);
+		quadmesh.set_draw_mode(GL_QUADS, 0, 4);
+		quadmesh.create_and_upload();
 	}
 
 	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)
@@ -120,7 +142,7 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
-	void render_manager::draw()
+	void render_manager::draw(Camera& cam)
 	{
 		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)
 		{
@@ -175,26 +197,26 @@ namespace eversim { namespace core { namespace rendering {
 			}
 			cnt++;
 		}
-		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
+		LOG(INFO) << "number of drawable blocks = " << blocks.size();
 		for(auto& block : blocks)
 		{
 			auto fbeptr = deref(entities.at(std::get<1>(block)));
 			auto& fbe = *fbeptr;
 			ShaderProgram& program = *(fbe.program);
 			program.use();
-
+			LOG(INFO) << "bind program " << program.name;
+			cam.use(program);
 			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
 			{
-				auto entityptr = deref(entities.at(i)); auto& entity = *entityptr;
+				auto entityptr = deref(entities.at(i)); RenderableEntity& entity = *entityptr;
 
-				if (entity.cam == nullptr) continue;
+				LOG(INFO) << "render entity " << entity.get_Multibuffer()->name;
 
 				auto location = glGetUniformLocation(program.getID(), "M");
 				if (location == -1)
 					LOG(INFO) << "Uniform name ""M"" does not exist";
-				glUniformMatrix3fv(location, 1, GL_FALSE, &entity.get_M()[0][0]);
+				glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(entity.get_M()));
 
-				entity.cam->use(program);
 				entity.bind();
 				entity.draw();
 			}
