@@ -31,6 +31,7 @@ namespace eversim {
 				const GLuint get_fbo_id() const;
 				const GLuint get_tex_id() const;
 				const GLuint get_depth_id() const;
+				Texture& get_texture() { return color_tex0; };
 			};
 		}
 	}

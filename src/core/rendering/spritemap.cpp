@@ -29,16 +29,14 @@ namespace eversim {
 				divider = Areadivider(resolution);
 			}
 
-			bool Spritemap::add_texture(ShaderProgram& program, Texture& tex)
+			glm::ivec2 Spritemap::add_texture(ShaderProgram& program, Texture& tex)
 			{
-
 				auto pos = divider.place_rectangle(tex.get_resolution());
 				
-				if (pos == glm::ivec2(-1, -1)) return false;
+				if (pos != glm::ivec2(-1, -1))
+					canvas_tex.place_texture(program, tex, pos, glm::vec2(1, 1));
 				
-				canvas_tex.place_texture(program, tex, pos, glm::vec2(1, 1));
-				
-				return true;
+				return pos;
 			}
 		}
 	}

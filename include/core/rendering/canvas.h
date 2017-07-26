@@ -49,6 +49,7 @@ namespace eversim {
 					const glm::vec2 scale = glm::vec2(1, 1));
 
 				GLuint get_texture_id() const { return fbo.get_tex_id(); }
+				Texture& get_texture() { return fbo.get_texture(); }
 				glm::ivec2 get_fbo_viewport() const { return fbo.viewport(); }
 				void bind_framebuffer();
 				glm::ivec2 get_resolution() const { return fbo.viewport(); }

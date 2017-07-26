@@ -53,10 +53,23 @@ namespace eversim {
 
 					glm::ivec2 res = {w,h};
 
-					std::vector<float> image_float(res[0] * res[1] * 4);
+					std::vector<float> image_float;//(res[0] * res[1] *4);
 
-					for (size_t i = 0; i < image_float.size(); ++i)
-						image_float.at(i) = static_cast<float>(image[i]) / 255.f;
+					auto idxf = [&](const int i ,const int j)
+					{
+						return i * w + j;
+					};
+					for(int i = h-1; i >= 0; i--)
+					{
+						for(int j = 0; j < w; j++)
+						{
+							auto idx = idxf(i,j) * 4;
+							image_float.push_back(static_cast<float>(image.at(idx)) / 255.f);
+							image_float.push_back(static_cast<float>(image.at(idx+1)) / 255.f);
+							image_float.push_back(static_cast<float>(image.at(idx+2)) / 255.f);
+							image_float.push_back(static_cast<float>(image.at(idx+3)) / 255.f);
+						}
+					}
 
 					GLuint tex_id = 0;
 				

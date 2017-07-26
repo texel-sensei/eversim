@@ -315,10 +315,10 @@ int main(int argc, char* argv[]) {
 
 		renderablentity.data.attach(
 		{
-			{ 1,0 },
-			{ 0,0 },
+			{ 1,1 },
 			{ 0,1 },
-			{ 1,1 }
+			{ 0,0 },
+			{ 1,0 }
 		}
 		);
 		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
 
 		renderablentity.program = &textured_quad_shaderprogram;
 		renderablentity.cam = &cam;
-		renderablentity.tex = &kobold;
+		renderablentity.tex = &(sm.get_texture());
 	}
 
 	int cnt = 0;
@@ -335,6 +335,16 @@ int main(int argc, char* argv[]) {
 
 		cam.rotate(0.1);
 		cam.translate({ -0.5,-0.5 });
+		if(cnt%60 ==  0)
+		{
+			auto& renderablentity = *textured_quad;
+			renderablentity.tex = &kobold;
+		}
+		else if(cnt%30 == 0)
+		{
+			auto& renderablentity = *textured_quad;
+			renderablentity.tex = &(sm.get_texture());
+		}
 
 		ImGui_ImplSdlGL3_NewFrame(window);
 
