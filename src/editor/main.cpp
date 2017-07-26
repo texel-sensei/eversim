@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 	ll.add_search_directory("../resources/levels");
 	ll.register_tile_descriptor(&dirt);
 	auto l = ll.load("example_level");
-	l->set_tile_size(0.2f);
+	l->set_tile_size(0.125f);
 
 	physics::physics_manager physics;
 	physics::body_template_loader loader;
@@ -204,9 +204,39 @@ int main(int argc, char* argv[])
 	};
 
 	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.4f, 0.1f }, 0.1f));
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.4f, 0.2f }, 0.1f));
 	//add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
 	//add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
+
+	utility::Delegate d;
+	d.connect(
+		[](physics::body* a, physics::body* b, physics::events::dyn_col_list const& list)
+	{
+		rendering::draw_line(a->position, b->position);
+		for(auto& dc : list)
+		{
+			rendering::draw_line(dc.a->pos, dc.b->pos);
+		}
+	},
+		physics.body_collisions_events()
+	);
+
+	d.connect(
+		[](physics::body* b, physics::events::static_col_list const& list)
+	{
+		for(auto& sc : list)
+		{
+			auto const* t = sc.t;
+			auto* p = sc.p;
+			
+			auto n = sc.normal;
+
+			rendering::draw_line(t->position(), p->pos);
+			rendering::draw_line(p->pos, p->pos + n * 0.05f);
+		}
+	},
+		physics.level_collision_events()
+	);
 
 	mouse_click = [&](glm::ivec2 pos, int button)
 	{
