@@ -69,6 +69,13 @@ target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
 SET(LIBS ${LIBS} imgui)
 
+#dear imgui
+file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
+add_library(lodepng ${LODEPNG_SOURCES})
+target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
+include_directories(${EXTERNALS}/lodepng/include/)
+SET(LIBS ${LIBS} lodepng)
+
 #soil
 add_subdirectory(${EXTERNALS}/soil)
 include_directories(${EXTERNALS}/soil/include/)
@@ -106,7 +113,7 @@ endif(WIN32)
 add_definitions(-DNOMINMAX)
 
 ############# SOURCE ###############
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 file(GLOB_RECURSE CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/core/*.h)
 file(GLOB_RECURSE GAME_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/game/*.h)
 file(GLOB_RECURSE EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/editor/*.h)

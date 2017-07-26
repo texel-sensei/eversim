@@ -83,7 +83,7 @@ namespace eversim { namespace core { namespace utility {
 					return full_path;
 				}
 			}
-			throw file_not_found_error{ "Could not find "s + desc.string() };
+			throw file_not_found_error{ "Could not find " + desc.string() };
 		}
 		
 	};

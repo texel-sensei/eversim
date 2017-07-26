@@ -6,13 +6,28 @@
 #include "core/physics/constraints/angle_constraint.h"
 
 #include "core/utility/helper.h"
+#include "core/system/programsequencer.h"
+#include "core/system/program_gui.h"
+
+#include "core/rendering/canvas.h"
+#include "core/rendering/shader_program.h"
+#include "core/rendering/renderable_entity.h"
+#include "core/rendering/multibuffer.h"
+#include "core/rendering/camera.h"
+#include "core/rendering/spritemap.h"
+
 
 #include <imgui/imgui_impl_sdl_gl3.h>
+#include <soil/SOIL.h>
 
 #define ELPP_FEATURE_PERFORMANCE_TRACKING
 #include <easylogging++.h>
 #include <imgui/imgui.h>
 #include <GL/glew.h>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <random>
+#include <chrono>
 
 
 #undef main
@@ -86,6 +101,37 @@ bool handle_sdl_events()
 	return should_continue;
 }
 
+namespace {
+	const char* glTypeToString(GLenum type) {
+		switch (type) {
+		case GL_DEBUG_TYPE_ERROR:
+			return "ERROR";
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			return "DEPRECATED_BEHAVIOR";
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			return "UNDEFINED_BEHAVIOR";
+		case GL_DEBUG_TYPE_PORTABILITY:
+			return "PORTABILITY";
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			return "PERFORMANCE";
+		case GL_DEBUG_TYPE_OTHER:
+			return "OTHER";
+		}
+		return "UNKNOWN";
+	}
+
+	const char* glSeverityToString(GLenum severity) {
+		switch (severity) {
+		case GL_DEBUG_SEVERITY_LOW:
+			return "LOW";
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			return "MEDIUM";
+		case GL_DEBUG_SEVERITY_HIGH:
+			return "HIGH";
+		}
+		return "UNKNOWN";
+	}
+}
 class floor_constraint : public physics::constraint {
 public:
 
@@ -204,14 +250,268 @@ int main(int argc, char* argv[])
 		}
 	};
 
-	while (handle_sdl_events())
+	//Enable Debugging
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+	glDebugMessageCallback([](
+		GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+		const GLchar* message, const void* userParam)
 	{
-		ImGui_ImplSdlGL3_NewFrame(window);
-		//prepare frame
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		LOG(INFO) << "GL Debug Message" << endl;
+		LOG(INFO) << "GL Debug Message" << endl;
+		LOG(INFO) << string(80, '=') << endl;
+		LOG(INFO) << "src: " << source << endl;
+		LOG(INFO) << "type: " << glTypeToString(type) << endl;
+		LOG(INFO) << "severity: " << glSeverityToString(type) << endl;
+		LOG(INFO) << message << endl;
+		LOG(INFO) << string(80, '=');
+	},
+		nullptr
+		);
 
-		// do rendering stuff
+	eversim::core::rendering::Camera cam("default_cam",
+										glm::fvec2(0,resolution[0]),
+										glm::fvec2(0,resolution[1]));
+
+	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
+	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
+	eversim::core::rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
+	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
+	eversim::core::rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
+	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
+	eversim::core::rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	eversim::core::rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
+	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
+		[]() {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	});
+	eversim::core::rendering::canvas empty_canvas;
+	empty_canvas.init(glm::ivec2(1920,1080));
+
+	rendering::ShaderProgram program("simple quad shader");
+	program.create();
+	program.attach
+	({
+		{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
+		{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	program.link();
+
+	rendering::ShaderProgram vertex_only_shaderprogram("simple shader");
+	vertex_only_shaderprogram.create();
+	vertex_only_shaderprogram.attach
+	({
+		{ "..\\resources\\shader\\vertex_only_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\vertex_only_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	vertex_only_shaderprogram.link();
+
+	vertex_only_shaderprogram.logUnfiformslogAttributes();
+
+	rendering::ShaderProgram textured_quad_shaderprogram("textured quad shader");
+	textured_quad_shaderprogram.create();
+	textured_quad_shaderprogram.attach
+	({
+		{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
+		{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+	});
+	textured_quad_shaderprogram.link();
+
+	textured_quad_shaderprogram.logUnfiformslogAttributes();
+
+	glm::fmat3 M = glm::fmat3(1.f);
+	
+	eversim::core::rendering::Spritemap sm(1024);
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::default_random_engine generator(seed);
+	
+	std::vector<eversim::core::rendering::Texture*> texes({
+		&brickwall,
+		&conjuration,
+		&conjuration_big,
+		&divination,
+		&brickwall_big,
+		&kobold,
+		&biggerkobold
+	});
+
+
+	sm.add_texture(program, conjuration);
+
+	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
+
+
+	//Test
+	auto entity_ptr = renderer.register_entity();
+	{
+		
+		auto& renderablentity = *entity_ptr;
+		renderablentity.data.attach(
+		{
+			{ 200,200 },
+			{ 0,200 },
+			{ 0,0 },
+			{ 200,0 },
+
+			{ 700,700 },
+			{ 500,700 },
+			{ 500,500 },
+			{ 700,500 }
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
+
+			{ 1,1,1,1 },
+			{ 0,0,0,1 },
+			{ 1,1,1,1 },
+			{ 0,0,0,1 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}
+
+	auto triangle = renderer.register_entity();
+	{
+
+		auto& renderablentity = *triangle;
+		renderablentity.data.attach(
+		{
+			{ 800,800 },
+			{ 600,800 },
+			{ 600,600 }
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 0,0,1,1 },
+			{ 1,0,0,1 },
+			{ 0,0,1,1 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_TRIANGLES, 0, 3);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}
+
+	/*auto entity_ptr_zwo = renderer.register_entity();
+	{
+
+		auto& renderablentity = *entity_ptr_zwo;
+		renderablentity.data.attach(
+		{
+			{ 500,500 },
+			{ 300,500 },
+			{ 300,300 },
+			{ 500,300 },
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 0,0,1,1 },
+			{ 0,1,0,1 },
+			{ 0,0,1,1 },
+			{ 0,1,0,1 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &vertex_only_shaderprogram;
+		renderablentity.cam = &cam;
+	}*/
+
+	auto textured_quad = renderer.register_entity();
+	{
+
+		auto& renderablentity = *textured_quad;
+		renderablentity.data.attach(
+		{
+			{ 500,500 },
+			{ 300,500 },
+			{ 300,300 },
+			{ 500,300 },
+		}
+		);
+
+		renderablentity.data.attach(
+		{
+			{ 1,1 },
+			{ 0,1 },
+			{ 0,0 },
+			{ 1,0 }
+		}
+		);
+		renderablentity.data.set_draw_mode(GL_QUADS, 0, 8);
+		renderablentity.data.create_and_upload();
+
+		renderablentity.program = &textured_quad_shaderprogram;
+		renderablentity.cam = &cam;
+		renderablentity.tex = &(sm.get_texture());
+	}
+
+	int cnt = 0;
+	while(handle_sdl_events())
+	{
+
+		cam.rotate(0.1);
+		cam.translate({ -0.5,-0.5 });
+		if(cnt%60 ==  0)
+		{
+			auto& renderablentity = *textured_quad;
+			renderablentity.tex = &kobold;
+		}
+		else if(cnt%30 == 0)
+		{
+			auto& renderablentity = *textured_quad;
+			renderablentity.tex = &(sm.get_texture());
+		}
+
+		ImGui_ImplSdlGL3_NewFrame(window);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+
+		int dice_roll = distribution(generator);
+		sm.add_texture(program, *(texes.at(dice_roll)));
+
+		empty_canvas.clear();
+		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
+		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
+		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
+		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
+		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
+
+		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
+
+		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
+
+		renderer.draw();
+
+		//render
 		ImGui::ShowTestWindow();
 
 		static float dt = 1 / 60.f;
@@ -264,8 +564,8 @@ int main(int argc, char* argv[])
 		renderer.do_draw();
 
 		ImGui::Render();
+
 		SDL_GL_SwapWindow(window);
 	}
-
 	return 0;
 }
