@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
 	{
 		auto& renderablentity = *player_entity;
 		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
-		renderablentity.set_Texture(sm.get_texture());
+		renderablentity.set_Texture(kobold);
 	}
 
 	auto floor = renderer.register_entity();
@@ -521,10 +521,7 @@ int main(int argc, char* argv[])
 			} 
 		}
 
-		auto& renderablentity = *player_entity;
-		auto PM = renderablentity.get_M();
-		PM[2] = glm::fvec3(player->position-glm::fvec2(0.5,0.5),1.f);
-		renderablentity.set_M(PM);
+		player_entity->set_Position(player->position-glm::fvec2(0.5, 0.5));
 
 		for (auto&& p : physics.get_particles())
 		{

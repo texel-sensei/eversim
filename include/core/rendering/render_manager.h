@@ -7,8 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-
-#include <vector>
+#include <functional>
 
 namespace eversim { namespace core { namespace rendering {
 
@@ -36,7 +35,19 @@ namespace eversim { namespace core { namespace rendering {
 		 * returns the shared ptr, keeps a weak ptr
 		 */
 		std::shared_ptr<RenderableEntity> register_entity();
+		/*
+		* Create new Texture from the given path
+		* utilizing the texture loader 
+		* returns the shared ptr, keeps a shared ptr
+		* you can safely pass them
+		*/
 		std::shared_ptr<Texture> register_texture(const std::string& path);
+		/*
+		* Create new Texture from the given path
+		* utilizing the texture loader and using the given filter funtion
+		* returns the shared ptr, keeps a shared ptr
+		* you can safely pass them
+		*/
 		std::shared_ptr<Texture> register_texture(const std::string& path, std::function<void()> filtering);
 
 		/*
