@@ -124,6 +124,7 @@ file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
 source_group("utility" REGULAR_EXPRESSION /utility/)
+source_group("utility\\time" REGULAR_EXPRESSION /utility/time/)
 source_group("rendering" REGULAR_EXPRESSION /rendering/)
 source_group("physics" REGULAR_EXPRESSION /physics/)
 source_group("physics\\constraints" REGULAR_EXPRESSION /physics/constraints/)
