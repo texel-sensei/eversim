@@ -16,6 +16,14 @@ using namespace std;
 
 namespace eversim { namespace core { namespace world {
 
+	namespace {
+		uint32_t load_big_endian(uint32_t in)
+		{
+			auto* dat = reinterpret_cast<unsigned char*>(&in);
+			return (dat[0] << 24) + (dat[1] << 16) + (dat[2] << 8) + dat[3];
+		}
+	}
+
 	level_loader::level_loader()
 	{
 		register_tile_descriptor(&blank_tile);
@@ -61,7 +69,7 @@ namespace eversim { namespace core { namespace world {
 			for(int y = 0; y < res.y; ++y)
 			{
 				auto& t = lvl->get_tile_by_index({ x,y });
-				auto id = layout[x][y];
+				auto id = load_big_endian(layout[x][y]);
 				if(idtable.find(id) == idtable.end())
 				{
 					throw runtime_error{
@@ -81,9 +89,9 @@ namespace eversim { namespace core { namespace world {
 		return lvl;
 	}
 
-	map<int, string> level_loader::load_id_table(istream& data)
+	map<uint32_t, string> level_loader::load_id_table(istream& data)
 	{
-		auto ret = map<int, string>();
+		auto ret = map<uint32_t, string>();
 		auto line = string();
 		while(getline(data, line))
 		{
@@ -91,8 +99,11 @@ namespace eversim { namespace core { namespace world {
 			in >> ws;
 			if (in.peek() == '#')
 				continue;
-			int num;
-			in >> num;
+			string num_txt;
+			in >> num_txt;
+
+			// use base '0' to let stoi automatically detect hex numbers
+			auto num = stoi(num_txt, nullptr, 0); 
 
 			string text;
 			in >> text;
