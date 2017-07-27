@@ -441,11 +441,10 @@ int main(int argc, char* argv[])
 
 	auto player_entity = renderer.register_entity();
 
-	{
+	/*{
 		auto& renderablentity = *player_entity;
-		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
 		renderablentity.set_Texture(kobold);
-	}
+	}*/
 
 	auto floor = renderer.register_entity();
 	{
