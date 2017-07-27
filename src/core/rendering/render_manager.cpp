@@ -142,6 +142,21 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
+	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path)
+	{
+		auto ptr = std::make_shared<Texture>(path);
+		textures.push_back(ptr);
+		return ptr;
+	}
+
+	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path,
+		std::function<void()> filtering)
+	{
+		auto ptr = std::make_shared<Texture>(path,filtering);
+		textures.push_back(ptr);
+		return ptr;
+	}
+
 	void render_manager::draw(Camera& cam)
 	{
 		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)
@@ -179,7 +194,7 @@ namespace eversim { namespace core { namespace rendering {
 			auto entityptr = deref(wkptr); auto& entity = *entityptr;
 
 			if (entity.program == nullptr)
-				break;
+				continue;
 
 			auto id = entity.program->getID();
 

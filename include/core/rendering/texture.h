@@ -50,6 +50,9 @@ namespace eversim {
 
 				void bind() const;
 				static void unbind();
+
+				bool is_valid() const { return valid; }
+				explicit operator bool() const { return valid; }
 			};
 		}
 	}
