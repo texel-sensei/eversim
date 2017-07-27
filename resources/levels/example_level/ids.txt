@@ -1,2 +1,4 @@
 0 blank
-0x744B35FF dirt
+0x744b35ff dirt
+0x28a21aff grass
+0x8a8a8aff bricks

@@ -33,6 +33,8 @@
 #include <random>
 #include <chrono>
 
+//#include <float.h>
+//unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
 
 #undef main
 
@@ -188,6 +190,8 @@ private:
 	float X;
 };
 
+eversim::core::rendering::ShaderProgram* default_shader;
+
 int main(int argc, char* argv[])
 {
 	START_EASYLOGGINGPP(argc, argv);
@@ -196,6 +200,8 @@ int main(int argc, char* argv[])
 	auto resolution = glm::ivec2(1920, 1080);
 
 	auto renderer = rendering::render_manager(resolution, false);
+	rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
+
 	auto window = renderer.get_window();
 
 	ImGui_ImplSdlGL3_Init(window);
@@ -213,12 +219,21 @@ int main(int argc, char* argv[])
 	world::tile_descriptor dirt;
 	dirt.name = "dirt";
 	dirt.collision = world::collision_type::solid;
+	dirt.texture_name = "dirt0.png";
+	auto grass = dirt;
+	grass.name = "grass";
+	grass.texture_name = "grass.png";
+	auto bricks = dirt;
+	bricks.name = "bricks";
+	bricks.texture_name = "stone_brick1.png";
 
 	world::level_loader ll;
 	ll.add_search_directory("../resources/levels");
 	ll.register_tile_descriptor(&dirt);
+	ll.register_tile_descriptor(&grass);
+	ll.register_tile_descriptor(&bricks);
 	auto l = ll.load("example_level");
-	l->set_tile_size(0.125f);
+	l->set_tile_size(0.5f);
 
 	physics::physics_manager physics;
 	physics::body_template_loader loader;
@@ -242,17 +257,11 @@ int main(int argc, char* argv[])
 			physics.insert_constraint(floor_constraint(
 				&p, floor_height
 			));
-			physics.insert_constraint(wall_constraint(
-				&p, -10.f
-			));
-			physics.insert_constraint(wall_constraint(
-				&p, 10.f
-			));
 		}
 	};
 
 	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.4f, 0.2f }, 0.1f));
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.1f, 0.3f }, 0.1f));
 	//add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
 	//add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
 
@@ -324,7 +333,6 @@ int main(int argc, char* argv[])
 										glm::fvec2(0,resolution[1]),
 										20.f);
 
-	eversim::core::rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
 	eversim::core::rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
 	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
@@ -373,6 +381,7 @@ int main(int argc, char* argv[])
 	textured_quad_shaderprogram.link();
 
 	textured_quad_shaderprogram.logUnfiformslogAttributes();
+	default_shader = &textured_quad_shaderprogram;
 
 	glm::fmat3 M = glm::fmat3(1.f);
 	
@@ -479,10 +488,16 @@ int main(int argc, char* argv[])
 	tribuff.set_draw_mode(GL_TRIANGLES, 0, 3);
 	tribuff.create_and_upload();*/
 
+	l->initialize_graphics(renderer);
+
+	player->position = {16.f, 28.f};
+	cam.set_position({16.f,30.f});
+	
 	int cnt = 0;
 	while(handle_sdl_events())
 	{
-
+		const auto old_cam_pos = cam.get_position();
+		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
 		//cam.rotate(0.1);
 		//cam.translate({ -0.5,-0.5 });
 		/*if(cnt%60 ==  0)
