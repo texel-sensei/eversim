@@ -210,8 +210,6 @@ namespace eversim { namespace core { namespace rendering {
 			{
 				auto entityptr = deref(entities.at(i)); RenderableEntity& entity = *entityptr;
 
-				LOG(INFO) << "render entity " << entity.get_Multibuffer()->name;
-
 				auto location = glGetUniformLocation(program.getID(), "M");
 				if (location == -1)
 					LOG(INFO) << "Uniform name ""M"" does not exist";
