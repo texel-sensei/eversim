@@ -20,6 +20,18 @@ namespace eversim { namespace core { namespace world {
 		}
 	}
 
+	void level::initialize_graphics(rendering::render_manager& mng)
+	{
+		for (auto x = 0; x < get_num_tiles().x; ++x)
+		{
+			for (auto y = 0; y < get_num_tiles().y; ++y)
+			{
+				auto& t = get_tile_by_index({ x,y });
+				t.initialize_graphics(mng);
+			}
+		}
+	}
+
 	void level::set_tile_size(float f)
 	{
 		tile_size = f;

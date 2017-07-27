@@ -5,12 +5,17 @@
 #include <glm/glm.hpp>
 #include <boost/multi_array.hpp>
 
+namespace eversim { namespace core { namespace rendering {
+	class render_manager;
+}}}
 
 namespace eversim { namespace core { namespace world {
 
 	class level {
 	public:
 		explicit level(glm::ivec2 extents);
+
+		void initialize_graphics(rendering::render_manager&);
 
 		float get_tile_size() const { return tile_size; }
 		void set_tile_size(float f);

@@ -4,6 +4,10 @@
 #include <glm/vec2.hpp>
 #include <memory>
 
+namespace eversim{namespace core{namespace rendering {
+	class render_manager;
+	class RenderableEntity;
+}}}
 
 namespace eversim { namespace core { namespace world {
 
@@ -39,12 +43,15 @@ namespace eversim { namespace core { namespace world {
 			descriptor = desc;
 		}
 
+		void initialize_graphics(rendering::render_manager& mng);
+
 	private:
 		friend class level;
 		glm::ivec2 idx;
 		float size_;
 		tile_descriptor const* descriptor = &blank_tile;
-
+		std::shared_ptr<rendering::RenderableEntity> display;
+	
 		void size(float s)
 		{
 			size_ = s;
