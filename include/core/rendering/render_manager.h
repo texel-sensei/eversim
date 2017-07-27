@@ -16,6 +16,8 @@ namespace eversim { namespace core { namespace rendering {
 	void draw_line(glm::vec2 a, glm::vec2 b, int dur = 1);
 	void draw_point(glm::vec2 p);
 
+	//using entity_ptr std::shared_ptr<RenderableEntity>;
+
 	class render_manager {
 	public:
 		explicit render_manager(glm::ivec2 resolution, bool fullscreen);
@@ -34,12 +36,16 @@ namespace eversim { namespace core { namespace rendering {
 		 * returns the shared ptr, keeps a weak ptr
 		 */
 		std::shared_ptr<RenderableEntity> register_entity();
+		std::shared_ptr<Texture> register_texture(const std::string& path);
+		std::shared_ptr<Texture> register_texture(const std::string& path, std::function<void()> filtering);
+
 		/*
 		 * Removes every dead weak ptr
 		 * Sorts entities with the shader id
 		 * draw everything
 		 */
 		void draw(Camera& cam);
+
 
 	private:
 		struct line
@@ -56,6 +62,7 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
 		std::vector<std::weak_ptr<RenderableEntity>> entities;
+		std::vector<std::shared_ptr<Texture>> textures;
 
 		void setup(bool fullscreen);
 	};

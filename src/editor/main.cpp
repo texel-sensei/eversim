@@ -286,6 +286,9 @@ int main(int argc, char* argv[])
 	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
 	eversim::core::rendering::Texture kobold("brick_gray0\\big_kobold.png");
 	eversim::core::rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
+
+	auto conjuration_ptr = renderer.register_texture("brick_gray0\\divination.png");
+
 	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 		[]() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -354,10 +357,10 @@ int main(int argc, char* argv[])
 	quadbuff.attach
 	(
 	{
-		{ 500,500 },
-		{ 300,500 },
-		{ 300,300 },
-		{ 500,300 }
+		{ 5,5 },
+		{ 0,5 },
+		{ 0,0 },
+		{ 5,0 }
 	}
 	);
 	quadbuff.attach
@@ -378,7 +381,7 @@ int main(int argc, char* argv[])
 		auto& renderablentity = *textured_quad;
 		renderablentity.set_Multibuffer(&quadbuff);
 		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
-		renderablentity.set_Texture(sm.get_texture());
+		renderablentity.set_Texture(*conjuration_ptr);
 	}
 
 	auto player_entity = renderer.register_entity();
