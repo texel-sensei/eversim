@@ -2,12 +2,13 @@
 
 namespace eversim {	namespace core { namespace rendering {
 
-	Multibuffer quadmesh("default quad mesh");
+	Multibuffer default_quadmesh("default quad mesh");
+	Texture default_texture(glm::ivec2(4,4));
+	ShaderProgram default_shader("default uv shader");
 
-	RenderableEntity::RenderableEntity() : data(&quadmesh)
-	{
-		
-	}
+	RenderableEntity::RenderableEntity() : 
+		program(&default_shader), tex(&default_texture), data(&default_quadmesh)
+	{}
 
 	void RenderableEntity::bind() const
 	{
@@ -39,6 +40,13 @@ namespace eversim {	namespace core { namespace rendering {
 	glm::fvec2 RenderableEntity::get_Scale() const
 	{
 		return { M[0][0], M[1][1] };
+	}
+
+	void RenderableEntity::default_State()
+	{
+		default_Multibuffer();
+		default_ShaderProgram();
+		default_Texture();
 	}
 
 }}}

@@ -13,14 +13,26 @@ namespace eversim {
 	namespace core {
 		namespace rendering {
 
-			extern Multibuffer quadmesh;
+			/*
+			* unit sized quad 0/0 to 1/1
+			*/
+			extern Multibuffer default_quadmesh;
+			/*
+			 * default shader takes positions and uv coordinates
+			 * and texture
+			 */
+			extern ShaderProgram default_shader;
+			/*
+			 * default texture 4x4 basic color
+			 */
+			extern Texture default_texture;
 
 			class RenderableEntity {
 			private:
 
 				glm::fmat3 M = glm::fmat3(1.f);
-				ShaderProgram* program = nullptr;
-				Texture* tex = nullptr;
+				ShaderProgram* program;
+				Texture* tex;
 				Multibuffer* data;
 
 				RenderableEntity();
@@ -50,7 +62,10 @@ namespace eversim {
 				void set_Texture(Texture* t) { tex = t; };
 				void set_Multibuffer(Multibuffer* b){ data = b;	};
 
-				void default_Multibuffer(){	data = &quadmesh; }
+				void default_Multibuffer(){	data = &default_quadmesh; }
+				void default_ShaderProgram() { program = &default_shader; }
+				void default_Texture() { tex = &default_texture; }
+				void default_State();
 
 				friend class render_manager;
 			};

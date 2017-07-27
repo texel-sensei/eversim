@@ -33,7 +33,7 @@ namespace eversim { namespace core { namespace rendering {
 		resolution(resolution)
 	{
 		setup(fullscreen);
-		quadmesh.attach(
+		default_quadmesh.attach(
 		{
 			{ 1,1 },
 			{ 0,1 },
@@ -41,7 +41,7 @@ namespace eversim { namespace core { namespace rendering {
 			{ 1,0 },
 		}
 		);
-		quadmesh.attach(
+		default_quadmesh.attach(
 		{
 			{ 1,1 },
 			{ 0,1 },
@@ -49,8 +49,18 @@ namespace eversim { namespace core { namespace rendering {
 			{ 1,0 }
 		}
 		);
-		quadmesh.set_draw_mode(GL_QUADS, 0, 4);
-		quadmesh.create_and_upload();
+		default_quadmesh.set_draw_mode(GL_QUADS, 0, 4);
+		default_quadmesh.create_and_upload();
+
+		default_shader.create();
+		default_shader.attach
+		({
+			{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
+			{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		});
+		default_shader.link();
+
+		default_shader.logUnfiformslogAttributes();
 	}
 
 	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)
@@ -212,20 +222,20 @@ namespace eversim { namespace core { namespace rendering {
 			}
 			cnt++;
 		}
-		LOG(INFO) << "number of drawable blocks = " << blocks.size();
+		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
 		for(auto& block : blocks)
 		{
 			auto fbeptr = deref(entities.at(std::get<1>(block)));
 			auto& fbe = *fbeptr;
 			ShaderProgram& program = *(fbe.program);
 			program.use();
-			LOG(INFO) << "bind program " << program.name;
+			//LOG(INFO) << "bind program " << program.name;
 			cam.use(program);
 			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
 			{
 				auto entityptr = deref(entities.at(i)); RenderableEntity& entity = *entityptr;
 
-				LOG(INFO) << "render entity " << entity.get_Multibuffer()->name;
+				//LOG(INFO) << "render entity " << entity.get_Multibuffer()->name;
 
 				auto location = glGetUniformLocation(program.getID(), "M");
 				if (location == -1)
