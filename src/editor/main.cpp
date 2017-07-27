@@ -49,7 +49,7 @@ bool direction_pressed[4];
 
 bool handle_keypress(SDL_Keysym sym, bool down)
 {
-	switch(sym.sym)
+	switch (sym.sym)
 	{
 	case SDLK_q:
 	case SDLK_ESCAPE:
@@ -93,13 +93,14 @@ bool handle_sdl_events()
 				break;
 			should_continue &= handle_keypress(event.key.keysym, false);
 			break;
-		case SDL_MOUSEBUTTONDOWN:{
-			if (io.WantCaptureMouse)
+		case SDL_MOUSEBUTTONDOWN:
+			{
+				if (io.WantCaptureMouse)
+					break;
+				auto pos = glm::ivec2{event.button.x, event.button.y};
+				mouse_click(pos, event.button.button);
 				break;
-			auto pos = glm::ivec2{ event.button.x, event.button.y };
-			mouse_click(pos,event.button.button);
-			break;
-		}
+			}
 		default:
 			break;
 		}
@@ -108,8 +109,10 @@ bool handle_sdl_events()
 }
 
 namespace {
-	const char* glTypeToString(GLenum type) {
-		switch (type) {
+	const char* glTypeToString(GLenum type)
+	{
+		switch (type)
+		{
 		case GL_DEBUG_TYPE_ERROR:
 			return "ERROR";
 		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
@@ -126,8 +129,10 @@ namespace {
 		return "UNKNOWN";
 	}
 
-	const char* glSeverityToString(GLenum severity) {
-		switch (severity) {
+	const char* glSeverityToString(GLenum severity)
+	{
+		switch (severity)
+		{
 		case GL_DEBUG_SEVERITY_LOW:
 			return "LOW";
 		case GL_DEBUG_SEVERITY_MEDIUM:
@@ -138,6 +143,7 @@ namespace {
 		return "UNKNOWN";
 	}
 }
+
 class floor_constraint : public physics::constraint {
 public:
 
@@ -162,6 +168,7 @@ public:
 private:
 	float height;
 };
+
 class wall_constraint : public physics::constraint {
 public:
 
@@ -177,13 +184,12 @@ public:
 		assert(particles.size() == get_arity());
 		if (X > 0)
 			return X - particles[0]->projected_position.x;
-		else
-			return particles[0]->projected_position.x - X;
+		return particles[0]->projected_position.x - X;
 	}
 
 	vector<glm::vec2> grad() const override
 	{
-		return { glm::vec2{ -glm::sign(particles[0]->projected_position.x),0.f } };
+		return {glm::vec2{-glm::sign(particles[0]->projected_position.x),0.f}};
 	}
 
 private:
@@ -250,7 +256,7 @@ int main(int argc, char* argv[])
 
 	auto add_floor_constraint = [&](physics::body* b)
 	{
-		for(auto& p : b->get_particles())
+		for (auto& p : b->get_particles())
 		{
 			physics.insert_constraint(floor_constraint(
 				&p, floor_height
@@ -259,51 +265,7 @@ int main(int argc, char* argv[])
 	};
 
 	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.1f, 0.3f }, 0.1f));
-	//add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
-	//add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
-
-	utility::Delegate d;
-	d.connect(
-		[](physics::body* a, physics::body* b, physics::events::dyn_col_list const& list)
-	{
-		rendering::draw_line(a->position, b->position);
-		for(auto& dc : list)
-		{
-			rendering::draw_line(dc.a->pos, dc.b->pos);
-		}
-	},
-		physics.body_collisions_events()
-	);
-
-	d.connect(
-		[](physics::body* b, physics::events::static_col_list const& list)
-	{
-		for(auto& sc : list)
-		{
-			auto const* t = sc.t;
-			auto* p = sc.p;
-			
-			auto n = sc.normal;
-
-			rendering::draw_line(t->position(), p->pos);
-			rendering::draw_line(p->pos, p->pos + n * 0.05f);
-		}
-	},
-		physics.level_collision_events()
-	);
-
-	mouse_click = [&](glm::ivec2 pos, int button)
-	{
-		auto ss_pos = glm::vec2(pos) / glm::vec2(resolution);
-		ss_pos = ss_pos*2.f - 1.f;
-		ss_pos.y *= -1;
-		LOG(INFO) << "Pressed " << button;
-
-		if(button == 1) {	
-			add_floor_constraint(physics.add_body(*boulder_templ, ss_pos, 0.1f));
-		}
-	};
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {0.1f, 0.3f}, 0.1f));
 
 	//Enable Debugging
 	glEnable(GL_DEBUG_OUTPUT);
@@ -311,53 +273,54 @@ int main(int argc, char* argv[])
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
 	glDebugMessageCallback([](
-		GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-		const GLchar* message, const void* userParam)
-	{
-		LOG(INFO) << "GL Debug Message" << endl;
-		LOG(INFO) << "GL Debug Message" << endl;
-		LOG(INFO) << string(80, '=') << endl;
-		LOG(INFO) << "src: " << source << endl;
-		LOG(INFO) << "type: " << glTypeToString(type) << endl;
-		LOG(INFO) << "severity: " << glSeverityToString(type) << endl;
-		LOG(INFO) << message << endl;
-		LOG(INFO) << string(80, '=');
-	},
-		nullptr
-		);
+		                       GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+		                       const GLchar* message, const void* userParam)
+                       {
+	                       LOG(INFO) << "GL Debug Message" << endl;
+	                       LOG(INFO) << "GL Debug Message" << endl;
+	                       LOG(INFO) << string(80, '=') << endl;
+	                       LOG(INFO) << "src: " << source << endl;
+	                       LOG(INFO) << "type: " << glTypeToString(type) << endl;
+	                       LOG(INFO) << "severity: " << glSeverityToString(type) << endl;
+	                       LOG(INFO) << message << endl;
+	                       LOG(INFO) << string(80, '=');
+                       },
+	                       nullptr
+	);
 
-	eversim::core::rendering::Camera cam("default_cam",
-										glm::fvec2(0,resolution[0]),
-										glm::fvec2(0,resolution[1]),
-										20.f);
+	rendering::Camera cam("default_cam",
+	                      glm::fvec2(0, resolution[0]),
+	                      glm::fvec2(0, resolution[1]),
+	                      20.f);
 
-	eversim::core::rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
-	eversim::core::rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
-	eversim::core::rendering::Texture conjuration("brick_gray0\\conjuration.png");
-	eversim::core::rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
-	eversim::core::rendering::Texture divination("brick_gray0\\divination.png");
-	eversim::core::rendering::Texture kobold("brick_gray0\\big_kobold.png");
-	eversim::core::rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
+	rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
+	rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
+	rendering::Texture conjuration("brick_gray0\\conjuration.png");
+	rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
+	rendering::Texture divination("brick_gray0\\divination.png");
+	rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
 
 	auto conjuration_ptr = renderer.register_texture("brick_gray0\\divination.png");
 
-	eversim::core::rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
-		[]() {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	});
-	eversim::core::rendering::canvas empty_canvas;
-	empty_canvas.init(glm::ivec2(1920,1080));
+	rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
+	                                    []()
+                                    {
+	                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                                    });
+	rendering::canvas empty_canvas;
+	empty_canvas.init(glm::ivec2(1920, 1080));
 
 	rendering::ShaderProgram program("simple quad shader");
 	program.create();
 	program.attach
 	({
-		{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		{"..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER},
+		{"..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER},
+		{"..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER}
 	});
 	program.link();
 
@@ -365,8 +328,8 @@ int main(int argc, char* argv[])
 	vertex_only_shaderprogram.create();
 	vertex_only_shaderprogram.attach
 	({
-		{ "..\\resources\\shader\\vertex_only_vertex.glsl",GL_VERTEX_SHADER },
-		{ "..\\resources\\shader\\vertex_only_fragment.glsl",GL_FRAGMENT_SHADER }
+		{"..\\resources\\shader\\vertex_only_vertex.glsl",GL_VERTEX_SHADER},
+		{"..\\resources\\shader\\vertex_only_fragment.glsl",GL_FRAGMENT_SHADER}
 	});
 	vertex_only_shaderprogram.link();
 
@@ -376,20 +339,20 @@ int main(int argc, char* argv[])
 	textured_quad_shaderprogram.create();
 	textured_quad_shaderprogram.attach
 	({
-		{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
-		{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		{"..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER},
+		{"..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER}
 	});
 	textured_quad_shaderprogram.link();
 
 	textured_quad_shaderprogram.logUnfiformslogAttributes();
 
 	glm::fmat3 M = glm::fmat3(1.f);
-	
-	eversim::core::rendering::Spritemap sm(1024);
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	std::default_random_engine generator(seed);
-	
-	std::vector<eversim::core::rendering::Texture*> texes({
+
+	rendering::Spritemap sm(1024);
+	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+	default_random_engine generator(seed);
+
+	vector<rendering::Texture*> texes({
 		&brickwall,
 		&conjuration,
 		&conjuration_big,
@@ -402,27 +365,27 @@ int main(int argc, char* argv[])
 
 	sm.add_texture(program, conjuration);
 
-	std::uniform_int_distribution<int> distribution(0, texes.size()-1);
-	
-	eversim::core::rendering::Multibuffer quadbuff("quadmesh");
+	uniform_int_distribution<int> distribution(0, texes.size() - 1);
+
+	rendering::Multibuffer quadbuff("quadmesh");
 
 	quadbuff.attach
 	(
-	{
-		{ 5,5 },
-		{ 0,5 },
-		{ 0,0 },
-		{ 5,0 }
-	}
+		{
+			{5,5},
+			{0,5},
+			{0,0},
+			{5,0}
+		}
 	);
 	quadbuff.attach
 	(
-	{
-		{ 1,1 },
-		{ 0,1 },
-		{ 0,0 },
-		{ 1,0 }
-	}
+		{
+			{1,1},
+			{0,1},
+			{0,0},
+			{1,0}
+		}
 	);
 
 	quadbuff.set_draw_mode(GL_QUADS, 0, 4);
@@ -438,77 +401,42 @@ int main(int argc, char* argv[])
 
 	auto player_entity = renderer.register_entity();
 
-	/*{
-		auto& renderablentity = *player_entity;
-		renderablentity.set_Texture(kobold);
-	}*/
 
 	auto floor = renderer.register_entity();
 	{
 		auto& renderablentity = *floor;
 		renderablentity.set_ShaderProgram(vertex_only_shaderprogram);
 
-		renderablentity.set_Multibuffer(new eversim::core::rendering::Multibuffer("line"));
+		renderablentity.set_Multibuffer(new rendering::Multibuffer("line"));
 		renderablentity.get_Multibuffer()->attach(
-		{
-			{ -10.f,floor_height },
-			{ 10.f,floor_height }
-		}
+			{
+				{-10.f,floor_height},
+				{10.f,floor_height}
+			}
 		);
 		renderablentity.get_Multibuffer()->attach(
-		{
-			{ 1,0,0,1 },
-			{ 0,0,1,1 }
-		}
+			{
+				{1,0,0,1},
+				{0,0,1,1}
+			}
 		);
 		renderablentity.get_Multibuffer()->set_draw_mode(GL_LINES, 0, 2);
 		renderablentity.get_Multibuffer()->create_and_upload();
 	}
 
-	/*eversim::core::rendering::Multibuffer tribuff("trianglemesh");
-
-	tribuff.attach
-	(
-	{ 
-	{ 400,500 },
-	{ 300,300 },
-	{ 500,300 }
-	}
-	);
-	tribuff.attach
-	(
-	{
-		{ 0.5,0.5 },
-		{ 0,0 },
-		{ 1,0 }
-	}
-	);
-
-	tribuff.set_draw_mode(GL_TRIANGLES, 0, 3);
-	tribuff.create_and_upload();*/
 
 	l->initialize_graphics(renderer);
 
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
-	
+
 	int cnt = 0;
-	while(handle_sdl_events())
+	while (handle_sdl_events())
 	{
+		TIMED_SCOPE(timer, "game loop");
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
-		//cam.rotate(0.1);
-		//cam.translate({ -0.5,-0.5 });
-		/*if(cnt%60 ==  0)
-		{
-			textured_quad->set_Texture(kobold);
-			textured_quad->set_Multibuffer(quadbuff);
-		}
-		else if(cnt%30 == 0)
-		{
-			textured_quad->set_Texture(sm.get_texture());
-			textured_quad->set_Multibuffer(tribuff);
-		}*/
+
 
 		ImGui_ImplSdlGL3_NewFrame(window);
 
@@ -517,7 +445,7 @@ int main(int argc, char* argv[])
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+
 
 		auto dice_roll = distribution(generator);
 		sm.add_texture(program, *(texes.at(dice_roll)));
@@ -529,7 +457,7 @@ int main(int argc, char* argv[])
 		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
 		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
 		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
-		empty_canvas.draw(program,resolution, glm::vec2(0, 0), glm::vec2(1, 1));
+		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		renderer.draw(cam);
 
@@ -540,10 +468,14 @@ int main(int argc, char* argv[])
 		static bool autostep = false;
 
 		auto vel = glm::vec2{};
-		if (direction_pressed[0]) vel += glm::vec2{0.f, 3.f};
-		if (direction_pressed[1]) vel += glm::vec2{ -1.f, 0.f };
-		if (direction_pressed[2]) vel += glm::vec2{ 0.f, -1.f };
-		if (direction_pressed[3]) vel += glm::vec2{ 1.f, 0.f };
+		if (direction_pressed[0])
+			vel += glm::vec2{0.f, 3.f};
+		if (direction_pressed[1])
+			vel += glm::vec2{-1.f, 0.f};
+		if (direction_pressed[2])
+			vel += glm::vec2{0.f, -1.f};
+		if (direction_pressed[3])
+			vel += glm::vec2{1.f, 0.f};
 		player->velocity += vel * dt;
 		rendering::draw_point(player->position);
 
@@ -554,7 +486,7 @@ int main(int argc, char* argv[])
 			physics.draw_constraints();
 		}
 
-		
+
 		ImGui::InputFloat("dt", &dt);
 
 		static bool atomic_steps = false;
@@ -563,7 +495,7 @@ int main(int argc, char* argv[])
 		if (atomic_steps || !physics.finished_frame())
 		{
 			ImGui::Text("Next step: %s", physics.get_step_name().c_str());
-			if(ImGui::Button("atomic step"))
+			if (ImGui::Button("atomic step"))
 			{
 				physics.atomic_step(dt);
 			}
@@ -573,12 +505,12 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				TIMED_SCOPE(timer, "physics simulation");
+				//TIMED_SCOPE(timer, "physics simulation");
 				physics.integrate(dt);
-			} 
+			}
 		}
 
-		player_entity->set_Position(player->position-glm::fvec2(0.5, 0.5));
+		player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
 
 		for (auto&& p : physics.get_particles())
 		{
