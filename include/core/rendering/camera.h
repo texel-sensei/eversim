@@ -26,7 +26,10 @@ namespace eversim {
 
 				void use(ShaderProgram&);
 				void translate(const glm::fvec2& t);
+				void set_position(const glm::fvec2& p);
+				glm::fvec2 get_position() const;
 				void rotate(const float angle); //2D Game, so lets only rotate around z-axis
+				void set_rotation(const float angle);
 				void set_width_in_meters(const float m);
 				float get_width_in_meters() const;
 			private:

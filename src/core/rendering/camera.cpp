@@ -61,16 +61,39 @@ namespace eversim {	namespace core { namespace rendering {
 		position += t;
 	}
 
+	void Camera::set_position(const glm::fvec2& p)
+	{
+		position = p;
+	}
+
+	glm::fvec2 Camera::get_position() const
+	{
+		return position;
+	}
+
+	void Camera::set_rotation(const float angle)
+	{
+		float a = (angle / 180.) * 3.141592653589;
+		glm::fmat2 R(std::cos(a), std::sin(a),
+			-std::sin(a), std::cos(a));
+
+		up_vector = R * glm::fvec2( 0,1 );
+		up_vector = glm::normalize(up_vector);
+
+		right_vector = R * glm::fvec2(1, 0);
+		right_vector = glm::normalize(right_vector);
+	}
+
 	void Camera::rotate(const float angle)
 	{
 		float a = (angle / 180.) * 3.141592653589;
 		glm::fmat2 R(std::cos(a), std::sin(a),
 			-std::sin(a), std::cos(a));
 
-		up_vector = R * up_vector; 
+		up_vector = R * up_vector;
 		up_vector = glm::normalize(up_vector);
 
-		right_vector = R * right_vector; 
+		right_vector = R * right_vector;
 		right_vector = glm::normalize(right_vector);
 	}
 

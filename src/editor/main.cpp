@@ -227,16 +227,16 @@ int main(int argc, char* argv[])
 				&p, floor_height
 			));
 			physics.insert_constraint(wall_constraint(
-				&p, -1.f
+				&p, -10.f
 			));
 			physics.insert_constraint(wall_constraint(
-				&p, 1.f
+				&p, 10.f
 			));
 		}
 	};
 
 	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.f, 0.1f }, 0.1f));
+	add_floor_constraint(player = physics.add_body(*boulder_templ, {  0.1f, 0.1f }, 1.f));
 	add_floor_constraint(physics.add_body(*boulder_templ, { -.5f, 0.1f }, 0.1f));
 	add_floor_constraint(physics.add_body(*boulder_templ, { 0.5f, 0.1f }, 0.1f));
 
@@ -520,7 +520,7 @@ int main(int argc, char* argv[])
 
 		auto& renderablentity = *player_entity;
 		auto PM = renderablentity.get_M();
-		PM[2] = glm::fvec3(player->position,1.f);
+		PM[2] = glm::fvec3(player->position-glm::fvec2(0.5,0.5),1.f);
 		renderablentity.set_M(PM);
 
 		for (auto&& p : physics.get_particles())
