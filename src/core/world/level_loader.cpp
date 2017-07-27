@@ -69,7 +69,7 @@ namespace eversim { namespace core { namespace world {
 			for(int y = 0; y < res.y; ++y)
 			{
 				auto& t = lvl->get_tile_by_index({ x,y });
-				auto id = load_big_endian(layout[x][y]);
+				auto id = load_big_endian(layout[res.y-y-1][x]);
 				if(idtable.find(id) == idtable.end())
 				{
 					throw runtime_error{
@@ -103,7 +103,7 @@ namespace eversim { namespace core { namespace world {
 			in >> num_txt;
 
 			// use base '0' to let stoi automatically detect hex numbers
-			auto num = stoi(num_txt, nullptr, 0); 
+			auto num = stoll(num_txt, nullptr, 0); 
 
 			string text;
 			in >> text;
