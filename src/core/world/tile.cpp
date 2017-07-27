@@ -2,9 +2,6 @@
 #include "core/world/tile_descriptor.h"
 #include "core/rendering/render_manager.h"
 
-// VERY hacky!
-extern eversim::core::rendering::ShaderProgram* default_shader;
-
 namespace eversim { namespace core { namespace world {
 	tile_descriptor blank_tile = {
 		"blank"
@@ -29,8 +26,5 @@ namespace eversim { namespace core { namespace world {
 
 		display->set_Position(position() - glm::vec2(size()));
 		display->set_Scale(glm::vec2(size()));
-
-		LOG(WARNING) << "Hacky solution for tile display!";
-		display->set_ShaderProgram(default_shader);
 	}
 }}}

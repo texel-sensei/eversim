@@ -190,8 +190,6 @@ private:
 	float X;
 };
 
-eversim::core::rendering::ShaderProgram* default_shader;
-
 int main(int argc, char* argv[])
 {
 	START_EASYLOGGINGPP(argc, argv);
@@ -384,7 +382,6 @@ int main(int argc, char* argv[])
 	textured_quad_shaderprogram.link();
 
 	textured_quad_shaderprogram.logUnfiformslogAttributes();
-	default_shader = &textured_quad_shaderprogram;
 
 	glm::fmat3 M = glm::fmat3(1.f);
 	
