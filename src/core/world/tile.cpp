@@ -18,30 +18,19 @@ namespace eversim { namespace core { namespace world {
 
 		return p.x >= min.x && p.x < max.x && p.y >= min.y && p.y < max.y;
 	}
-
 	
-
 	void tile::initialize_graphics(rendering::render_manager& mng)
 	{
 		auto const& tex_name = descriptor->texture_name;
 		if (tex_name.empty())
 			return;
 		display = mng.register_entity();
-		auto M = display->get_M();
-		M[2] = glm::vec3(position() - glm::vec2(size()), 1);
-		display->set_M(M);
+		display->set_Texture(mng.register_texture(tex_name).get());
+
+		display->set_Position(position() - glm::vec2(size()));
+		display->set_Scale(glm::vec2(size()));
 
 		LOG(WARNING) << "Hacky solution for tile display!";
-		static std::map<std::string, rendering::Texture> textures;
-
-		const auto it = textures.find(tex_name);
-		if(it == textures.end())
-		{
-			textures[tex_name] = rendering::Texture(tex_name);
-		}
-
-		display->set_Texture(textures[tex_name]);
 		display->set_ShaderProgram(default_shader);
-
 	}
 }}}
