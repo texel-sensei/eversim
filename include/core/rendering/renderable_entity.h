@@ -43,6 +43,9 @@ namespace eversim {
 				void set_Position(glm::fvec2 pos);
 				glm::fvec2 get_Position() const;
 
+				void set_Scale(glm::fvec2 scale);
+				glm::fvec2 get_Scale() const;
+
 				void set_ShaderProgram(ShaderProgram* p) { program = p; };
 				void set_Texture(Texture* t) { tex = t; };
 				void set_Multibuffer(Multibuffer* b){ data = b;	};
