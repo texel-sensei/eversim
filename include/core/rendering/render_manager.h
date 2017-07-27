@@ -2,8 +2,12 @@
 
 #include "core/utility/sdl.h"
 #include "core/utility/helper.h"
+#include "core/rendering/canvas.h"
+#include "core/rendering/renderable_entity.h"
 
 #include <glm/glm.hpp>
+#include <vector>
+
 #include <vector>
 
 namespace eversim { namespace core { namespace rendering {
@@ -25,6 +29,18 @@ namespace eversim { namespace core { namespace rendering {
 		void draw_point(glm::vec2 p);
 
 		void do_draw();
+		/*
+		 * Create new RenderableEntity
+		 * returns the shared ptr, keeps a weak ptr
+		 */
+		std::shared_ptr<RenderableEntity> register_entity();
+		/*
+		 * Removes every dead weak ptr
+		 * Sorts entities with the shader id
+		 * draw everything
+		 */
+		void draw(Camera& cam);
+
 	private:
 		struct line
 		{
@@ -39,6 +55,8 @@ namespace eversim { namespace core { namespace rendering {
 
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
+		std::vector<std::weak_ptr<RenderableEntity>> entities;
+
 		void setup(bool fullscreen);
 	};
 	
