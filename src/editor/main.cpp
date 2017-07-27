@@ -10,6 +10,9 @@
 #include "core/world/tile_descriptor.h"
 
 #include "core/utility/helper.h"
+#include "core/utility/time/scoped_timer.h"
+#include "core/utility/time/print.h"
+
 #include "core/system/programsequencer.h"
 #include "core/system/program_gui.h"
 
@@ -43,7 +46,7 @@ INITIALIZE_EASYLOGGINGPP
 using namespace eversim::core;
 using namespace std;
 
-function<void(glm::ivec2, int)> mouse_click;
+function<void(glm::ivec2, int)> mouse_click = [](auto, auto){};
 
 bool direction_pressed[4];
 
@@ -107,6 +110,13 @@ bool handle_sdl_events()
 	}
 	return should_continue;
 }
+
+struct imgui_log_time {
+	string message;
+	void operator()(utility::clock::duration dur) {
+		ImGui::Text((message + " " + utility::to_string(dur)).c_str());
+	}
+};
 
 namespace {
 	const char* glTypeToString(GLenum type)
@@ -433,7 +443,6 @@ int main(int argc, char* argv[])
 	int cnt = 0;
 	while (handle_sdl_events())
 	{
-		TIMED_SCOPE(timer, "game loop");
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
 
@@ -459,7 +468,10 @@ int main(int argc, char* argv[])
 		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
 		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
-		renderer.draw(cam);
+		{
+			utility::scoped_timer tim(imgui_log_time{ "rendering" });
+			renderer.draw(cam);
+		}
 
 		//render
 		ImGui::ShowTestWindow();
@@ -505,7 +517,7 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				//TIMED_SCOPE(timer, "physics simulation");
+				utility::scoped_timer tim(imgui_log_time{ "Physics loop" });
 				physics.integrate(dt);
 			}
 		}
@@ -517,7 +529,10 @@ int main(int argc, char* argv[])
 			rendering::draw_point(p.pos);
 		}
 
-		renderer.do_draw();
+		{
+			utility::scoped_timer tim(imgui_log_time{ "super billig test rendering" });
+			renderer.do_draw();
+		}
 
 		ImGui::Render();
 
