@@ -33,6 +33,8 @@ namespace eversim { namespace core { namespace rendering {
 		resolution(resolution)
 	{
 		setup(fullscreen);
+		default_quadmesh_ptr = std::make_unique<Multibuffer>("default quad mesh");
+		auto& default_quadmesh = *default_quadmesh_ptr;
 		default_quadmesh.attach(
 		{
 			{ 1,1 },

@@ -16,7 +16,7 @@ namespace eversim {
 			/*
 			* unit sized quad 0/0 to 1/1
 			*/
-			extern Multibuffer default_quadmesh;
+			extern std::unique_ptr<Multibuffer> default_quadmesh_ptr;
 			/*
 			 * default shader takes positions and uv coordinates
 			 * and texture
@@ -62,7 +62,7 @@ namespace eversim {
 				void set_Texture(Texture* t) { tex = t; };
 				void set_Multibuffer(Multibuffer* b){ data = b;	};
 
-				void default_Multibuffer(){	data = &default_quadmesh; }
+				void default_Multibuffer(){	data = &(*default_quadmesh_ptr); }
 				void default_ShaderProgram() { program = &default_shader; }
 				void default_Texture() { tex = &default_texture; }
 				void default_State();

@@ -400,7 +400,7 @@ int main(int argc, char* argv[])
 	}
 
 	auto player_entity = renderer.register_entity();
-
+	player_entity->set_Texture(kobold);
 
 	auto floor = renderer.register_entity();
 	{

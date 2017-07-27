@@ -2,12 +2,12 @@
 
 namespace eversim {	namespace core { namespace rendering {
 
-	Multibuffer default_quadmesh("default quad mesh");
+	std::unique_ptr<Multibuffer> default_quadmesh_ptr = nullptr;
 	Texture default_texture(glm::ivec2(4,4));
 	ShaderProgram default_shader("default uv shader");
 
 	RenderableEntity::RenderableEntity() : 
-		program(&default_shader), tex(&default_texture), data(&default_quadmesh)
+		program(&default_shader), tex(&default_texture), data(&(*default_quadmesh_ptr))
 	{}
 
 	void RenderableEntity::bind() const
