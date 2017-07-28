@@ -1,15 +1,18 @@
-#include <easylogging++.h>
-#include <glm/glm.hpp>
-#include <SDL2/SDL.h>
 #include "core/rendering/texture.h"
 #include "core/rendering/render_manager.h"
+
 #include "core/world/tile_descriptor.h"
 #include "core/world/level_loader.h"
 #include "core/world/level.h"
+
 #include "core/physics/constraints/angle_constraint.h"
 #include "core/physics/body_template.h"
 #include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/physics_manager.h"
+
+#include <easylogging++.h>
+#include <glm/glm.hpp>
+#include <SDL2/SDL.h>
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -99,56 +102,78 @@ void initialize_tiles(world::level_loader& loader)
 	loader.register_tile_descriptor(&bricks);
 }
 
+struct loaders {
+	utility::texture_loader* tex;
+	world::level_loader* lev;
+	physics::body_template_loader* bdy;
+
+	void add_directory(string const& path)
+	{
+		tex->add_search_directory(path + "/sprites");
+		lev->add_search_directory(path + "/levels");
+		bdy->add_search_directory(path + "/physics");
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	START_EASYLOGGINGPP(argc, argv);
 
+	// init rendering
 	const auto resolution = glm::ivec2(1920,1080);
 	auto renderer = rendering::render_manager(resolution, false);
-	rendering::Texture::loader.add_search_directory("..\\resources\\sprites");
 
-	world::level_loader ll;
-	ll.add_search_directory("../resources/levels");
-	initialize_tiles(ll);
+	// create loaders
+	world::level_loader level_loader;
+	initialize_tiles(level_loader);
 
-	const auto level = ll.load("example_level");
-	level->set_tile_size(0.5f);
-	level->initialize_graphics(renderer);
-
-	physics::physics_manager physics;
 	physics::body_template_loader body_loader;
-	body_loader.add_search_directory("../resources/physics");
-
 	body_loader.register_factory("distance", make_unique<physics::distance_constraint_factory>());
 	body_loader.register_factory("angle", make_unique<physics::angle_constraint_factory>());
 
+	// add search directories	
+	auto ldrs = loaders{&rendering::Texture::loader, &level_loader, &body_loader};
+	ldrs.add_directory("../resources");
+	ldrs.add_directory("./resources");
+
+	// load level
+	const auto level = level_loader.load("example_level");
+	level->set_tile_size(0.5f);
+	level->initialize_graphics(renderer);
+
+	// initialize physics
+	physics::physics_manager physics;
 	physics.register_constraint_types<
 		physics::distance_constraint, physics::angle_constraint
 	>();
 
 	physics.set_level(level.get());
 
+	// prepare player
+	//	1. physics
+	const auto player_body_template = body_loader.load("cube.bdy");
+	auto* player = physics.add_body(*player_body_template, { 16.f, 28.f }, 0.1f);
+
+	//	2. rendering
+	auto player_entity = renderer.register_entity();
+	rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	player_entity->set_Texture(kobold);
+	player_entity->set_Position(player->position);
+
+	// setup camera
 	rendering::Camera cam("default_cam",
 		glm::fvec2(0, resolution[0]),
 		glm::fvec2(0, resolution[1]),
 		20.f);
-
-
-	rendering::Texture kobold("brick_gray0\\big_kobold.png");
-	const auto player_body_template = body_loader.load("cube.bdy");
-
-	auto* player = physics.add_body(*player_body_template, { 16.f, 28.f }, 0.1f);
-	auto player_entity = renderer.register_entity();
-	player_entity->set_Texture(kobold);
-	player_entity->set_Position(player->position);
-
 	cam.set_position(player->position);
 
+	// do neccessary gl setup
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// game loop
 	while(handle_sdl_events())
 	{
 		const auto dt = 1.f / 60.f;
