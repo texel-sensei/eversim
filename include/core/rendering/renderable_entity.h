@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/utility/plattform.h"
+
 #include "core/rendering/shader_program.h"
 #include "core/rendering/multibuffer.h"
-#include "core/rendering/camera.h"
 #include "core/rendering/texture.h"
+#include "core/rendering/spritemap.h"
+#include "core/rendering/texture_base_class.h"
 
-#include <easylogging++.h>
 #include <glm/glm.hpp>
 
 namespace eversim {
@@ -29,10 +29,11 @@ namespace eversim {
 
 			class RenderableEntity {
 			private:
-
+				glm::ivec2 texoffset = glm::ivec2(0,0);
+				glm::ivec2 texsize, spritesize;
 				glm::fmat3 M = glm::fmat3(1.f);
 				ShaderProgram* program;
-				Texture* tex;
+				TextureBase* tex;
 				Multibuffer* data;
 
 				RenderableEntity();
@@ -44,12 +45,44 @@ namespace eversim {
 
 				glm::fmat3 get_M() const { return M; };
 				ShaderProgram* get_ShaderProgram() const { return program; };
-				Texture* get_Texture() const { return tex; };
+				TextureBase* get_Texture() const { return tex; };
 				Multibuffer* get_Multibuffer() const { return data; };
 
 				void set_M(const glm::fmat3& m) { M = m; };
-				void set_ShaderProgram(ShaderProgram& p) { program = &p; };
-				void set_Texture(Texture& t) { tex = &t; };
+
+				void set_ShaderProgram(ShaderProgram* p) { program = p; };
+				void set_ShaderProgram(ShaderProgram& p) { set_ShaderProgram(&p); };
+
+				void set_Texture(Texture* t)
+				{
+					tex = t;
+					texsize = t->get_resolution();
+					spritesize = texsize;
+				};
+				void set_Texture(Texture& t) { set_Texture(&t); };
+
+				void set_Texture(Spritemap* sm)
+				{
+					tex = sm;
+					texsize = sm->get_texture().get_resolution();
+					spritesize = texsize;
+				};
+				void set_Texture(Spritemap* sm,
+					const glm::ivec2& offset, const glm::ivec2& resolution)
+				{
+					tex = sm;
+					texoffset = offset;
+					texsize = resolution;
+					spritesize = sm->get_texture().get_resolution();
+				};
+
+				void set_Texture(Spritemap& sm) 
+						{ set_Texture(&sm); };
+				void set_Texture(Spritemap& sm, 
+					const glm::ivec2& offset, const glm::ivec2& resolution)
+						{ set_Texture(&sm, offset, resolution);	};
+
+				void set_Multibuffer(Multibuffer* b) { data = b; };
 				void set_Multibuffer(Multibuffer& b) { data = &b; };
 
 				void set_Position(glm::fvec2 pos);
@@ -57,14 +90,19 @@ namespace eversim {
 
 				void set_Scale(glm::fvec2 scale);
 				glm::fvec2 get_Scale() const;
-
-				void set_ShaderProgram(ShaderProgram* p) { program = p; };
-				void set_Texture(Texture* t) { tex = t; };
-				void set_Multibuffer(Multibuffer* b){ data = b;	};
-
-				void default_Multibuffer(){	data = &(*default_quadmesh_ptr); }
-				void default_ShaderProgram() { program = &default_shader; }
-				void default_Texture() { tex = &default_texture; }
+			
+				void default_Multibuffer()
+				{
+					set_Multibuffer(*default_quadmesh_ptr);
+				}
+				void default_ShaderProgram()
+				{
+					set_ShaderProgram(default_shader);
+				}
+				void default_Texture()
+				{
+					set_Texture(default_texture);
+				}
 				void default_State();
 
 				friend class render_manager;

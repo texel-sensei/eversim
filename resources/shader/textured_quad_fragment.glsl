@@ -1,6 +1,8 @@
 #version 440
 
 uniform sampler2D tex;
+uniform vec2 texoffset;
+uniform vec2 texsize;
 
 in vec2 ex_UV;
 

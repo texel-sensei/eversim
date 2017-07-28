@@ -2,6 +2,7 @@
 
 #include "core/utility/plattform.h"
 #include "core/utility/texture_loader.h"
+#include "core/rendering/texture_base_class.h"
 
 #include <glm/glm.hpp>
 
@@ -20,7 +21,7 @@ namespace {
 namespace eversim {
 	namespace core {
 		namespace rendering {
-			class Texture {
+			class Texture : public TextureBase {
 			private:
 
 				bool valid = false;
@@ -48,7 +49,7 @@ namespace eversim {
 				GLuint get_tex_id() const;
 				glm::ivec2 get_resolution() const;
 
-				void bind() const;
+				void bind() const override;
 				static void unbind();
 
 				bool is_valid() const { return valid; }

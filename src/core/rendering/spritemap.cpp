@@ -38,6 +38,11 @@ namespace eversim {
 				
 				return pos;
 			}
+
+			void Spritemap::bind() const
+			{
+				glBindTexture(GL_TEXTURE_2D, canvas_tex.get_texture_id());
+			}
 		}
 	}
 }

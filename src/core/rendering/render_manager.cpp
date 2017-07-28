@@ -169,6 +169,23 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
+	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution)
+	{
+		auto ptr = std::make_shared<Spritemap>(resolution);
+		spritemaps.push_back(ptr);
+		return ptr;
+	}
+
+	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution,
+		std::function<void()> filtering)
+	{
+		LOG(ERROR) << "TODO spritemap with filterfunction";
+		auto ptr = std::make_shared<Spritemap>(resolution);
+		spritemaps.push_back(ptr);
+		return ptr;
+	}
+
+
 	void render_manager::draw(Camera& cam)
 	{
 		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)

@@ -27,14 +27,14 @@ namespace eversim {
 				const std::string name;
 				
 
-				ShaderProgram(const std::string& name);
+				explicit ShaderProgram(const std::string& name);
 				~ShaderProgram();
 
-				void attach(const AttachableShader& shader);
-				void attach(const std::string& filename,const GLenum TYPE);
+				void attach(const AttachableShader& shader) const;
+				void attach(const std::string& filename,const GLenum TYPE) const;
 				void attach(const std::vector<
 					std::pair<std::string,GLenum>
-							>& shaders);
+							>& shaders) const;
 				void create();
 				void link();
 				void use() const;
@@ -50,6 +50,8 @@ namespace eversim {
 				void logUniforms() const;
 				void logAttributes() const;
 				void logUnfiformslogAttributes() const { logUniforms(); logAttributes(); }
+
+				GLint getUniformLocation(const std::string& uname) const;
 
 			};
 		}

@@ -105,7 +105,7 @@ namespace eversim {
 				return resolution;
 			}
 
-			void Texture::bind() const
+			void Texture::bind() const 
 			{
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 			}

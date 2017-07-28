@@ -37,15 +37,15 @@ namespace eversim {
 				for (GLuint i = 0; i < count; i++)
 				{
 					glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, properties.size(),
-						&properties[0], values.size(), NULL, &values[0]);
+						&properties[0], values.size(), nullptr, &values[0]);
 
 					nameData.resize(values[0]);
 
-					glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), NULL, &nameData[0]);
+					glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), nullptr, &nameData[0]);
 					attributes.push_back(
 						std::make_tuple(
 							values[1], 
-							std::string(nameData.data(), nameData.size()),
+							std::string(nameData.data(), nameData.size()-1),
 							values[2])
 					);
 				}
@@ -71,13 +71,13 @@ namespace eversim {
 				for (GLuint i = 0; i < count; i++)
 				{
 					glGetProgramResourceiv(id, GL_UNIFORM, i, properties.size(),
-						&properties[0], values.size(), NULL, &values[0]);
+						&properties[0], values.size(), nullptr, &values[0]);
 
 					nameData.resize(values[0]);
 					GLenum type = values[1];
 
-					glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), NULL, &nameData[0]);
-					uniforms.emplace_back(type, std::string(nameData.data(), nameData.size()));
+					glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
+					uniforms.emplace_back(type, std::string(nameData.data(), nameData.size()-1));
 				}
 			}
 
@@ -99,7 +99,7 @@ namespace eversim {
 				}
 			}
 
-			void ShaderProgram::attach(const AttachableShader& shader)
+			void ShaderProgram::attach(const AttachableShader& shader) const
 			{
 				if (!shader.created)
 					throw exception(string("The shader you try to attach is not yet compiled. Tried to attach: " + shader.name).c_str());
@@ -108,7 +108,7 @@ namespace eversim {
 				LOG(INFO) << "attached " << shader.name << " to " << name;
 			}
 
-			void ShaderProgram::attach(const std::string& filename, const GLenum TYPE)
+			void ShaderProgram::attach(const std::string& filename, const GLenum TYPE) const
 			{
 				switch (TYPE) {
 				case GL_FRAGMENT_SHADER:
@@ -139,7 +139,7 @@ namespace eversim {
 			}
 			void ShaderProgram::attach(const std::vector<
 				std::pair<std::string, GLenum>
-			>& shaders)
+			>& shaders) const
 			{
 				for (const auto& shader : shaders)
 					attach(shader.first, shader.second);
@@ -162,7 +162,11 @@ namespace eversim {
 			void ShaderProgram::use() const
 			{
 				glUseProgram(id);
-				//TODO error
+			}
+
+			GLint ShaderProgram::getUniformLocation(const std::string& uname) const
+			{
+				return glGetUniformLocation(getID(), uname.c_str());
 			}
 		}
 	}

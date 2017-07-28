@@ -2,8 +2,10 @@
 
 #include "core/utility/sdl.h"
 #include "core/utility/helper.h"
-#include "core/rendering/canvas.h"
 #include "core/rendering/renderable_entity.h"
+#include "core/rendering/spritemap.h"
+#include "core/rendering/texture.h"
+#include "core/rendering/camera.h"
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -50,6 +52,10 @@ namespace eversim { namespace core { namespace rendering {
 		*/
 		std::shared_ptr<Texture> register_texture(const std::string& path, std::function<void()> filtering);
 
+		std::shared_ptr<Spritemap> register_spritemap(const size_t resolution);
+
+		std::shared_ptr<Spritemap> register_spritemap(const size_t resolution, std::function<void()> filtering);
+
 		/*
 		 * Removes every dead weak ptr
 		 * Sorts entities with the shader id
@@ -74,6 +80,7 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<glm::vec2> points;
 		std::vector<std::weak_ptr<RenderableEntity>> entities;
 		std::vector<std::shared_ptr<Texture>> textures;
+		std::vector<std::shared_ptr<Spritemap>> spritemaps;
 
 		void setup(bool fullscreen);
 	};

@@ -358,7 +358,8 @@ int main(int argc, char* argv[])
 
 	glm::fmat3 M = glm::fmat3(1.f);
 
-	rendering::Spritemap sm(1024);
+	auto sm_ptr = renderer.register_spritemap(1024);
+	auto& sm = *sm_ptr;
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 	default_random_engine generator(seed);
 
@@ -409,8 +410,16 @@ int main(int argc, char* argv[])
 		renderablentity.set_Texture(*conjuration_ptr);
 	}
 
+	auto player_sm_ptr = renderer.register_spritemap(64);
+	auto& player_sm = *player_sm_ptr;
+
+	player_sm.add_texture(program, conjuration);
+	player_sm.add_texture(program, divination);
+	player_sm.add_texture(program, kobold);
+	player_sm.add_texture(program, brickwall);
+
 	auto player_entity = renderer.register_entity();
-	player_entity->set_Texture(kobold);
+	player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
 
 	auto floor = renderer.register_entity();
 	{

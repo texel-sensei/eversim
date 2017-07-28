@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/rendering/texture_base_class.h"
 #include "core/rendering/texture.h"
 #include "core/utility/texture_loader.h"
 #include "core/rendering/canvas.h"
@@ -15,7 +16,7 @@
 namespace eversim {
 	namespace core {
 		namespace rendering {
-			class Spritemap{
+			class Spritemap : public TextureBase {
 			private:
 				glm::ivec2 resolution;
 				canvas canvas_tex;
@@ -41,6 +42,8 @@ namespace eversim {
 				glm::ivec2 add_texture(ShaderProgram& program, Texture& tex);
 				GLuint get_texture_id() const { return canvas_tex.get_texture_id(); }
 				Texture& get_texture() { return canvas_tex.get_texture(); };
+
+				void bind() const override;
 			};
 		}
 	}
