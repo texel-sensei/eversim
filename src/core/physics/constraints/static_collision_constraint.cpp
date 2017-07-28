@@ -57,14 +57,8 @@ namespace eversim { namespace core { namespace physics {
 				}
 			}
 			entry = l->closest_point(p.pos);
-			rendering::draw_point(entry);
 		} else
 		{
-			for(auto const& l : lines)
-			{
-				rendering::draw_line(l.start, l.end, 60);
-			}
-
 			float t = -1;
 			
 			for(int i = 0; i < lines.size(); ++i)
