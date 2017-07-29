@@ -24,7 +24,7 @@ namespace eversim { namespace core { namespace world {
 		display = mng.register_entity();
 		display->set_Texture(mng.register_texture(tex_name).get());
 
-		display->set_Position(position() - glm::vec2(size()));
+		display->set_Position(position() - glm::vec2(size()/2));
 		display->set_Scale(glm::vec2(size()));
 	}
 }}}
