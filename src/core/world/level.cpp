@@ -84,4 +84,11 @@ namespace eversim { namespace core { namespace world {
 		return tile_size * vec2(idx) + vec2(tile_size / 2.f);
 	}
 
+	bool level::contains_index(ivec2 idx) const noexcept
+	{
+		if (idx.x < 0 || idx.y < 0) return false;
+		if (idx.x >= tiles.shape()[0] || idx.y >= tiles.shape()[1]) return false;
+		return true;
+	}
+
 }}}

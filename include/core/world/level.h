@@ -32,6 +32,7 @@ namespace eversim { namespace core { namespace world {
 		glm::ivec2 index_for_pos(glm::vec2) const;
 		glm::vec2 center_of_tile(glm::ivec2) const;
 
+		bool contains_index(glm::ivec2) const noexcept;
 	private:
 		using container = boost::multi_array<tile, 2>;
 
