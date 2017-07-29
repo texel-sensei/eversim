@@ -74,14 +74,22 @@ namespace eversim { namespace core { namespace rendering {
 		points.emplace_back(p);
 	}
 
-	void render_manager::do_draw()
+	void render_manager::do_draw(Camera const& cam)
 	{
+		const auto V = cam.get_view_matrix();
+		const auto P = cam.get_projection_matrix();
+
+		const auto VP = P * V;
+
 		glPointSize(5);
 		glBegin(GL_POINTS);
 		for(auto const& p : points)
 		{
+			auto proj = VP * glm::vec3(p, 1);
+			proj /= proj.z;
+
 			glColor3f(1, 1, 1);
-			glVertex2f(p.x, p.y);
+			glVertex2f(proj.x, proj.y);
 		}
 		glEnd();
 
@@ -89,9 +97,13 @@ namespace eversim { namespace core { namespace rendering {
 		glBegin(GL_LINES);
 		for(auto& l : lines)
 		{
+			auto a = VP * glm::vec3(l.a, 1);
+			a /= a.z;
+			auto b = VP * glm::vec3(l.b, 1);
+			b /= b.z;
 			glColor3f(1, 0, 0);
-			glVertex2f(l.a.x, l.a.y);
-			glVertex2f(l.b.x, l.b.y);
+			glVertex2f(a.x, a.y);
+			glVertex2f(b.x, b.y);
 			l.dur--;
 		}
 		glEnd();

@@ -539,7 +539,7 @@ int main(int argc, char* argv[])
 
 		{
 			utility::scoped_timer tim(imgui_log_time{ "super billig test rendering" });
-			renderer.do_draw();
+			renderer.do_draw(cam);
 		}
 
 		ImGui::Render();
