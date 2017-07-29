@@ -15,12 +15,8 @@ namespace eversim {
 		namespace rendering {
 			class Camera {
 			public:
-				const std::string name;
-				const float aspect_ratio;
-
 				explicit Camera(const std::string&, 
-					const glm::fvec2 left_right,
-					const glm::fvec2 bottom_top,
+					const glm::ivec2& resolution,
 					const float width_in_meters,
 					const glm::fvec2 position = glm::fvec2(0, 0));
 
@@ -28,16 +24,30 @@ namespace eversim {
 				void translate(const glm::fvec2& t);
 				void set_position(const glm::fvec2& p);
 				glm::fvec2 get_position() const;
-				void rotate(const float angle); //2D Game, so lets only rotate around z-axis
-				void set_rotation(const float angle);
+				void rotate(const float radians); //2D Game, so lets only rotate around z-axis
+				void set_rotation(const float radians);
 				void set_width_in_meters(const float m);
+
+				void set_aspect_ratio(const float ar);
+				void set_resolution(const glm::ivec2& resolution);
+
 				float get_width_in_meters() const;
+				float get_rotation() const;
+
+				float get_aspect_ratio() const;
+				std::string get_name() const;
+
+				glm::fmat3 get_projection_matrix() const;
+				glm::fmat3 get_view_matrix() const;
 			private:
+				const std::string name;
 				glm::fmat3 P, V;
-				glm::fvec2 left_right, bottom_top, up_vector, right_vector, position;
-				float width_in_meters;
+				glm::fvec2 up_vector = {0,1}, position;
+				float width_in_meters, rotation, aspect_ratio;
 
 				void calc();
+				void calc_P();
+				void calc_V();
 			};
 		}
 	}

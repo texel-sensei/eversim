@@ -299,8 +299,7 @@ int main(int argc, char* argv[])
 	);
 
 	rendering::Camera cam("default_cam",
-	                      glm::fvec2(0, resolution[0]),
-	                      glm::fvec2(0, resolution[1]),
+						  resolution,
 	                      20.f);
 
 	rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
@@ -448,7 +447,7 @@ int main(int argc, char* argv[])
 
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
-
+	
 	int cnt = 0;
 	while (handle_sdl_events())
 	{

@@ -1,22 +1,29 @@
 #include "core/rendering/camera.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 namespace eversim {	namespace core { namespace rendering {
 
 	void Camera::calc()
 	{
-		left_right = glm::fvec2(0, width_in_meters);
-		bottom_top = glm::fvec2(0, width_in_meters / aspect_ratio);
-		auto pos = position - glm::fvec2(
-			left_right[1] / 2.f,
-			bottom_top[1] / 2.f
-		);
-		P = glm::fmat3(2.f / (left_right[1] - left_right[0]), 0, 0,
-			0, 2.f / (bottom_top[1] - bottom_top[0]), 0,
+		calc_P();
+		calc_V();
+	}
+
+	void Camera::calc_P()
+	{
+		P = glm::fmat3(2.f / width_in_meters, 0, 0,
+			0, (2.f * aspect_ratio) / width_in_meters, 0,
 			-1, -1, 1);
+	}
+
+	void Camera::calc_V()
+	{
+		auto pos = position - glm::fvec2(
+			width_in_meters / 2.f,
+			width_in_meters / (2.f * aspect_ratio)
+		);
+
 		V = glm::fmat3(
-			right_vector[0], right_vector[1], 0,
+			up_vector[1], -up_vector[0], 0,
 			up_vector[0], up_vector[1], 0,
 			-pos[0], -pos[1], 1
 		);
@@ -24,27 +31,19 @@ namespace eversim {	namespace core { namespace rendering {
 
 
 	Camera::Camera(const std::string& n,
-		const glm::fvec2 left_right,
-		const glm::fvec2 bottom_top,
+		const glm::ivec2& resolution,
 		const float width_in_meters,
 		const glm::fvec2 position) :
 		name(n),
-		aspect_ratio((left_right[1]-left_right[0])/(bottom_top[1]-bottom_top[0])),
-		left_right(left_right),
-		bottom_top(bottom_top),
-		up_vector({ 0,1 }),
-		right_vector({ 1,0 }),
 		position(position),
 		width_in_meters(width_in_meters)
 	{
+		set_resolution(resolution);
 		calc();
-		//LOG(INFO) << "camera with aspect ratio = " << aspect_ratio << "\n" << "screen size in meters = " << width_in_meters << "x" << width_in_meters / aspect_ratio;
 	} 
 
 	void Camera::use(ShaderProgram& program)
 	{
-		calc();
-
 		auto location = glGetUniformLocation(program.getID(), "V");
 		if (location == -1)
 			LOG(INFO) << "Uniform name ""V"" does not exist";
@@ -59,11 +58,13 @@ namespace eversim {	namespace core { namespace rendering {
 	void Camera::translate(const glm::fvec2& t)
 	{
 		position += t;
+		calc_V();
 	}
 
 	void Camera::set_position(const glm::fvec2& p)
 	{
 		position = p;
+		calc_V();
 	}
 
 	glm::fvec2 Camera::get_position() const
@@ -71,39 +72,68 @@ namespace eversim {	namespace core { namespace rendering {
 		return position;
 	}
 
-	void Camera::set_rotation(const float angle)
+	void Camera::set_rotation(const float radians)
 	{
-		float a = (angle / 180.) * 3.141592653589;
-		glm::fmat2 R(std::cos(a), std::sin(a),
-			-std::sin(a), std::cos(a));
-
-		up_vector = R * glm::fvec2( 0,1 );
-		up_vector = glm::normalize(up_vector);
-
-		right_vector = R * glm::fvec2(1, 0);
-		right_vector = glm::normalize(right_vector);
+		rotation = radians;
+		up_vector = {0,1};
+		rotate(radians);
 	}
 
-	void Camera::rotate(const float angle)
+	void Camera::rotate(const float radians)
 	{
-		float a = (angle / 180.) * 3.141592653589;
-		glm::fmat2 R(std::cos(a), std::sin(a),
-			-std::sin(a), std::cos(a));
+		rotation += radians;
+		glm::fmat2 R(std::cos(radians), std::sin(radians),
+			-std::sin(radians), std::cos(radians));
 
 		up_vector = R * up_vector;
 		up_vector = glm::normalize(up_vector);
-
-		right_vector = R * right_vector;
-		right_vector = glm::normalize(right_vector);
+		calc_V();
 	}
 
 	void Camera::set_width_in_meters(const float m)
 	{
 		width_in_meters = m;
+		calc();
+	}
+
+	void Camera::set_aspect_ratio(const float ar)
+	{
+		aspect_ratio = ar;
+		calc();
+	}
+
+	void Camera::set_resolution(const glm::ivec2& resolution)
+	{
+		set_aspect_ratio(static_cast<float>(resolution[0]) / static_cast<float>(resolution[1]));
 	}
 
 	float Camera::get_width_in_meters() const
 	{
 		return width_in_meters;
+	}
+
+	float Camera::get_rotation() const
+	{
+		return rotation;
+	}
+
+	float Camera::get_aspect_ratio() const
+	{
+		return aspect_ratio;
+	}
+
+	std::string Camera::get_name() const
+	{
+		return name;
+	}
+
+	glm::fmat3 Camera::get_projection_matrix() const
+	{
+		return P;
+	}
+
+	glm::fmat3 Camera::get_view_matrix() const
+	{
+		return V;
 	}
 }}}
