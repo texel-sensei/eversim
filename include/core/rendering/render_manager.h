@@ -18,7 +18,16 @@ namespace eversim { namespace core { namespace rendering {
 	void draw_line(glm::vec2 a, glm::vec2 b, int dur = 1);
 	void draw_point(glm::vec2 p);
 
-	//using entity_ptr std::shared_ptr<RenderableEntity>;
+	using entity_shptr = std::shared_ptr<RenderableEntity>;
+	using entity_wkptr = std::weak_ptr<RenderableEntity>;
+
+	using texture_shptr = std::shared_ptr<Texture>;
+	using texture_wkptr = std::weak_ptr<Texture>;
+
+	using spritemap_shptr = std::shared_ptr<Spritemap>;
+	using spritemap_wkptr = std::weak_ptr<Spritemap>;
+
+	using filter = std::function<void()>;
 
 	class render_manager {
 	public:
@@ -37,25 +46,25 @@ namespace eversim { namespace core { namespace rendering {
 		 * Create new RenderableEntity
 		 * returns the shared ptr, keeps a weak ptr
 		 */
-		std::shared_ptr<RenderableEntity> register_entity(const entity_type type=DYNAMIC);
+		entity_shptr register_entity(const entity_type type=DYNAMIC);
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader 
 		* returns the shared ptr, keeps a shared ptr
 		* you can safely pass them
 		*/
-		std::shared_ptr<Texture> register_texture(const std::string& path);
+		texture_shptr register_texture(const std::string& path);
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader and using the given filter funtion
 		* returns the shared ptr, keeps a shared ptr
 		* you can safely pass them
 		*/
-		std::shared_ptr<Texture> register_texture(const std::string& path, std::function<void()> filtering);
+		texture_shptr register_texture(const std::string& path, filter filtering);
 
-		std::shared_ptr<Spritemap> register_spritemap(const size_t resolution);
+		spritemap_shptr register_spritemap(const size_t resolution);
 
-		std::shared_ptr<Spritemap> register_spritemap(const size_t resolution, std::function<void()> filtering);
+		spritemap_shptr register_spritemap(const size_t resolution, filter filtering);
 
 		/*
 		 * Removes every dead weak ptr
@@ -79,10 +88,11 @@ namespace eversim { namespace core { namespace rendering {
 
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
-		std::vector<std::weak_ptr<RenderableEntity>> dynamic_entities;
-		std::vector<std::weak_ptr<RenderableEntity>> static_entities;
-		std::vector<std::shared_ptr<Texture>> textures;
-		std::vector<std::shared_ptr<Spritemap>> spritemaps;
+		std::vector<entity_wkptr> dynamic_entities;
+		std::vector<entity_wkptr> static_entities;
+
+		std::vector<texture_shptr> textures;
+		std::vector<spritemap_shptr> spritemaps;
 		std::map<Multibuffer*, shader_storage_buffer> ssbs;
 
 		void setup(bool fullscreen);
@@ -91,9 +101,9 @@ namespace eversim { namespace core { namespace rendering {
 		 * removes entities
 		 * returns number of removed entities
 		 */
-		size_t remove_expired_entities(std::vector<std::weak_ptr<RenderableEntity>>&);
-		void sort_entities_by_shader(std::vector<std::weak_ptr<RenderableEntity>>&);
-		void sort_entities_by_mesh(std::vector<std::weak_ptr<RenderableEntity>>&);
+		size_t remove_expired_entities(std::vector<entity_wkptr>&);
+		void sort_entities_by_shader(std::vector<entity_wkptr>&);
+		void sort_entities_by_mesh(std::vector<entity_wkptr>&);
 	};
 	
 } /* rendering */} /* core */ } /* eversim */

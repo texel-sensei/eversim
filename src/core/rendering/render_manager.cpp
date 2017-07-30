@@ -147,9 +147,9 @@ namespace eversim { namespace core { namespace rendering {
 
 	}
 
-	std::shared_ptr<RenderableEntity> render_manager::register_entity(const entity_type type)
+	entity_shptr render_manager::register_entity(const entity_type type)
 	{
-		auto ptr = std::shared_ptr<RenderableEntity>(new RenderableEntity);
+		auto ptr = entity_shptr(new RenderableEntity);
 		if(type == STATIC)
 		{
 			static_entities.push_back(ptr);
@@ -162,30 +162,30 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
-	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path)
+	texture_shptr  render_manager::register_texture(const std::string& path)
 	{
 		auto ptr = std::make_shared<Texture>(path);
 		textures.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path,
-		std::function<void()> filtering)
+	texture_shptr  render_manager::register_texture(const std::string& path,
+		filter filtering)
 	{
 		auto ptr = std::make_shared<Texture>(path,filtering);
 		textures.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution)
+	spritemap_shptr  render_manager::register_spritemap(const size_t resolution)
 	{
 		auto ptr = std::make_shared<Spritemap>(resolution);
 		spritemaps.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution,
-		std::function<void()> filtering)
+	spritemap_shptr  render_manager::register_spritemap(const size_t resolution,
+		filter filtering)
 	{
 		LOG(ERROR) << "TODO spritemap with filterfunction";
 		auto ptr = std::make_shared<Spritemap>(resolution);
@@ -193,23 +193,23 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
-	size_t render_manager::remove_expired_entities(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	size_t render_manager::remove_expired_entities(std::vector<entity_wkptr>& es)
 	{
-		size_t size = es.size();
+		auto size = es.size();
 		auto end_ptr = std::remove_if(begin(es), end(es),
-			[](std::weak_ptr<RenderableEntity>& wptr)
+			[](entity_wkptr& wptr)
 		{
 			return wptr.expired();
 		});
 
-		es = std::vector<std::weak_ptr<RenderableEntity>>(begin(es), end_ptr);
+		es = std::vector<entity_wkptr>(begin(es), end_ptr);
 		return size - es.size();
 	}
 
-	void render_manager::sort_entities_by_shader(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	void render_manager::sort_entities_by_shader(std::vector<entity_wkptr>& es)
 	{
 		std::sort(begin(es), end(es),
-			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
+			[&](entity_wkptr& a, entity_wkptr& b)
 		{
 			auto& ra = *(a.lock());
 			auto& rb = *(b.lock());
@@ -221,10 +221,10 @@ namespace eversim { namespace core { namespace rendering {
 		});
 	}
 
-	void render_manager::sort_entities_by_mesh(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	void render_manager::sort_entities_by_mesh(std::vector<entity_wkptr>& es)
 	{
 		std::sort(begin(es), end(es),
-			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
+			[&](entity_wkptr& a, entity_wkptr& b)
 		{
 			auto& ra = *(a.lock());
 			auto& rb = *(b.lock());
@@ -238,7 +238,7 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
-		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)
+		auto deref = [](entity_wkptr& wkptr)
 		{
 			auto sptr = wkptr.lock();
 			return sptr;
