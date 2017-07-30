@@ -11,9 +11,13 @@ namespace eversim { namespace core { namespace rendering {
 
 namespace eversim { namespace core { namespace world {
 
+	/*
+	 * Represents a 2D array of tiles. The origin (0,0) is the bottom left corner with X and Y
+	 * increasing to the right/top.
+	 */
 	class level {
 	public:
-		explicit level(glm::ivec2 extents);
+		explicit level(glm::ivec2 extents, utility::array_view<tile_descriptor const*> = {});
 
 		void initialize_graphics(rendering::render_manager&);
 
@@ -22,6 +26,8 @@ namespace eversim { namespace core { namespace world {
 
 		glm::vec2 get_world_size() const;
 		glm::ivec2 get_num_tiles() const;
+		int get_width() const;
+		int get_height() const;
 
 		tile& get_tile_by_index(glm::ivec2);
 		tile& get_tile_by_pos(glm::vec2);

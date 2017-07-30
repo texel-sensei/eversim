@@ -1,22 +1,54 @@
 #include "core/world/level.h"
 #include "core/world/tile.h"
 #include <glm/detail/type_mat.hpp>
+#include <easylogging++.h>
 
 using namespace boost;
 using namespace glm;
 
 namespace eversim { namespace core { namespace world {
 
-	level::level(ivec2 size)
-		: tiles(extents[size.x][size.y])
+	level::level(ivec2 size, utility::array_view<tile_descriptor const*> data)
+		: tiles(extents[size.y][size.x])
 	{
-		for (auto x = 0; x < get_num_tiles().x; ++x)
+		const auto num_tiles = size.x * size.y;
+
+		const auto descriptors = multi_array_ref<tile_descriptor const*, 2>(
+			data.data(), extents[size.y][size.x]
+		);
+
+		// pass null-view to initialize all tiles to blank
+		// if we use a null-view we don't need to check size
+		if(data){
+			if(data.size() < num_tiles)
+			{
+				LOG(ERROR) << "Not enough data passed to level c'tor! Size is ("
+					<< size.x << ", " << size.y << ") [" << num_tiles <<
+					" tiles] but got only data for " << data.size() << " tiles!";
+				throw std::runtime_error{"Too few data in level c'tor!"};
+			}
+			if(data.size() > num_tiles)
+			{
+				LOG(WARNING) << "Too much data passed to level c'tor! Size is ("
+					<< size.x << ", " << size.y << ") [" << num_tiles <<
+					" tiles] but got data for " << data.size() << " tiles!";
+			}
+		}
+
+		for (auto y = 0; y < get_height(); ++y)
 		{
-			for (auto y = 0; y < get_num_tiles().y; ++y)
+			for (auto x = 0; x < get_width(); ++x)
 			{
 				auto& t = get_tile_by_index({ x,y });
-				t = tile{ {x,y}, tile_size };
+				t = tile{ { x,y }, tile_size };
 				t.lvl = this;
+				if(data)
+				{
+					auto const* d = descriptors[size.y - y - 1][x];
+					if (d){
+						t.descriptor = d;
+					}
+				}
 			}
 		}
 	}
@@ -50,23 +82,33 @@ namespace eversim { namespace core { namespace world {
 
 	ivec2 level::get_num_tiles() const
 	{
-		return {tiles.shape()[0], tiles.shape()[1]};
+		return {get_width(), get_height()};
+	}
+
+	int level::get_width() const
+	{
+		return tiles.shape()[1];
+	}
+
+	int level::get_height() const
+	{
+		return tiles.shape()[0];
 	}
 
 	tile& level::get_tile_by_index(ivec2 idx)
 	{
-		return tiles[idx.x][idx.y];
+		return tiles[get_height() - idx.y - 1][idx.x];
+	}
+
+	tile const& level::get_tile_by_index(ivec2 idx) const
+	{
+		return tiles[get_height() - idx.y - 1][idx.x];
 	}
 
 	tile& level::get_tile_by_pos(vec2 pos)
 	{
 		const auto index = index_for_pos(pos);
 		return get_tile_by_index(index);
-	}
-
-	tile const& level::get_tile_by_index(ivec2 idx) const
-	{
-		return tiles[idx.x][idx.y];
 	}
 
 	tile const& level::get_tile_by_pos(vec2 pos) const
@@ -88,7 +130,7 @@ namespace eversim { namespace core { namespace world {
 	bool level::contains_index(ivec2 idx) const noexcept
 	{
 		if (idx.x < 0 || idx.y < 0) return false;
-		if (idx.x >= tiles.shape()[0] || idx.y >= tiles.shape()[1]) return false;
+		if (idx.x >= get_width() || idx.y >= get_height()) return false;
 		return true;
 	}
 
