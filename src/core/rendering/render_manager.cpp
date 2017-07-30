@@ -193,6 +193,48 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
+	size_t render_manager::remove_expired_entities(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	{
+		size_t size = es.size();
+		auto end_ptr = std::remove_if(begin(es), end(es),
+			[](std::weak_ptr<RenderableEntity>& wptr)
+		{
+			return wptr.expired();
+		});
+
+		es = std::vector<std::weak_ptr<RenderableEntity>>(begin(es), end_ptr);
+		return size - es.size();
+	}
+
+	void render_manager::sort_entities_by_shader(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	{
+		std::sort(begin(es), end(es),
+			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
+		{
+			auto& ra = *(a.lock());
+			auto& rb = *(b.lock());
+
+			if (ra.get_ShaderProgram() == nullptr || rb.get_ShaderProgram() == nullptr)
+				return false;
+
+			return ra.get_ShaderProgram()->getID() < rb.get_ShaderProgram()->getID();
+		});
+	}
+
+	void render_manager::sort_entities_by_mesh(std::vector<std::weak_ptr<RenderableEntity>>& es)
+	{
+		std::sort(begin(es), end(es),
+			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
+		{
+			auto& ra = *(a.lock());
+			auto& rb = *(b.lock());
+
+			if (ra.get_Multibuffer() == nullptr || rb.get_Multibuffer() == nullptr)
+				return false;
+
+			return ra.get_Multibuffer() < rb.get_Multibuffer();
+		});
+	}
 
 	void render_manager::draw(Camera& cam)
 	{
@@ -202,26 +244,12 @@ namespace eversim { namespace core { namespace rendering {
 			return sptr;
 		};
 
-		auto end_ptr = std::remove_if(begin(dynamic_entities), end(dynamic_entities),
-			[](std::weak_ptr<RenderableEntity>& wptr)
-		{
-			return wptr.expired();
-		});
+		auto removed_dynamics = remove_expired_entities(dynamic_entities);
+		auto removed_statics = remove_expired_entities(static_entities);
 
-		std::sort(begin(dynamic_entities), end_ptr,
-			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
-		{
-			auto raptr = deref(a); auto& ra = *raptr;
-			auto rbptr = deref(b); auto& rb = *rbptr;
-
-			if (ra.program == nullptr || rb.program == nullptr)
-				return false;
-
-			return ra.program->getID() < rb.program->getID();
-		});
-
-		dynamic_entities = std::vector<std::weak_ptr<RenderableEntity>>(begin(dynamic_entities),end_ptr);
-
+		sort_entities_by_shader(dynamic_entities);
+		sort_entities_by_mesh(static_entities);
+		
 		//shader id, start idx, num elems
 		std::vector<std::tuple<GLuint, size_t, size_t>> blocks;
 

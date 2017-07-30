@@ -6,6 +6,50 @@
 
 namespace eversim { namespace core { namespace utility {
 
+	enum byte : uint8_t {};
+
+	template<typename T>
+	struct byte_array_view;
+
+	template<>
+	struct byte_array_view<const byte> {
+		byte_array_view() : data_(nullptr), n(0) {}
+		byte_array_view(void const* ptr, size_t n) : data_(ptr), n(n) {}
+
+		template<typename Cont>
+		byte_array_view(Cont const& c) : byte_array_view(c.data(), c.size() * sizeof(*c.data())) {}
+
+		template<typename T, size_t N>
+		byte_array_view(T(&arr)[N]) : data_(arr), n(N * sizeof(T)) {}
+
+		void const* data() const { return data_; }
+		size_t size() const { return n; }
+		size_t byte_size() const { return n; }
+
+		operator bool() const { return data_; }
+	private:
+		void const* data_;
+		size_t n;
+	};
+	template<>
+	struct byte_array_view<byte> {
+		byte_array_view() : data_(nullptr), n(0) {}
+		byte_array_view(void* ptr, size_t n) : data_(ptr), n(n) {}
+
+		template<typename Cont>
+		byte_array_view(Cont const& c) : byte_array_view(c.data(), c.size() * sizeof(*c.data())) {}
+
+		void* data() const { return data_; }
+		size_t size() const { return n; }
+		size_t byte_size() const { return n; }
+
+		operator bool() const { return data_; }
+		operator byte_array_view<const byte>() const { return byte_array_view<const byte>(data(), byte_size()); }
+	private:
+		void* data_;
+		size_t n;
+	};
+
 	template <typename T>
 	struct array_view {
 		using value_type = T;

@@ -6,6 +6,7 @@
 #include "core/rendering/spritemap.h"
 #include "core/rendering/texture.h"
 #include "core/rendering/camera.h"
+#include "core/rendering/shader_storage_buffer.h"
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -82,8 +83,17 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<std::weak_ptr<RenderableEntity>> static_entities;
 		std::vector<std::shared_ptr<Texture>> textures;
 		std::vector<std::shared_ptr<Spritemap>> spritemaps;
+		std::map<Multibuffer*, shader_storage_buffer> ssbs;
 
 		void setup(bool fullscreen);
+
+		/*
+		 * removes entities
+		 * returns number of removed entities
+		 */
+		size_t remove_expired_entities(std::vector<std::weak_ptr<RenderableEntity>>&);
+		void sort_entities_by_shader(std::vector<std::weak_ptr<RenderableEntity>>&);
+		void sort_entities_by_mesh(std::vector<std::weak_ptr<RenderableEntity>>&);
 	};
 	
 } /* rendering */} /* core */ } /* eversim */
