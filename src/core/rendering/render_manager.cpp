@@ -147,10 +147,18 @@ namespace eversim { namespace core { namespace rendering {
 
 	}
 
-	std::shared_ptr<RenderableEntity> render_manager::register_entity()
+	std::shared_ptr<RenderableEntity> render_manager::register_entity(const entity_type type)
 	{
 		auto ptr = std::shared_ptr<RenderableEntity>(new RenderableEntity);
-		entities.push_back(ptr);
+		if(type == STATIC)
+		{
+			static_entities.push_back(ptr);
+			ptr->set_Type(STATIC);
+		} else if (type == DYNAMIC)
+		{
+			dynamic_entities.push_back(ptr);
+			ptr->set_Type(DYNAMIC);
+		}
 		return ptr;
 	}
 
@@ -194,13 +202,13 @@ namespace eversim { namespace core { namespace rendering {
 			return sptr;
 		};
 
-		auto end_ptr = std::remove_if(begin(entities), end(entities), 
+		auto end_ptr = std::remove_if(begin(dynamic_entities), end(dynamic_entities),
 			[](std::weak_ptr<RenderableEntity>& wptr)
 		{
 			return wptr.expired();
 		});
 
-		std::sort(begin(entities), end_ptr, 
+		std::sort(begin(dynamic_entities), end_ptr,
 			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
 		{
 			auto raptr = deref(a); auto& ra = *raptr;
@@ -212,13 +220,13 @@ namespace eversim { namespace core { namespace rendering {
 			return ra.program->getID() < rb.program->getID();
 		});
 
-		entities = std::vector<std::weak_ptr<RenderableEntity>>(begin(entities),end_ptr);
+		dynamic_entities = std::vector<std::weak_ptr<RenderableEntity>>(begin(dynamic_entities),end_ptr);
 
 		//shader id, start idx, num elems
 		std::vector<std::tuple<GLuint, size_t, size_t>> blocks;
 
 		size_t cnt = 0;
-		for (auto& wkptr : entities)
+		for (auto& wkptr : dynamic_entities)
 		{
 			auto entityptr = deref(wkptr); auto& entity = *entityptr;
 
@@ -244,7 +252,7 @@ namespace eversim { namespace core { namespace rendering {
 		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
 		for(auto& block : blocks)
 		{
-			auto fbeptr = deref(entities.at(std::get<1>(block)));
+			auto fbeptr = deref(dynamic_entities.at(std::get<1>(block)));
 			auto& fbe = *fbeptr;
 			ShaderProgram& program = *(fbe.program);
 			program.use();
@@ -252,7 +260,7 @@ namespace eversim { namespace core { namespace rendering {
 			cam.use(program);
 			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
 			{
-				auto entityptr = deref(entities.at(i)); RenderableEntity& entity = *entityptr;
+				auto entityptr = deref(dynamic_entities.at(i)); RenderableEntity& entity = *entityptr;
 
 				auto location = glGetUniformLocation(program.getID(), "M");
 				if (location == -1)

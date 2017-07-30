@@ -36,7 +36,7 @@ namespace eversim { namespace core { namespace rendering {
 		 * Create new RenderableEntity
 		 * returns the shared ptr, keeps a weak ptr
 		 */
-		std::shared_ptr<RenderableEntity> register_entity();
+		std::shared_ptr<RenderableEntity> register_entity(const entity_type type=DYNAMIC);
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader 
@@ -78,7 +78,8 @@ namespace eversim { namespace core { namespace rendering {
 
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
-		std::vector<std::weak_ptr<RenderableEntity>> entities;
+		std::vector<std::weak_ptr<RenderableEntity>> dynamic_entities;
+		std::vector<std::weak_ptr<RenderableEntity>> static_entities;
 		std::vector<std::shared_ptr<Texture>> textures;
 		std::vector<std::shared_ptr<Spritemap>> spritemaps;
 

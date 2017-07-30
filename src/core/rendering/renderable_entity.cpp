@@ -72,6 +72,7 @@ namespace eversim {	namespace core { namespace rendering {
 	void  RenderableEntity::set_Position(glm::fvec2 pos)
 	{
 		M[2] = glm::fvec3(pos,1.f);
+		touch();
 	}
 
 	glm::fvec2  RenderableEntity::get_Position() const
@@ -83,6 +84,7 @@ namespace eversim {	namespace core { namespace rendering {
 	{
 		M[0] = { scale[0], 0, 0 };
 		M[1] = { 0, scale[1], 0};
+		touch();
 	}
 
 	glm::fvec2 RenderableEntity::get_Scale() const
