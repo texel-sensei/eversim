@@ -113,6 +113,48 @@ TEST_CASE_METHOD(level_testing_data, "data constructor", "[world][level]")
 		REQUIRE(desc_at(l,2,2) == X);
 	}
 }
+
+TEST_CASE_METHOD(level_testing_data,"tile collision ids", "[world][tile]")
+{
+	tile_descriptor solid{"X"};
+	solid.collision = collision_type::solid;
+
+	auto const* X = &solid;
+
+	tile_descriptor const* level_data[] = {
+	//	0 1 2 3 4 5
+		X,O,X,O,O,O, // 6
+		O,O,X,O,O,O, // 5
+		O,O,X,O,O,O, // 4
+		O,O,O,X,X,X, // 3
+		X,X,X,O,O,O, // 2
+		X,X,X,O,O,O, // 1
+		X,X,X,O,O,O  // 0
+	//  0 1 2 3 4 5
+	};
+
+	// collision shape is left,down,right,up
+
+	auto l = level({ 6,7 }, level_data);
+
+	const auto shape = [&l](int x, int y)
+	{
+		return l.get_tile_by_index({ x,y }).calculate_collision_shape();
+	};
+
+	REQUIRE(shape(0,6) == 0b0000);
+
+	REQUIRE(shape(2,6) == 0b0100);
+	REQUIRE(shape(2,5) == 0b0101);
+	REQUIRE(shape(2,4) == 0b0001);
+
+	REQUIRE(shape(3, 3) == 0b0010);
+	REQUIRE(shape(4, 3) == 0b1010);
+	REQUIRE(shape(5, 3) == 0b1000);
+
+	REQUIRE(shape(1, 1) == 0b1111);
+}
+
 TEST_CASE("tile size", "[world][level]")
 {
 	auto l = level({ 10,1 });
@@ -217,5 +259,18 @@ TEST_CASE("tile positions", "[world][level]")
 			REQUIRE(t.x() == Approx(center.x));
 			REQUIRE(t.y() == Approx(center.y));
 		}
+	}
+}
+
+TEST_CASE("level collision shape building", "[world][level]")
+{
+	auto l = level({ 3,3 });
+
+	for(unsigned char c = 0; c < 16; ++c)
+	{
+		const auto v = l.get_collision_shape(c);
+		const auto bits = std::bitset<4>(c);
+		const auto zeros = bits.size() - bits.count();
+		REQUIRE(v.size() == zeros);
 	}
 }

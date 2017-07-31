@@ -85,7 +85,7 @@ namespace eversim { namespace core { namespace world {
 				t.set_descriptor(desc);
 			}
 		}
-
+		lvl->calculate_collision_shapes();
 		return lvl;
 	}
 

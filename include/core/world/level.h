@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/world/tile.h"
+#include "core/utility/math.h"
 
 #include <glm/glm.hpp>
 #include <boost/multi_array.hpp>
@@ -20,6 +21,7 @@ namespace eversim { namespace core { namespace world {
 		explicit level(glm::ivec2 extents, utility::array_view<tile_descriptor const*> = {});
 
 		void initialize_graphics(rendering::render_manager&);
+		void calculate_collision_shapes();
 
 		float get_tile_size() const { return tile_size; }
 		void set_tile_size(float f);
@@ -39,11 +41,16 @@ namespace eversim { namespace core { namespace world {
 		glm::vec2 center_of_tile(glm::ivec2) const;
 
 		bool contains_index(glm::ivec2) const noexcept;
+		utility::array_view<const utility::line> get_collision_shape(unsigned char bitset) const;
 	private:
 		using container = boost::multi_array<tile, 2>;
 
 		container tiles;
 		float tile_size = 1.f;
+
+		// there are 16 different collision shapes
+		// collision shape with index 15 is empty, so we don't need a vector to store it
+		mutable std::vector<utility::line> collision_shapes[15];
 	};
 
 }}}

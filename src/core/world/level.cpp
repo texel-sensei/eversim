@@ -51,6 +51,8 @@ namespace eversim { namespace core { namespace world {
 				}
 			}
 		}
+
+		calculate_collision_shapes();
 	}
 
 	void level::initialize_graphics(rendering::render_manager& mng)
@@ -133,5 +135,69 @@ namespace eversim { namespace core { namespace world {
 		if (idx.x >= get_width() || idx.y >= get_height()) return false;
 		return true;
 	}
+
+	utility::array_view<const utility::line> level::get_collision_shape(unsigned char sides) const
+	{
+		assert(sides < 16);
+
+		// bitset == 15 means the tile is surrounded on all sides
+		// and does not have any collidable lines
+		if(sides == 15)
+		{
+			return {};
+		}
+
+		auto& v = collision_shapes[sides];
+
+		// if the vector is empty, then it is not yet build
+		if(v.empty())
+		{
+			const auto side_bits = std::bitset<4>(sides);
+			const array<vec2,4>offsets = {
+				vec2(-tile_size, 0), vec2(0,-tile_size), vec2(tile_size,0), vec2(0,tile_size) 
+			};
+
+			const auto s = tile_size / 2;
+			array<vec2, 4> corners = {
+				vec2(-s,s), vec2(-s,-s), vec2(s,-s), vec2(s,s)
+			};
+			const array<ivec2, 4> side_indices = {
+				ivec2{0,1}, ivec2{1,2}, ivec2{2,3}, ivec2{3,0}
+			};
+
+			for(int i = 0; i < side_bits.size(); ++i)
+			{
+				if(side_bits[3-i])
+				{
+					const auto idx = side_indices[i];
+					corners[idx.x] += offsets[i];
+					corners[idx.y] += offsets[i];
+				}
+			}
+			for(int i = 0; i < side_bits.size(); ++i)
+			{
+				if(!side_bits[3-i])
+				{
+					const auto idx = side_indices[i];
+					v.push_back({corners[idx.x], corners[idx.y]});
+				}
+			}
+		}
+
+		return v;
+	}
+
+	void level::calculate_collision_shapes()
+	{
+		for (auto x = 0; x < get_num_tiles().x; ++x)
+		{
+			for (auto y = 0; y < get_num_tiles().y; ++y)
+			{
+				auto& t = get_tile_by_index({ x,y });
+				t.collision_shape = t.calculate_collision_shape();
+			}
+		}
+	}
+
 
 }}}
