@@ -26,6 +26,8 @@ namespace eversim { namespace core { namespace world {
 
 		// Returns nullptr if neighbour is invalid
 		tile const* get_neighbour(glm::ivec2 delta) const;
+		bool has_collision() const noexcept;
+
 		float x() const { return idx.x*size() + size() / 2.f; }
 		float y() const { return idx.y*size() + size() / 2.f; }
 		glm::vec2 position() const { return {x(), y()}; }

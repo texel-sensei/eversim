@@ -23,6 +23,12 @@ namespace eversim { namespace core { namespace world {
 		if (!lvl->contains_index(idx)) return nullptr;
 		return &lvl->get_tile_by_index(idx);
 	}
+
+	bool tile::has_collision() const noexcept
+	{
+		return descriptor->collision != collision_type::none;
+	}
+
 	void tile::initialize_graphics(rendering::render_manager& mng)
 	{
 		auto const& tex_name = descriptor->texture_name;
