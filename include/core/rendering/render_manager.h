@@ -41,7 +41,7 @@ namespace eversim { namespace core { namespace rendering {
 		void draw_line(glm::vec2 a, glm::vec2 b, int dur = 1);
 		void draw_point(glm::vec2 p);
 
-		void do_draw();
+		void do_draw(Camera const& cam);
 		/*
 		 * Create new RenderableEntity
 		 * returns the shared ptr, keeps a weak ptr

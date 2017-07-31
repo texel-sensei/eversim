@@ -1,13 +1,20 @@
 #pragma once
 
+#include "core/utility/array_view.h"
 
 #include <glm/vec2.hpp>
 #include <memory>
+#include <bitset>
 
-namespace eversim{namespace core{namespace rendering {
-	class render_manager;
-	class RenderableEntity;
-}}}
+namespace eversim{namespace core{
+	namespace utility {
+		struct line;
+	}
+	namespace rendering {
+		class render_manager;
+		class RenderableEntity;
+	}
+}}
 
 namespace eversim { namespace core { namespace world {
 
@@ -23,6 +30,24 @@ namespace eversim { namespace core { namespace world {
 		}
 
 		bool point_inside(glm::vec2 p) const;
+
+		// Returns nullptr if neighbour is invalid
+		tile const* get_neighbour(glm::ivec2 delta) const;
+		bool has_collision() const noexcept;
+
+		/* This returns the general shape of this tile
+		 * Note: The returned lines are not in the correct position!
+		 * They are centered around (0,0) and not the position of the tile!
+		*/
+		utility::array_view<const utility::line> get_collision_shape() const;
+
+		/*
+		 * calculates the (internal) used 4 bit index for the collision shape.
+		 * The bits are set, when there is a solid tile in the corresponding direction.
+		 * The directions are (from bit[3] to bit[0]):
+		 *	west, south, east, north
+		 */
+		std::bitset<4> calculate_collision_shape() const;
 
 		float x() const { return idx.x*size() + size() / 2.f; }
 		float y() const { return idx.y*size() + size() / 2.f; }
@@ -47,15 +72,21 @@ namespace eversim { namespace core { namespace world {
 
 	private:
 		friend class level;
+		level const* lvl = nullptr;
 		glm::ivec2 idx;
 		float size_;
 		tile_descriptor const* descriptor = &blank_tile;
 		std::shared_ptr<rendering::RenderableEntity> display;
+
+		// encodes what collision shape this tile should use
+		// depending on its neighbours
+		std::bitset<4> collision_shape;
 	
 		void size(float s)
 		{
 			size_ = s;
 		}
+
 	};
 
 }}}

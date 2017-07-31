@@ -343,6 +343,10 @@ namespace eversim { namespace core { namespace physics {
 			{
 				auto& p = c.particles[i];
 				const auto correction = -scale * p->inv_mass * grad[i] * k;
+				if(glm::length(correction) > 0.5f)
+				{
+					LOG(WARNING) << "Way too big step! (" << correction.x << ", " << correction.y <<")";
+				}
 				p->projected_position += correction;
 			}
 		}
@@ -431,22 +435,30 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::particle_tile_collision(particle& p)
 	{
 		assert(level);
-		auto const& t = level->get_tile_by_pos(p.projected_position);
+		
+		const auto pos = p.projected_position;
+
+		auto const& t = level->get_tile_by_pos(pos);
 		switch (t.get_descriptor()->collision)
 		{
 		case world::collision_type::none: return;
-		case world::collision_type::solid: 
+		case world::collision_type::solid:
 			handle_simple_tile_collision(p, t);
 			break;
-		case world::collision_type::extra: throw runtime_error{"Extra collision not yet implemented!"};
-		default: throw runtime_error{"Invalid tile collision descriptor"};
+		case world::collision_type::extra: throw runtime_error{ "Extra collision not yet implemented!" };
+		default: throw runtime_error{ "Invalid tile collision descriptor" };
 		}
 	}
 
 	void physics_manager::handle_simple_tile_collision(particle& p, world::tile const& t)
 	{
-		if(t.point_inside(p.projected_position)) {
-			static_collision_constraints.emplace_back(t, p);
+		if(t.point_inside(p.projected_position) && t.get_collision_shape().size() > 0) {
+			try{
+				static_collision_constraints.emplace_back(t, p);
+			}catch(std::exception const& e)
+			{
+				LOG(ERROR) << "Got exception: " << e.what();
+			}
 		}
 	}
 }}}

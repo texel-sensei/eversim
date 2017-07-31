@@ -162,8 +162,7 @@ int main(int argc, char* argv[])
 
 	// setup camera
 	rendering::Camera cam("default_cam",
-		glm::fvec2(0, resolution[0]),
-		glm::fvec2(0, resolution[1]),
+		resolution,
 		20.f);
 	cam.set_position(player->position);
 
