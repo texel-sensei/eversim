@@ -35,6 +35,12 @@ namespace eversim { namespace core { namespace world {
 		tile const* get_neighbour(glm::ivec2 delta) const;
 		bool has_collision() const noexcept;
 
+		/* This returns the general shape of this tile
+		 * Note: The returned lines are not in the correct position!
+		 * They are centered around (0,0) and not the position of the tile!
+		*/
+		utility::array_view<const utility::line> get_collision_shape() const;
+
 		/*
 		 * calculates the (internal) used 4 bit index for the collision shape.
 		 * The bits are set, when there is a solid tile in the corresponding direction.
@@ -80,6 +86,7 @@ namespace eversim { namespace core { namespace world {
 		{
 			size_ = s;
 		}
+
 	};
 
 }}}

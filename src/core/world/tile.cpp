@@ -29,6 +29,23 @@ namespace eversim { namespace core { namespace world {
 		return descriptor->collision != collision_type::none;
 	}
 
+	utility::array_view<const utility::line> tile::get_collision_shape() const
+	{
+		switch(descriptor->collision)
+		{
+		case collision_type::none: 
+			return {};
+		case collision_type::solid: 
+			return lvl->get_collision_shape(collision_shape.to_ulong());
+		case collision_type::extra: 
+			throw std::runtime_error{"Complex collisions shapes are not yet implemented!"};
+		default:
+			LOG(ERROR) << "Invalid enumeration value in " __FUNCTION__
+				<< " tile @(" << idx.x << ", " << idx.y << ")";
+			throw std::runtime_error("Invalid Enumeration value!");
+		}
+	}
+
 	void tile::initialize_graphics(rendering::render_manager& mng)
 	{
 		auto const& tex_name = descriptor->texture_name;
