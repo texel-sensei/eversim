@@ -15,6 +15,7 @@
 
 #include "core/system/programsequencer.h"
 #include "core/system/program_gui.h"
+#include "core/system/imgui/performance_display.h"
 
 #include "core/rendering/canvas.h"
 #include "core/rendering/shader_program.h"
@@ -110,13 +111,6 @@ bool handle_sdl_events()
 	}
 	return should_continue;
 }
-
-struct imgui_log_time {
-	string message;
-	void operator()(utility::clock::duration dur) {
-		ImGui::Text((message + " " + utility::to_string(dur)).c_str());
-	}
-};
 
 namespace {
 	const char* glTypeToString(GLenum type)
@@ -447,7 +441,9 @@ int main(int argc, char* argv[])
 
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
-	
+
+	system::imgui::performance_display pd;
+
 	int cnt = 0;
 	while (handle_sdl_events())
 	{
@@ -456,6 +452,10 @@ int main(int argc, char* argv[])
 
 
 		ImGui_ImplSdlGL3_NewFrame(window);
+
+		static bool compact_performance_display = true;
+		ImGui::Checkbox("timings compact display", &compact_performance_display);
+		pd.compact_display(compact_performance_display);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
@@ -477,7 +477,7 @@ int main(int argc, char* argv[])
 		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		{
-			utility::scoped_timer tim(imgui_log_time{ "rendering" });
+			utility::scoped_timer tim(pd.get_reporter("rendering"));
 			renderer.draw(cam);
 		}
 
@@ -525,7 +525,7 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				utility::scoped_timer tim(imgui_log_time{ "Physics loop" });
+				utility::scoped_timer tim(pd.get_reporter( "Physics loop" ));
 				physics.integrate(dt);
 			}
 		}
@@ -538,10 +538,11 @@ int main(int argc, char* argv[])
 		}
 
 		{
-			utility::scoped_timer tim(imgui_log_time{ "super billig test rendering" });
+			utility::scoped_timer tim(pd.get_reporter("debug rendering"));
 			renderer.do_draw(cam);
 		}
 
+		pd.draw();
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
