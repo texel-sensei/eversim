@@ -16,6 +16,7 @@ namespace eversim { namespace core { namespace world {
 			{
 				auto& t = get_tile_by_index({ x,y });
 				t = tile{ {x,y}, tile_size };
+				t.lvl = this;
 			}
 		}
 	}

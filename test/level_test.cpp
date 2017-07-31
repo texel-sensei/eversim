@@ -58,6 +58,16 @@ TEST_CASE("index / position conversion", "[world][level]")
 	REQUIRE(t.y() == Approx(pos.y));
 }
 
+TEST_CASE("tile neighbours", "[world][level]")
+{
+	auto l = level({ 12,17 });
+	auto const& t = l.get_tile_by_index({ 4,4 });
+
+	auto const& n = t.get_neighbour({ 1,0 });
+	REQUIRE(n.index() == glm::ivec2(5, 4));
+	REQUIRE(&n.get_neighbour({ -1,0 }) == &t);
+}
+
 TEST_CASE("tile positions", "[world][level]")
 {
 	auto l = level({ 5,5 });

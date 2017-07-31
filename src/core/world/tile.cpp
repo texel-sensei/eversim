@@ -1,6 +1,7 @@
 #include "core/world/tile.h"
 #include "core/world/tile_descriptor.h"
 #include "core/rendering/render_manager.h"
+#include "core/world/level.h"
 
 namespace eversim { namespace core { namespace world {
 	tile_descriptor blank_tile = {
@@ -15,7 +16,13 @@ namespace eversim { namespace core { namespace world {
 
 		return p.x >= min.x && p.x < max.x && p.y >= min.y && p.y < max.y;
 	}
-	
+
+	tile const* tile::get_neighbour(glm::ivec2 delta) const
+	{
+		const auto idx = index() + delta;
+		if (!lvl->contains_index(idx)) return nullptr;
+		return &lvl->get_tile_by_index(idx);
+	}
 	void tile::initialize_graphics(rendering::render_manager& mng)
 	{
 		auto const& tex_name = descriptor->texture_name;

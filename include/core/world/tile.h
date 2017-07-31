@@ -24,6 +24,8 @@ namespace eversim { namespace core { namespace world {
 
 		bool point_inside(glm::vec2 p) const;
 
+		// Returns nullptr if neighbour is invalid
+		tile const* get_neighbour(glm::ivec2 delta) const;
 		float x() const { return idx.x*size() + size() / 2.f; }
 		float y() const { return idx.y*size() + size() / 2.f; }
 		glm::vec2 position() const { return {x(), y()}; }
@@ -47,6 +49,7 @@ namespace eversim { namespace core { namespace world {
 
 	private:
 		friend class level;
+		level const* lvl = nullptr;
 		glm::ivec2 idx;
 		float size_;
 		tile_descriptor const* descriptor = &blank_tile;
