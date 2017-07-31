@@ -11,6 +11,7 @@
 #include <tuple>
 #include <limits>
 
+#include <boost/align/aligned_allocator.hpp>
 
 
 using namespace std;
@@ -153,6 +154,7 @@ namespace eversim { namespace core { namespace rendering {
 		if(type == STATIC)
 		{
 			static_entities.push_back(ptr);
+			freshly_added_static_entities.push_back(ptr);
 			ptr->set_Type(STATIC);
 		} else if (type == DYNAMIC)
 		{
@@ -238,46 +240,26 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
-		auto deref = [](entity_wkptr& wkptr)
+		//getchar();
+
+	/*	auto deref = [](entity_wkptr& wkptr)
 		{
 			auto sptr = wkptr.lock();
 			return sptr;
 		};
 
 		auto removed_dynamics = remove_expired_entities(dynamic_entities);
-		auto removed_statics = remove_expired_entities(static_entities);
 
 		sort_entities_by_shader(dynamic_entities);
-		sort_entities_by_mesh(static_entities);
 		
-		//shader id, start idx, num elems
-		std::vector<std::tuple<GLuint, size_t, size_t>> blocks;
-
-		size_t cnt = 0;
-		for (auto& wkptr : dynamic_entities)
+		auto blocks = gen_blocks<GLuint>(
+			dynamic_entities,
+			[](const RenderableEntity& e)
 		{
-			auto entityptr = deref(wkptr); auto& entity = *entityptr;
-
-			if (entity.program == nullptr)
-				continue;
-
-			auto id = entity.program->getID();
-
-			if (blocks.size() == 0)
-			{
-				blocks.emplace_back(id,cnt,1);
-			} else
-			{
-				auto& block = blocks.back();
-
-				if (std::get<0>(block) == id)
-					std::get<2>(block)++;
-				else
-					blocks.emplace_back(id,cnt,1);
-			}
-			cnt++;
+			return e.get_ShaderProgram()->getID();
 		}
-		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
+			);
+		LOG(INFO) << "number of drawable blocks = " << blocks.size();
 		for(auto& block : blocks)
 		{
 			auto fbeptr = deref(dynamic_entities.at(std::get<1>(block)));
@@ -288,7 +270,7 @@ namespace eversim { namespace core { namespace rendering {
 			cam.use(program);
 			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
 			{
-				auto entityptr = deref(dynamic_entities.at(i)); RenderableEntity& entity = *entityptr;
+				RenderableEntity& entity = *(dynamic_entities.at(i).lock());
 
 				auto location = glGetUniformLocation(program.getID(), "M");
 				if (location == -1)
@@ -300,8 +282,102 @@ namespace eversim { namespace core { namespace rendering {
 			}
 
 			glUseProgram(0);
+		}*/
 
+		//Draw static entities
+		auto removed_statics = remove_expired_entities(static_entities);
+		remove_expired_entities(freshly_added_static_entities);
+
+		sort_entities_by_mesh(static_entities);
+		sort_entities_by_mesh(freshly_added_static_entities);
+
+		if(freshly_added_static_entities.size() > 0)
+		{
+			auto mesh_blocks = gen_blocks<Multibuffer*>(
+				freshly_added_static_entities,
+				[](const RenderableEntity& e)
+			{
+				return e.get_Multibuffer();
+			}
+				);
+
+			for (auto& block : mesh_blocks)
+			{
+
+				Multibuffer* buffer_ptr = std::get<0>(block);
+				const size_t start_idx = std::get<1>(block);
+				const size_t num_instances = std::get<2>(block);
+
+				auto& fbe = *(freshly_added_static_entities.at(start_idx).lock());
+				
+				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
+
+				auto it = ssbs.find(buffer_ptr);
+
+				if(it != ssbs.end())
+				{
+					//found, but changed ! TODO
+				} else
+				{
+					//not found, add :)
+					ssbs[buffer_ptr] = shader_storage_buffer();
+				}
+
+				shader_storage_buffer& ssb = (ssbs.find(buffer_ptr))->second;
+
+				std::vector<instanced_entity_information,boost::alignment::aligned_allocator<instanced_entity_information,16>> matrices;
+				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				{
+					RenderableEntity& entity = *(freshly_added_static_entities.at(i)).lock();
+					auto M = entity.get_M();
+					matrices.emplace_back(entity.get_M());
+				}
+
+				utility::byte_array_view matrices_view = matrices;
+				ssb = shader_storage_buffer(matrices_view);
+
+			}
+		}
+
+		freshly_added_static_entities.clear();
+
+		auto mesh_blocks = gen_blocks<Multibuffer*>(
+			static_entities,
+			[](const RenderableEntity& e)
+		{
+			return e.get_Multibuffer();
+		}
+		);
+
+		//LOG(INFO) << mesh_blocks.size();
+		//getchar();
+		for (auto& block : mesh_blocks)
+		{
+			auto* buffer_ptr = std::get<0>(block);
+			const auto start_idx = std::get<1>(block);
+			const auto num_instances = std::get<2>(block);
+
+			auto& fbe = *((static_entities.at(start_idx)).lock());
+
+			auto& program = *(fbe.get_ShaderProgram());
+			auto& texptr = *(fbe.get_Texture());
+			auto& pointsuv = *(fbe.get_Multibuffer());
+
+			program.use();
+			cam.use(program);
+
+			/*LOG(INFO) << "drawing ssb with data from multibuffer " << buffer_ptr 
+				<< " and " << num_instances << "#instances from index " << start_idx;*/
+
+			auto& ssb = ssbs.at(buffer_ptr);
+
+			pointsuv.bind();
+			ssb.bind(42);
+			texptr.bind();
+			
+			glDrawArraysInstanced(GL_QUADS, 0, 4, num_instances);
+
+			glUseProgram(0);
 		}
 	}
-
 } /* rendering */ } /* core */ } /* eversim */

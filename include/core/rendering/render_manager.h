@@ -90,7 +90,7 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<glm::vec2> points;
 		std::vector<entity_wkptr> dynamic_entities;
 		std::vector<entity_wkptr> static_entities;
-
+		std::vector<entity_wkptr> freshly_added_static_entities;
 		std::vector<texture_shptr> textures;
 		std::vector<spritemap_shptr> spritemaps;
 		std::map<Multibuffer*, shader_storage_buffer> ssbs;
@@ -104,6 +104,37 @@ namespace eversim { namespace core { namespace rendering {
 		size_t remove_expired_entities(std::vector<entity_wkptr>&);
 		void sort_entities_by_shader(std::vector<entity_wkptr>&);
 		void sort_entities_by_mesh(std::vector<entity_wkptr>&);
+
+		template<typename T>
+		std::vector<std::tuple<T, size_t, size_t>> gen_blocks(
+			const std::vector<entity_wkptr>& es,
+			std::function<T(const RenderableEntity&)> get)
+		{
+			std::vector<std::tuple<T, size_t, size_t>> blocks;
+			size_t cnt = 0;
+			for (auto& wkptr : es)
+			{
+				auto& entity = *(wkptr.lock());
+
+				auto id = get(entity);
+
+				if (blocks.size() == 0)
+				{
+					blocks.emplace_back(id, cnt, 1);
+				}
+				else
+				{
+					auto& block = blocks.back();
+
+					if (std::get<0>(block) == id)
+						std::get<2>(block)+=1;
+					else
+						blocks.emplace_back(id, cnt, 1);
+				}
+				cnt++;
+			}
+			return blocks;
+		}
 	};
 	
 } /* rendering */} /* core */ } /* eversim */

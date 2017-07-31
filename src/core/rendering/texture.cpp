@@ -54,8 +54,8 @@ namespace eversim {
 				auto base_tex_id = tp.tex_id;
 				resolution = tp.resolution;
 
-				LOG(INFO) << "Create texture with size " << resolution[0] << "/" <<
-					resolution[1];
+			    /*LOG(INFO) << "Create texture with size " << resolution[0] << "/" <<
+					resolution[1];*/
 
 				//Generate the texture we want to use for the view
 				glGenTextures(1, &tex_id);

@@ -1,5 +1,8 @@
 #include "core/rendering/buffer.h"
 
+#include <cassert>
+#include <utility>
+
 namespace eversim {
 	namespace core
 	{
@@ -10,7 +13,7 @@ namespace eversim {
 
 	buffer::buffer(
 			GLenum target,
-			eversim::core::utility::byte_array_view<const utility::byte> data /* = {} */,
+			eversim::core::utility::const_byte_array_view data /* = {} */,
 			GLenum usage /* = GL_DYNAMIC_DRAW */
 	) : buffer(buffer::empty, target) {
 		createGLBuffer(data, usage);
@@ -38,7 +41,7 @@ namespace eversim {
 	}
 
 	void buffer::createGLBuffer(
-			eversim::core::utility::byte_array_view<const utility::byte> data /* = {} */,
+			eversim::core::utility::const_byte_array_view data /* = {} */,
 			GLenum usage /* = GL_DYNAMIC_DRAW */
 	){
 		assert(handle == 0);
@@ -54,7 +57,7 @@ namespace eversim {
 		}
 	}
 
-	void buffer::update(eversim::core::utility::byte_array_view<const utility::byte> data, unsigned int offset){
+	void buffer::update(eversim::core::utility::const_byte_array_view data, unsigned int offset){
 		assert(handle != 0);
 		bind();
 		glBufferSubData(target, offset, data.byte_size(), data.data());

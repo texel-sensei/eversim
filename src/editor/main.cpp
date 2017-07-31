@@ -417,8 +417,8 @@ int main(int argc, char* argv[])
 	player_sm.add_texture(program, kobold);
 	player_sm.add_texture(program, brickwall);
 
-	auto player_entity = renderer.register_entity();
-	player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
+	//auto player_entity = renderer.register_entity();
+	//player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
 
 	auto floor = renderer.register_entity();
 	{
@@ -530,7 +530,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
+		//player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
 
 		for (auto&& p : physics.get_particles())
 		{

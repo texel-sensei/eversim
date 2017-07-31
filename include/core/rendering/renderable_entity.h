@@ -18,6 +18,12 @@ namespace eversim {
 				DYNAMIC, STATIC
 			};
 
+			struct alignas(16) instanced_entity_information
+			{
+				glm::fmat4 M;
+				explicit instanced_entity_information(const glm::fmat4& m) : M(m){}
+			};
+
 			/*
 			* unit sized quad 0/0 to 1/1
 			*/
