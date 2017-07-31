@@ -40,4 +40,24 @@ namespace eversim { namespace core { namespace world {
 		display->set_Position(position() - glm::vec2(size()/2));
 		display->set_Scale(glm::vec2(size()));
 	}
+
+	std::bitset<4> tile::calculate_collision_shape() const
+	{
+		using namespace glm;
+		
+		std::bitset<4> sides = 0;
+
+		const ivec2 offsets[] = {
+			ivec2(-1,0), ivec2(0,-1), ivec2(1,0), ivec2(0,1)
+		};
+		for(int i = 0; i < sides.size(); ++i)
+		{
+			const auto n = get_neighbour(offsets[3-i]);
+			if(n && n->has_collision())
+			{
+				sides[i] = true;
+			}
+		}
+		return sides;
+	}
 }}}
