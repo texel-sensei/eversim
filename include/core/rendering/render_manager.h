@@ -110,6 +110,8 @@ namespace eversim { namespace core { namespace rendering {
 			const std::vector<entity_wkptr>& es,
 			std::function<T(const RenderableEntity&)> get)
 		{
+			//TODO sort
+			//return vector of iterators begin, end
 			std::vector<std::tuple<T, size_t, size_t>> blocks;
 			size_t cnt = 0;
 			for (auto& wkptr : es)

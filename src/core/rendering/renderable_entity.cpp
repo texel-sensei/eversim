@@ -69,6 +69,21 @@ namespace eversim {	namespace core { namespace rendering {
 		data->draw();
 	}
 
+	const instanced_entity_information& RenderableEntity::get_instanced_entity_information() const
+	{
+		instanced_entity_information ifo;
+		get_instanced_entity_information(ifo);
+		return ifo;
+	}
+
+	void RenderableEntity::get_instanced_entity_information(instanced_entity_information& ifo) const
+	{
+		ifo.set_M(M);
+		ifo.set_texoffset(texoffset);
+		ifo.set_texsize(texsize);
+		ifo.set_spritesize(spritesize);
+	}
+
 	void  RenderableEntity::set_Position(glm::fvec2 pos)
 	{
 		M[2] = glm::fvec3(pos,1.f);

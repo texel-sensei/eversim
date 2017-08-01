@@ -335,14 +335,15 @@ namespace eversim { namespace core { namespace rendering {
 					ssbs[buffer_ptr] = shader_storage_buffer();
 				}
 
-				shader_storage_buffer& ssb = (ssbs.find(buffer_ptr))->second;
+				auto& ssb = (ssbs.find(buffer_ptr))->second;
 
 				std::vector<instanced_entity_information,boost::alignment::aligned_allocator<instanced_entity_information,16>> matrices;
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
-					RenderableEntity& entity = *(freshly_added_static_entities.at(i)).lock();
-					auto M = entity.get_M();
-					matrices.emplace_back(entity.get_M());
+					auto& entity = *(freshly_added_static_entities.at(i)).lock();
+					matrices.emplace_back();
+					auto& entity_information = matrices.back();
+					entity.get_instanced_entity_information(entity_information);
 				}
 
 				utility::byte_array_view matrices_view = matrices;

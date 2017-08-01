@@ -20,8 +20,32 @@ namespace eversim {
 
 			struct alignas(16) instanced_entity_information
 			{
-				glm::fmat4 M;
-				explicit instanced_entity_information(const glm::fmat4& m) : M(m){}
+				glm::fmat4 data;
+				
+				void set_M(const glm::fmat3& M)
+				{
+					for (size_t i = 0; i < 3; ++i)
+						for (size_t j = 0; j < 3; ++j)
+							data[i][j] = M[i][j];
+				}
+
+				void set_texoffset(const glm::ivec2& texoffset)
+				{
+					data[0][3] = texoffset[0];
+					data[1][3] = texoffset[1];
+				}
+
+				void set_texsize(const glm::ivec2& texsize)
+				{
+					data[2][3] = texsize[0];
+					data[3][3] = texsize[1];
+				}
+
+				void set_spritesize(const glm::ivec2& spritesize)
+				{
+					data[3][0] = spritesize[0];
+					data[3][1] = spritesize[1];
+				}
 			};
 
 			/*
@@ -57,6 +81,9 @@ namespace eversim {
 				void touch() { touched = true; }
 				void untouch() { touched = false; };
 			public:
+
+				const instanced_entity_information& get_instanced_entity_information() const;
+				void get_instanced_entity_information(instanced_entity_information& ifo) const;
 
 				glm::fmat3 get_M() const { return M; };
 				ShaderProgram* get_ShaderProgram() const { return program; };
