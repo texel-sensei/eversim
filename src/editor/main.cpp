@@ -15,6 +15,7 @@
 
 #include "core/system/programsequencer.h"
 #include "core/system/program_gui.h"
+#include "core/system/imgui/window_manager.h"
 #include "core/system/imgui/performance_display.h"
 
 #include "core/rendering/canvas.h"
@@ -442,7 +443,8 @@ int main(int argc, char* argv[])
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
 
-	system::imgui::performance_display pd;
+	system::imgui::window_manager windows;
+	auto* pd = windows.add_window<system::imgui::performance_display>();
 
 	int cnt = 0;
 	while (handle_sdl_events())
@@ -452,10 +454,7 @@ int main(int argc, char* argv[])
 
 
 		ImGui_ImplSdlGL3_NewFrame(window);
-
-		static bool compact_performance_display = true;
-		ImGui::Checkbox("timings compact display", &compact_performance_display);
-		pd.compact_display(compact_performance_display);
+		windows.begin_frame();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
@@ -477,7 +476,7 @@ int main(int argc, char* argv[])
 		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		{
-			utility::scoped_timer tim(pd.get_reporter("rendering"));
+			utility::scoped_timer tim(pd->get_reporter("rendering"));
 			renderer.draw(cam);
 		}
 
@@ -525,7 +524,7 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				utility::scoped_timer tim(pd.get_reporter( "Physics loop" ));
+				utility::scoped_timer tim(pd->get_reporter( "Physics loop" ));
 				physics.integrate(dt);
 			}
 		}
@@ -538,11 +537,11 @@ int main(int argc, char* argv[])
 		}
 
 		{
-			utility::scoped_timer tim(pd.get_reporter("debug rendering"));
+			utility::scoped_timer tim(pd->get_reporter("debug rendering"));
 			renderer.do_draw(cam);
 		}
 
-		pd.draw();
+		windows.end_frame();
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
