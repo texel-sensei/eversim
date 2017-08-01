@@ -17,6 +17,7 @@
 #include "core/system/program_gui.h"
 #include "core/system/imgui/window_manager.h"
 #include "core/system/imgui/performance_display.h"
+#include "core/system/imgui/log_window.h"
 
 #include "core/rendering/canvas.h"
 #include "core/rendering/shader_program.h"
@@ -218,6 +219,10 @@ int main(int argc, char* argv[])
 	auto& io = ImGui::GetIO();
 	io.DisplaySize.x = float(resolution.x);
 	io.DisplaySize.y = float(resolution.y);
+
+	system::imgui::window_manager windows;
+	auto* pd = windows.add_window<system::imgui::performance_display>();
+	windows.add_window<system::imgui::log_window>();
 
 	rendering::myrenderer = &renderer;
 	auto floor_height = -0.35f;
@@ -442,9 +447,6 @@ int main(int argc, char* argv[])
 
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
-
-	system::imgui::window_manager windows;
-	auto* pd = windows.add_window<system::imgui::performance_display>();
 
 	int cnt = 0;
 	while (handle_sdl_events())
