@@ -333,6 +333,8 @@ int main(int argc, char* argv[])
 	});
 	program.link();
 
+	renderer.set_spritmap_program(program);
+
 	rendering::ShaderProgram vertex_only_shaderprogram("simple shader");
 	vertex_only_shaderprogram.create();
 	vertex_only_shaderprogram.attach

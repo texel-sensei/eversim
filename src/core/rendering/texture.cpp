@@ -23,6 +23,7 @@ namespace eversim {
 				std::function<void()> filtering) : resolution(resolution)
 			{
 				glGenTextures(1, &tex_id);
+				set_unique_id(tex_id);
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 
 				vector<float> image(resolution[0] * resolution[1] * 4, 0.f);
@@ -52,6 +53,7 @@ namespace eversim {
 				tex_ptr = loader.load(path);
 				auto& tp = *tex_ptr;
 				auto base_tex_id = tp.tex_id;
+				set_unique_id(base_tex_id);
 				resolution = tp.resolution;
 
 			    /*LOG(INFO) << "Create texture with size " << resolution[0] << "/" <<

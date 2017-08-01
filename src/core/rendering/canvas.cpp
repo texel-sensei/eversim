@@ -23,7 +23,7 @@ namespace eversim {
 			}
 
 			void canvas::place_texture(const ShaderProgram& program,
-				Texture& texture, 
+				TextureBase& texture, 
 				const glm::vec2 translation,
 				const glm::vec2 scale
 			)
@@ -36,7 +36,7 @@ namespace eversim {
 
 				GLint loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture.get_tex_id());
+				texture.bind();
 				glUniform1i(loc, 0);
 
 				loc = glGetUniformLocation(program.getID(), "target_resolution");
@@ -64,7 +64,7 @@ namespace eversim {
 			void canvas::draw(const ShaderProgram& program, 
 				const glm::ivec2& target_resolution,
 				const glm::vec2 translation,
-				const glm::vec2 scale)
+				const glm::vec2 scale) const
 			{
 
 				program.use();

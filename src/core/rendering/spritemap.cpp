@@ -27,9 +27,10 @@ namespace eversim {
 				canvas_tex.init(resolution);
 				canvas_tex.clear({ 1,1,1,0 });
 				divider = Areadivider(resolution);
+				set_unique_id(canvas_tex.get_texture_id());
 			}
 
-			glm::ivec2 Spritemap::add_texture(ShaderProgram& program, Texture& tex)
+			glm::ivec2 Spritemap::add_texture(ShaderProgram& program, TextureBase& tex)
 			{
 				auto pos = divider.place_rectangle(tex.get_resolution());
 				
@@ -42,6 +43,11 @@ namespace eversim {
 			void Spritemap::bind() const
 			{
 				glBindTexture(GL_TEXTURE_2D, canvas_tex.get_texture_id());
+			}
+
+			glm::ivec2 Spritemap::get_resolution() const
+			{
+				return resolution;
 			}
 		}
 	}

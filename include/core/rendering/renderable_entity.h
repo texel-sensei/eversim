@@ -20,8 +20,11 @@ namespace eversim {
 
 			struct alignas(16) instanced_entity_information
 			{
+			private:
 				glm::fmat4 data;
-				
+			public:
+
+				//setter
 				void set_M(const glm::fmat3& M)
 				{
 					for (size_t i = 0; i < 3; ++i)
@@ -45,6 +48,30 @@ namespace eversim {
 				{
 					data[3][0] = spritesize[0];
 					data[3][1] = spritesize[1];
+				}
+				//getter
+				glm::fmat3 get_M() const
+				{
+					glm::fmat3 M;
+					for (size_t i = 0; i < 3; ++i)
+						for (size_t j = 0; j < 3; ++j)
+							M[i][j] = data[i][j];
+					return M;
+				}
+
+				glm::ivec2 get_texoffset() const
+				{
+					return { data[0][3] , data[1][3] };
+				}
+
+				glm::ivec2 get_texsize() const
+				{
+					return { data[2][3] , data[3][3] };
+				}
+
+				glm::ivec2 get_spritesize() const
+				{
+					return { data[3][0] , data[3][1] };
 				}
 			};
 

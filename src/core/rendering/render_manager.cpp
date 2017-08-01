@@ -250,6 +250,11 @@ namespace eversim { namespace core { namespace rendering {
 		});
 	}
 
+	void render_manager::set_spritmap_program(ShaderProgram& program)
+	{
+		spriteprog = &program;
+	}
+
 	void render_manager::draw(Camera& cam)
 	{
 		//getchar();
@@ -336,19 +341,43 @@ namespace eversim { namespace core { namespace rendering {
 				}
 
 				auto& ssb = (ssbs.find(buffer_ptr))->second;
+				std::map<size_t, TextureBase*> found_textures;
+				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				{
+					auto& entity = *(freshly_added_static_entities.at(i)).lock();
+					auto* tex = entity.get_Texture();
+					found_textures[tex->get_unique_id()] = tex;
+				}
+
+				auto_spritemaps.push_back(std::make_shared<Spritemap>(512));
+				auto& sm = *(auto_spritemaps.back());
+
+				std::map<size_t, glm::ivec2> texture_offsets;
+				for (auto& tex : found_textures)
+				{
+					LOG(INFO) << "add " << tex.second << " to sm";
+					auto* texbaseptr = tex.second;
+					texture_offsets[texbaseptr->get_unique_id()] = sm.add_texture(*spriteprog, *texbaseptr);
+				}
 
 				std::vector<instanced_entity_information,boost::alignment::aligned_allocator<instanced_entity_information,16>> matrices;
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
 					auto& entity = *(freshly_added_static_entities.at(i)).lock();
 					matrices.emplace_back();
+					
+					auto unique_id = entity.get_Texture()->get_unique_id();
+					auto* tex = found_textures[unique_id];
+					entity.texoffset = texture_offsets[unique_id];
+					entity.spritesize = sm.get_resolution();
+					entity.texsize = tex->get_resolution();
+
 					auto& entity_information = matrices.back();
 					entity.get_instanced_entity_information(entity_information);
 				}
 
 				utility::byte_array_view matrices_view = matrices;
 				ssb = shader_storage_buffer(matrices_view);
-
 			}
 		}
 
@@ -364,6 +393,7 @@ namespace eversim { namespace core { namespace rendering {
 
 		//LOG(INFO) << mesh_blocks.size();
 		//getchar();
+		size_t cnt = 0;
 		for (auto& block : mesh_blocks)
 		{
 			auto* buffer_ptr = std::get<0>(block);
@@ -375,6 +405,7 @@ namespace eversim { namespace core { namespace rendering {
 			auto& program = *(fbe.get_ShaderProgram());
 			auto& texptr = *(fbe.get_Texture());
 			auto& pointsuv = *(fbe.get_Multibuffer());
+			auto& sm = *(auto_spritemaps.at(cnt));
 
 			program.use();
 			cam.use(program);
@@ -386,11 +417,13 @@ namespace eversim { namespace core { namespace rendering {
 
 			pointsuv.bind();
 			ssb.bind(42);
-			texptr.bind();
+			sm.bind();
+			//texptr.bind();
 			
 			glDrawArraysInstanced(pointsuv.type, 0, 4, num_instances);
 
 			glUseProgram(0);
+			cnt++;
 		}
 	}
 } /* rendering */ } /* core */ } /* eversim */

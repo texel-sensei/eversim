@@ -32,7 +32,7 @@ namespace eversim {
 				*/
 				void place_texture(
 					const ShaderProgram& program,
-					Texture& texture,
+					TextureBase& texture,
 					const glm::vec2 translation = glm::vec2(0, 0),
 					const glm::vec2 scale = glm::vec2(1, 1));
 				/*
@@ -46,7 +46,7 @@ namespace eversim {
 				void draw(const ShaderProgram& program, 
 					const glm::ivec2& target_resolution,
 					const glm::vec2 translation = glm::vec2(0,0),
-					const glm::vec2 scale = glm::vec2(1, 1));
+					const glm::vec2 scale = glm::vec2(1, 1)) const;
 
 				GLuint get_texture_id() const { return fbo.get_tex_id(); }
 				Texture& get_texture() { return fbo.get_texture(); }

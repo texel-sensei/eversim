@@ -73,6 +73,8 @@ namespace eversim { namespace core { namespace rendering {
 		 */
 		void draw(Camera& cam);
 
+		void set_spritmap_program(ShaderProgram& program);
+		ShaderProgram* spriteprog;
 
 	private:
 		struct line
@@ -93,6 +95,9 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<entity_wkptr> freshly_added_static_entities;
 		std::vector<texture_shptr> textures;
 		std::vector<spritemap_shptr> spritemaps;
+
+		std::vector<spritemap_shptr> auto_spritemaps;
+
 		std::map<Multibuffer*, shader_storage_buffer> ssbs;
 
 		void setup(bool fullscreen);
