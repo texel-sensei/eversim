@@ -6,7 +6,7 @@ namespace eversim {namespace core{ namespace utility {
 	
 	class clock {
 	public:
-		using duration					= std::chrono::milliseconds;
+		using duration					= std::chrono::microseconds;
 		using rep						= duration::rep;
 		using period					= duration::period;
 		using time_point				= std::chrono::time_point<clock>;
