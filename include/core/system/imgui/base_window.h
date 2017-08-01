@@ -15,16 +15,25 @@ namespace eversim {namespace core {namespace system {namespace imgui {
 		explicit base_window(std::string const& name, bool visible = false);
 		virtual ~base_window(){}
 
+		std::string const& get_name() const { return name; }
+		bool is_visible() const noexcept { return visible; }
+		void set_visible(bool b) noexcept { visible = b; }
+
+		virtual bool has_menu() const { return false; }
+		virtual void draw_menu() {}
+
 		void draw(display_type type = display_type::window);
 	protected:
+		float alpha = -1;
 		ImGuiWindowFlags flags = 0;
 
+		virtual void begin_window() {}
 		virtual void draw_content() = 0;
 	private:
 		std::string name;
 		bool visible;
 
-		void header(display_type);
+		bool header(display_type);
 		void footer(display_type);
 	};
 

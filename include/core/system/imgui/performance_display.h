@@ -19,10 +19,14 @@ namespace eversim {namespace core {namespace system {namespace imgui {
 		void register_time(std::string const& name, utility::clock::duration time);
 		utility::scoped_timer::reporter_function get_reporter(std::string name);
 
+		bool has_menu() const override { return true; }
+		void draw_menu() override;
+
 	protected:
+		void begin_window() override;
 		void draw_content() override;
 	private:
-		bool compact = false;
+		bool compact = true;
 		std::map<std::string, utility::clock::duration> timings;
 
 		void draw_time(

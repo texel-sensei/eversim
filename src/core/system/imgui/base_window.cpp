@@ -9,24 +9,25 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 
 	void base_window::draw(display_type type)
 	{
-		header(type);
-		draw_content();
-		footer(type);
+		auto vis = header(type);
+		if(vis){
+			draw_content();
+			footer(type);
+		}
 	}
 
-	void base_window::header(display_type type)
+	bool base_window::header(display_type type)
 	{
 		switch(type)
 		{
-		case display_type::window: 
-			ImGui::Begin(name.c_str(), &visible, flags);
-			break;
+		case display_type::window:
+			this->begin_window();
+			return ImGui::Begin(name.c_str(), nullptr, ImVec2(0,0), alpha, flags);
 		case display_type::child_window: 
-			ImGui::BeginChild(name.c_str());
-			break;
+			return ImGui::BeginChild(name.c_str());
 		case display_type::inplace: 
 			ImGui::PushID(name.c_str());
-			break;
+			return true;
 		default: ;
 		}
 	}

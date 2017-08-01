@@ -16,7 +16,16 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 	performance_display::performance_display(std::string const& name, bool visible)
 		: base_window(name, visible)
 	{
-		flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
+		alpha = 0.3f;
+		flags 
+			= ImGuiWindowFlags_NoTitleBar 
+			| ImGuiWindowFlags_NoResize 
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_AlwaysAutoResize
+			| ImGuiWindowFlags_NoInputs
+			| ImGuiWindowFlags_NoSavedSettings
+		;
 	}
 
 	void performance_display::compact_display(bool enable)
@@ -35,6 +44,16 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		{
 			register_time(name, time);
 		};
+	}
+
+	void performance_display::draw_menu()
+	{
+		ImGui::MenuItem("Compact display", nullptr, &compact);
+	}
+
+	void performance_display::begin_window()
+	{
+		ImGui::SetNextWindowPos(ImVec2(10, 20));
 	}
 
 	void performance_display::draw_content()
