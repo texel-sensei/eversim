@@ -5,6 +5,8 @@
 #include <imgui/imgui.h>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/max_element.hpp>
+#include "core/system/imgui/bar_graph.h"
+#include <vector>
 
 
 namespace eversim { namespace core { namespace system { namespace imgui {
@@ -37,8 +39,23 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 
 	void performance_display::draw_content()
 	{
+		using namespace std::chrono;
 		clock::duration sum{};
 	
+		if(!compact)
+			ImGui::BeginBarGraph();
+
+		std::vector<ImVec4> colors = {
+			{ 1,0,0,1 },
+			{ 0,1,0,1 },
+			{ 1,1,0,1 },
+			{ 0,0,1,1 },
+			{ 1,0,1,1 },
+			{ 0,1,1,1 },
+			{ 1,1,1,1 }
+		};
+
+		int idx = 0;
 		for (auto& p : timings)
 		{
 			auto& name = p.first;
@@ -46,10 +63,26 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 
 			sum += time;
 
+			const auto float_time = float(duration_cast<microseconds>(time).count()) / 1000.f;
+
+			if(!compact)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, colors[idx % colors.size()]);
+				ImGui::BarGraphInputValue(float_time, name);
+			}
+			
 			draw_time(name, time);
+			if(!compact)
+			{	
+				ImGui::PopStyleColor();
+			}
+
+			++idx;
 		}
 		ImGui::Separator();
 		draw_time("sum", sum);
+		if (!compact)
+			ImGui::EndBarGraph();
 
 		timings.clear();
 	}
