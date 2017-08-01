@@ -462,22 +462,26 @@ int main(int argc, char* argv[])
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_MULTISAMPLE);
 
 
-		auto dice_roll = distribution(generator);
-		sm.add_texture(program, *(texes.at(dice_roll)));
 
-		empty_canvas.clear();
-		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
-		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
-		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
-		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
-		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
-		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
-		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
 
 		{
 			utility::scoped_timer tim(imgui_log_time{ "rendering" });
+
+			auto dice_roll = distribution(generator);
+			sm.add_texture(program, *(texes.at(dice_roll)));
+
+			empty_canvas.clear();
+			empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
+			empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
+			empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
+			empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
+			empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
+			empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
+			empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
+
 			renderer.draw(cam);
 		}
 

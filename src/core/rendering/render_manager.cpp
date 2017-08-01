@@ -388,7 +388,7 @@ namespace eversim { namespace core { namespace rendering {
 			ssb.bind(42);
 			texptr.bind();
 			
-			glDrawArraysInstanced(GL_QUADS, 0, 4, num_instances);
+			glDrawArraysInstanced(pointsuv.type, 0, 4, num_instances);
 
 			glUseProgram(0);
 		}
