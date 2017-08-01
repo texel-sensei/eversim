@@ -25,7 +25,7 @@ namespace eversim {
 			void Spritemap::init()
 			{
 				canvas_tex.init(resolution);
-				canvas_tex.clear();
+				canvas_tex.clear({ 1,1,1,0 });
 				divider = Areadivider(resolution);
 			}
 
