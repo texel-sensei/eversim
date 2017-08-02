@@ -2,6 +2,8 @@
 
 #include "core/utility/filesystem_wrapper.h"
 
+#include "core/error.h"
+
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -83,7 +85,7 @@ namespace eversim { namespace core { namespace utility {
 					return full_path;
 				}
 			}
-			throw file_not_found_error{ "Could not find " + desc.string() };
+			EVERSIM_THROW(generic_error::FileNotFound, desc.string());
 		}
 		
 	};
