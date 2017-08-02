@@ -1,7 +1,9 @@
 #include "core/world/tile.h"
 #include "core/world/tile_descriptor.h"
-#include "core/rendering/render_manager.h"
 #include "core/world/level.h"
+#include "core/world/errors.h"
+
+#include "core/rendering/render_manager.h"
 
 namespace eversim { namespace core { namespace world {
 	tile_descriptor blank_tile = {
@@ -40,9 +42,10 @@ namespace eversim { namespace core { namespace world {
 		case collision_type::extra: 
 			throw std::runtime_error{"Complex collisions shapes are not yet implemented!"};
 		default:
+			using namespace std;
 			LOG(ERROR) << "Invalid enumeration value in " __FUNCTION__
 				<< " tile @(" << idx.x << ", " << idx.y << ")";
-			throw std::runtime_error("Invalid Enumeration value!");
+			EVERSIM_THROW(make_error_code(errc::invalid_argument), "Invalid enumeration!");
 		}
 	}
 
