@@ -24,7 +24,7 @@ namespace eversim { namespace core { namespace physics {
 		}
 		catch(ios::failure const& c)
 		{
-			if (c.code() == make_error_condition(io_errc::stream))
+			if (c.code() == io_errc::stream)
 			{
 				EVERSIM_THROW(body_template_error::SyntaxError);
 			}
