@@ -7,6 +7,17 @@
 namespace eversim {
 	namespace core {
 		namespace rendering {
+
+			class FramebufferAutoUnbind
+			{
+			public:
+				~FramebufferAutoUnbind()
+				{
+					//LOG(INFO) << "unbind";
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				}
+			};
+
 			class Framebuffer {
 			private:
 				bool valid, with_depth;
@@ -26,11 +37,14 @@ namespace eversim {
 				Framebuffer& operator=(Framebuffer&& buffer) noexcept;
 
 				void bind() const;
-				
-				const glm::ivec2 viewport() const;
-				const GLuint get_fbo_id() const;
-				const GLuint get_tex_id() const;
-				const GLuint get_depth_id() const;
+				std::shared_ptr<FramebufferAutoUnbind> bind_auto_unbind() const;
+
+				void clear(const glm::fvec4 col = glm::fvec4(1.f)) const;
+
+				glm::ivec2 viewport() const;
+				GLuint get_fbo_id() const;
+				GLuint get_tex_id() const;
+				GLuint get_depth_id() const;
 				Texture& get_texture() { return color_tex0; };
 			};
 		}

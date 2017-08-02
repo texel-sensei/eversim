@@ -15,6 +15,7 @@
 
 #include "core/system/programsequencer.h"
 #include "core/system/program_gui.h"
+#include "core/system/imgui/performance_display.h"
 
 #include "core/rendering/canvas.h"
 #include "core/rendering/shader_program.h"
@@ -110,13 +111,6 @@ bool handle_sdl_events()
 	}
 	return should_continue;
 }
-
-struct imgui_log_time {
-	string message;
-	void operator()(utility::clock::duration dur) {
-		ImGui::Text((message + " " + utility::to_string(dur)).c_str());
-	}
-};
 
 namespace {
 	const char* glTypeToString(GLenum type)
@@ -359,8 +353,8 @@ int main(int argc, char* argv[])
 
 	glm::fmat3 M = glm::fmat3(1.f);
 
-	auto sm_ptr = renderer.register_spritemap(1024);
-	auto& sm = *sm_ptr;
+	/*auto sm_ptr = renderer.register_spritemap(1024);
+	auto& sm = *sm_ptr;*/
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 	default_random_engine generator(seed);
 
@@ -375,41 +369,9 @@ int main(int argc, char* argv[])
 	});
 
 
-	sm.add_texture(program, conjuration);
+	//sm.add_texture(program, conjuration);
 
 	uniform_int_distribution<int> distribution(0, texes.size() - 1);
-
-	rendering::Multibuffer quadbuff("quadmesh");
-
-	quadbuff.attach
-	(
-		{
-			{5,5},
-			{0,5},
-			{0,0},
-			{5,0}
-		}
-	);
-	quadbuff.attach
-	(
-		{
-			{1,1},
-			{0,1},
-			{0,0},
-			{1,0}
-		}
-	);
-
-	quadbuff.set_draw_mode(GL_QUADS, 0, 4);
-	quadbuff.create_and_upload();
-
-	auto textured_quad = renderer.register_entity();
-	{
-		auto& renderablentity = *textured_quad;
-		renderablentity.set_Multibuffer(&quadbuff);
-		renderablentity.set_ShaderProgram(textured_quad_shaderprogram);
-		renderablentity.set_Texture(*conjuration_ptr);
-	}
 
 	auto player_sm_ptr = renderer.register_spritemap(64);
 	auto& player_sm = *player_sm_ptr;
@@ -419,37 +381,19 @@ int main(int argc, char* argv[])
 	player_sm.add_texture(program, kobold);
 	player_sm.add_texture(program, brickwall);
 
-	//auto player_entity = renderer.register_entity();
-	//player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
-
-	auto floor = renderer.register_entity();
-	{
-		auto& renderablentity = *floor;
-		renderablentity.set_ShaderProgram(vertex_only_shaderprogram);
-
-		renderablentity.set_Multibuffer(new rendering::Multibuffer("line"));
-		renderablentity.get_Multibuffer()->attach(
-			{
-				{-10.f,floor_height},
-				{10.f,floor_height}
-			}
-		);
-		renderablentity.get_Multibuffer()->attach(
-			{
-				{1,0,0,1},
-				{0,0,1,1}
-			}
-		);
-		renderablentity.get_Multibuffer()->set_draw_mode(GL_LINES, 0, 2);
-		renderablentity.get_Multibuffer()->create_and_upload();
-	}
+	auto player_entity = renderer.register_entity();
+	player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
 
 
 	l->initialize_graphics(renderer);
 
 	player->position = {16.f, 28.f};
 	cam.set_position({16.f,30.f});
-	
+
+	system::imgui::performance_display pd;
+	empty_canvas.clear();
+	empty_canvas.place_texture(program, biggerkobold, { 420,380 }, {1,1});
+
 	int cnt = 0;
 	while (handle_sdl_events())
 	{
@@ -459,21 +403,22 @@ int main(int argc, char* argv[])
 
 		ImGui_ImplSdlGL3_NewFrame(window);
 
+		static bool compact_performance_display = true;
+		ImGui::Checkbox("timings compact display", &compact_performance_display);
+		pd.compact_display(compact_performance_display);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.623, 0.76, 0.729, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_MULTISAMPLE);
 
-
-
-
 		{
-			utility::scoped_timer tim(imgui_log_time{ "rendering" });
-
-			auto dice_roll = distribution(generator);
-			sm.add_texture(program, *(texes.at(dice_roll)));
+			utility::scoped_timer tim(pd.get_reporter("rendering"));
 
 			empty_canvas.clear();
 			empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
@@ -483,10 +428,9 @@ int main(int argc, char* argv[])
 			empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
 			empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
 			empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
-
 			renderer.draw(cam);
 		}
-
+		
 		//render
 		ImGui::ShowTestWindow();
 
@@ -531,12 +475,12 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				utility::scoped_timer tim(imgui_log_time{ "Physics loop" });
+				utility::scoped_timer tim(pd.get_reporter( "Physics loop" ));
 				physics.integrate(dt);
 			}
 		}
 
-		//player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
+		player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
 
 		for (auto&& p : physics.get_particles())
 		{
@@ -544,13 +488,15 @@ int main(int argc, char* argv[])
 		}
 
 		{
-			utility::scoped_timer tim(imgui_log_time{ "super billig test rendering" });
+			utility::scoped_timer tim(pd.get_reporter("debug rendering"));
 			renderer.do_draw(cam);
 		}
 
+		pd.draw();
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
+
 	}
 	return 0;
 }
