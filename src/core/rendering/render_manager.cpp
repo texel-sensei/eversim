@@ -11,6 +11,7 @@
 #include <tuple>
 #include <limits>
 
+#include <boost/align/aligned_allocator.hpp>
 
 
 using namespace std;
@@ -159,37 +160,46 @@ namespace eversim { namespace core { namespace rendering {
 
 	}
 
-	std::shared_ptr<RenderableEntity> render_manager::register_entity()
+	entity_shptr render_manager::register_entity(const entity_type type)
 	{
-		auto ptr = std::shared_ptr<RenderableEntity>(new RenderableEntity);
-		entities.push_back(ptr);
+		auto ptr = entity_shptr(new RenderableEntity);
+		if(type == STATIC)
+		{
+			static_entities.push_back(ptr);
+			freshly_added_static_entities.push_back(ptr);
+			ptr->set_Type(STATIC);
+		} else if (type == DYNAMIC)
+		{
+			dynamic_entities.push_back(ptr);
+			ptr->set_Type(DYNAMIC);
+		}
 		return ptr;
 	}
 
-	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path)
+	texture_shptr  render_manager::register_texture(const std::string& path)
 	{
 		auto ptr = std::make_shared<Texture>(path);
 		textures.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Texture>  render_manager::register_texture(const std::string& path,
-		std::function<void()> filtering)
+	texture_shptr  render_manager::register_texture(const std::string& path,
+		filter filtering)
 	{
 		auto ptr = std::make_shared<Texture>(path,filtering);
 		textures.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution)
+	spritemap_shptr  render_manager::register_spritemap(const size_t resolution)
 	{
 		auto ptr = std::make_shared<Spritemap>(resolution);
 		spritemaps.push_back(ptr);
 		return ptr;
 	}
 
-	std::shared_ptr<Spritemap>  render_manager::register_spritemap(const size_t resolution,
-		std::function<void()> filtering)
+	spritemap_shptr  render_manager::register_spritemap(const size_t resolution,
+		filter filtering)
 	{
 		LOG(ERROR) << "TODO spritemap with filterfunction";
 		auto ptr = std::make_shared<Spritemap>(resolution);
@@ -197,87 +207,172 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
-
-	void render_manager::draw(Camera& cam)
+	size_t render_manager::remove_expired_entities(std::vector<entity_wkptr>& es)
 	{
-		auto deref = [](std::weak_ptr<RenderableEntity>& wkptr)
-		{
-			auto sptr = wkptr.lock();
-			return sptr;
-		};
-
-		auto end_ptr = std::remove_if(begin(entities), end(entities), 
-			[](std::weak_ptr<RenderableEntity>& wptr)
+		auto size = es.size();
+		auto end_ptr = std::remove_if(begin(es), end(es),
+			[](entity_wkptr& wptr)
 		{
 			return wptr.expired();
 		});
 
-		std::sort(begin(entities), end_ptr, 
-			[&](std::weak_ptr<RenderableEntity>& a, std::weak_ptr<RenderableEntity>& b)
-		{
-			auto raptr = deref(a); auto& ra = *raptr;
-			auto rbptr = deref(b); auto& rb = *rbptr;
-
-			if (ra.program == nullptr || rb.program == nullptr)
-				return false;
-
-			return ra.program->getID() < rb.program->getID();
-		});
-
-		entities = std::vector<std::weak_ptr<RenderableEntity>>(begin(entities),end_ptr);
-
-		//shader id, start idx, num elems
-		std::vector<std::tuple<GLuint, size_t, size_t>> blocks;
-
-		size_t cnt = 0;
-		for (auto& wkptr : entities)
-		{
-			auto entityptr = deref(wkptr); auto& entity = *entityptr;
-
-			if (entity.program == nullptr)
-				continue;
-
-			auto id = entity.program->getID();
-
-			if (blocks.size() == 0)
-			{
-				blocks.emplace_back(id,cnt,1);
-			} else
-			{
-				auto& block = blocks.back();
-
-				if (std::get<0>(block) == id)
-					std::get<2>(block)++;
-				else
-					blocks.emplace_back(id,cnt,1);
-			}
-			cnt++;
-		}
-		//LOG(INFO) << "number of drawable blocks = " << blocks.size();
-		for(auto& block : blocks)
-		{
-			auto fbeptr = deref(entities.at(std::get<1>(block)));
-			auto& fbe = *fbeptr;
-			ShaderProgram& program = *(fbe.program);
-			program.use();
-			//LOG(INFO) << "bind program " << program.name;
-			cam.use(program);
-			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
-			{
-				auto entityptr = deref(entities.at(i)); RenderableEntity& entity = *entityptr;
-
-				auto location = glGetUniformLocation(program.getID(), "M");
-				if (location == -1)
-					LOG(INFO) << "Uniform name ""M"" does not exist";
-				glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(entity.get_M()));
-
-				entity.bind();
-				entity.draw();
-			}
-
-			glUseProgram(0);
-
-		}
+		es = std::vector<entity_wkptr>(begin(es), end_ptr);
+		return size - es.size();
 	}
 
+	void render_manager::sort_entities_by_shader(std::vector<entity_wkptr>& es)
+	{
+		std::sort(begin(es), end(es),
+			[&](entity_wkptr& a, entity_wkptr& b)
+		{
+			auto& ra = *(a.lock());
+			auto& rb = *(b.lock());
+
+			if (ra.get_ShaderProgram() == nullptr || rb.get_ShaderProgram() == nullptr)
+				return false;
+
+			return ra.get_ShaderProgram()->getID() < rb.get_ShaderProgram()->getID();
+		});
+	}
+
+	void render_manager::sort_entities_by_mesh(std::vector<entity_wkptr>& es)
+	{
+		std::sort(begin(es), end(es),
+			[&](entity_wkptr& a, entity_wkptr& b)
+		{
+			auto& ra = *(a.lock());
+			auto& rb = *(b.lock());
+
+			if (ra.get_Multibuffer() == nullptr || rb.get_Multibuffer() == nullptr)
+				return false;
+
+			return ra.get_Multibuffer() < rb.get_Multibuffer();
+		});
+	}
+
+	void render_manager::set_spritmap_program(ShaderProgram& program)
+	{
+		spriteprog = &program;
+	}
+
+	void render_manager::draw(Camera& cam)
+	{
+		//Draw dynamic entities todo
+		for(auto& dynamic : dynamic_entities)
+		{
+			if(!dynamic.expired())
+			{
+				auto& dynamic_entity = *dynamic.lock();
+				DrawcallEntity drawer(dynamic_entity.get_ShaderProgram(),
+					dynamic_entity.get_Texture(), dynamic_entity.get_Multibuffer());
+
+				drawer.add_entity_data(dynamic_entity);
+				drawer.upload();
+				drawer.draw(cam);
+
+			}
+		}
+
+		//Draw static entities
+		auto removed_statics = remove_expired_entities(static_entities);
+		remove_expired_entities(freshly_added_static_entities);
+
+		sort_entities_by_mesh(static_entities);
+		sort_entities_by_mesh(freshly_added_static_entities);
+
+		if(freshly_added_static_entities.size() > 0)
+		{
+			auto mesh_blocks = gen_blocks<Multibuffer*>(
+				freshly_added_static_entities,
+				[](const RenderableEntity& e)
+			{
+				return e.get_Multibuffer();
+			}
+				);
+
+			for (auto& block : mesh_blocks)
+			{
+
+				Multibuffer* buffer_ptr = std::get<0>(block);
+				const size_t start_idx = std::get<1>(block);
+				const size_t num_instances = std::get<2>(block);
+
+				auto& fbe = *(freshly_added_static_entities.at(start_idx).lock());
+				
+				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
+
+				//auto it = ssbs.find(buffer_ptr);
+				
+				std::map<size_t, TextureBase*> found_textures;
+				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				{
+					auto& entity = *(freshly_added_static_entities.at(i)).lock();
+					auto* tex = entity.get_Texture();
+					found_textures[tex->get_unique_id()] = tex;
+				}
+
+				auto_spritemaps.push_back(std::make_shared<Spritemap>(512));
+				auto& sm = *(auto_spritemaps.back());
+
+				std::map<size_t, glm::ivec2> texture_offsets;
+				for (auto& tex : found_textures)
+				{
+					auto* texbaseptr = tex.second;
+					texture_offsets[texbaseptr->get_unique_id()] = sm.add_texture(*spriteprog, *texbaseptr);
+				}
+				
+				auto it = std::find_if(begin(drawers), end(drawers),
+					[&](const DrawcallEntity& drawer)
+				{
+					return drawer.get_Multibuffer() == buffer_ptr;
+				}
+				);
+
+				DrawcallEntity* drawer_ptr = nullptr;
+
+				if (it == drawers.end())
+				{
+					//not found, add
+					auto& entity = *(freshly_added_static_entities.at(start_idx)).lock();
+
+					drawers.emplace_back(
+						entity.get_ShaderProgram(),
+						&sm,
+						entity.get_Multibuffer()
+					);
+
+					drawer_ptr = &drawers.back();
+				} else
+				{
+					//found
+					drawer_ptr = &(*it);
+				}
+
+				if (drawer_ptr == nullptr) continue;
+				auto& drawer = *drawer_ptr;
+				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				{
+					auto& entity = *(freshly_added_static_entities.at(i)).lock();
+
+					auto unique_id = entity.get_Texture()->get_unique_id();
+					auto* tex = found_textures[unique_id];
+
+					drawer.add_entity_data(entity,
+						texture_offsets[unique_id],
+						tex->get_resolution(),
+						sm.get_resolution()
+					);
+				}
+
+				drawer.upload();
+			}
+		}
+
+		freshly_added_static_entities.clear();
+
+		for(auto& drawcall : drawers)
+		{
+			drawcall.draw(cam);
+		}
+	}
 } /* rendering */ } /* core */ } /* eversim */
