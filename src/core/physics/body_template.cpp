@@ -1,4 +1,6 @@
 #include "core/physics/body_template.h"
+#include "core/physics/errors.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -16,8 +18,18 @@ namespace eversim { namespace core { namespace physics {
 		data.exceptions(istream::badbit | istream::failbit);
 		body_template templ;
 
-		load_particles(templ, data);
-		load_constraints(templ, data);
+		try{
+			load_particles(templ, data);
+			load_constraints(templ, data);
+		}
+		catch(ios::failure const& c)
+		{
+			if (c.code() == make_error_condition(io_errc::stream))
+			{
+				EVERSIM_THROW(body_template_error::SyntaxError);
+			}
+			EVERSIM_THROW(c.code());
+		}
 
 		return templ;
 	}
@@ -35,7 +47,7 @@ namespace eversim { namespace core { namespace physics {
 		in >> num;
 		if(num <= 0)
 		{
-			throw runtime_error{"Number of particles must be positive!"};
+			EVERSIM_THROW(body_template_error::NotEnoughParticles);
 		}
 
 		templ.particles.resize(num);
@@ -53,7 +65,7 @@ namespace eversim { namespace core { namespace physics {
 		in >> num;
 		if (num < 0)
 		{
-			throw runtime_error{ "Number of constraints must be positive!" };
+			EVERSIM_THROW(body_template_error::NotEnoughConstraints);
 		}
 
 		templ.constraints.resize(num);
@@ -71,7 +83,7 @@ namespace eversim { namespace core { namespace physics {
 			{
 				if(index >= templ.particles.size())
 				{
-					throw runtime_error{"Invalid particle index in constraint!"};
+					EVERSIM_THROW(body_template_error::InvalidIndex);
 				}
 			}
 			templ.constraints[i] = move(c);
@@ -122,7 +134,7 @@ namespace eversim { namespace core { namespace physics {
 		auto rem = get_remainder(data);
 		if(!rem.empty())
 		{
-			throw runtime_error{"Too much data while parsing particle! " + rem};
+			EVERSIM_THROW(body_template_error::SyntaxError, "Too much data while parsing particle! " + rem);
 		}
 		return desc;
 	}
@@ -159,7 +171,7 @@ namespace eversim { namespace core { namespace physics {
 
 		if (!rem.empty())
 		{
-			throw runtime_error{ "Too much data while parsing constraint! " + rem };
+			EVERSIM_THROW(body_template_error::SyntaxError, "Too much data while parsing particle! " + rem);
 		}
 
 		return desc;
