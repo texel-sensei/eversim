@@ -103,7 +103,6 @@ namespace eversim {
 
 			void canvas::clear(const glm::fvec4& col) const
 			{
-				LOG(INFO) << "clear " << fbo.get_fbo_id() <<"/"<< fbo.get_tex_id() << " with " << col[3];
 				fbo.clear(col);
 			}
 		}

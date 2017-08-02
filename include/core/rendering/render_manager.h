@@ -7,6 +7,7 @@
 #include "core/rendering/texture.h"
 #include "core/rendering/camera.h"
 #include "core/rendering/shader_storage_buffer.h"
+#include "core/rendering/drawcall_entity.h"
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -100,6 +101,8 @@ namespace eversim { namespace core { namespace rendering {
 
 		std::map<Multibuffer*, shader_storage_buffer> ssbs;
 
+		std::vector<DrawcallEntity> drawers;
+
 		void setup(bool fullscreen);
 
 		/*
@@ -115,7 +118,6 @@ namespace eversim { namespace core { namespace rendering {
 			const std::vector<entity_wkptr>& es,
 			std::function<T(const RenderableEntity&)> get)
 		{
-			//TODO sort
 			//return vector of iterators begin, end
 			std::vector<std::tuple<T, size_t, size_t>> blocks;
 			size_t cnt = 0;

@@ -257,49 +257,21 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
-		//getchar();
-
-	/*	auto deref = [](entity_wkptr& wkptr)
+		//Draw dynamic entities todo
+		for(auto& dynamic : dynamic_entities)
 		{
-			auto sptr = wkptr.lock();
-			return sptr;
-		};
-
-		auto removed_dynamics = remove_expired_entities(dynamic_entities);
-
-		sort_entities_by_shader(dynamic_entities);
-		
-		auto blocks = gen_blocks<GLuint>(
-			dynamic_entities,
-			[](const RenderableEntity& e)
-		{
-			return e.get_ShaderProgram()->getID();
-		}
-			);
-		LOG(INFO) << "number of drawable blocks = " << blocks.size();
-		for(auto& block : blocks)
-		{
-			auto fbeptr = deref(dynamic_entities.at(std::get<1>(block)));
-			auto& fbe = *fbeptr;
-			ShaderProgram& program = *(fbe.program);
-			program.use();
-			//LOG(INFO) << "bind program " << program.name;
-			cam.use(program);
-			for(auto i = std::get<1>(block); i < std::get<1>(block) + std::get<2>(block) ;++i)
+			if(!dynamic.expired())
 			{
-				RenderableEntity& entity = *(dynamic_entities.at(i).lock());
+				auto& dynamic_entity = *dynamic.lock();
+				DrawcallEntity drawer(dynamic_entity.get_ShaderProgram(),
+					dynamic_entity.get_Texture(), dynamic_entity.get_Multibuffer());
 
-				auto location = glGetUniformLocation(program.getID(), "M");
-				if (location == -1)
-					LOG(INFO) << "Uniform name ""M"" does not exist";
-				glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(entity.get_M()));
+				drawer.add_entity_data(dynamic_entity);
+				drawer.upload();
+				drawer.draw(cam);
 
-				entity.bind();
-				entity.draw();
 			}
-
-			glUseProgram(0);
-		}*/
+		}
 
 		//Draw static entities
 		auto removed_statics = remove_expired_entities(static_entities);
@@ -329,18 +301,8 @@ namespace eversim { namespace core { namespace rendering {
 				
 				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
 
-				auto it = ssbs.find(buffer_ptr);
-
-				if(it != ssbs.end())
-				{
-					//found, but changed ! TODO
-				} else
-				{
-					//not found, add :)
-					ssbs[buffer_ptr] = shader_storage_buffer();
-				}
-
-				auto& ssb = (ssbs.find(buffer_ptr))->second;
+				//auto it = ssbs.find(buffer_ptr);
+				
 				std::map<size_t, TextureBase*> found_textures;
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
@@ -349,84 +311,68 @@ namespace eversim { namespace core { namespace rendering {
 					found_textures[tex->get_unique_id()] = tex;
 				}
 
-				LOG(INFO) << "make shared Spritemap";
 				auto_spritemaps.push_back(std::make_shared<Spritemap>(512));
 				auto& sm = *(auto_spritemaps.back());
 
 				std::map<size_t, glm::ivec2> texture_offsets;
 				for (auto& tex : found_textures)
 				{
-					LOG(INFO) << "add " << tex.second << " to sm";
 					auto* texbaseptr = tex.second;
 					texture_offsets[texbaseptr->get_unique_id()] = sm.add_texture(*spriteprog, *texbaseptr);
 				}
 				
-				LOG(INFO) << "sm finish";
+				auto it = std::find_if(begin(drawers), end(drawers),
+					[&](const DrawcallEntity& drawer)
+				{
+					return drawer.get_Multibuffer() == buffer_ptr;
+				}
+				);
 
-				std::vector<instanced_entity_information,boost::alignment::aligned_allocator<instanced_entity_information,16>> matrices;
+				DrawcallEntity* drawer_ptr = nullptr;
+
+				if (it == drawers.end())
+				{
+					//not found, add
+					auto& entity = *(freshly_added_static_entities.at(start_idx)).lock();
+
+					drawers.emplace_back(
+						entity.get_ShaderProgram(),
+						&sm,
+						entity.get_Multibuffer()
+					);
+
+					drawer_ptr = &drawers.back();
+				} else
+				{
+					//found
+					drawer_ptr = &(*it);
+				}
+
+				if (drawer_ptr == nullptr) continue;
+				auto& drawer = *drawer_ptr;
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
 					auto& entity = *(freshly_added_static_entities.at(i)).lock();
-					matrices.emplace_back();
-					
+
 					auto unique_id = entity.get_Texture()->get_unique_id();
 					auto* tex = found_textures[unique_id];
-					entity.texoffset = texture_offsets[unique_id];
-					entity.spritesize = sm.get_resolution();
-					entity.texsize = tex->get_resolution();
 
-					auto& entity_information = matrices.back();
-					entity.get_instanced_entity_information(entity_information);
+					drawer.add_entity_data(entity,
+						texture_offsets[unique_id],
+						tex->get_resolution(),
+						sm.get_resolution()
+					);
 				}
 
-				utility::byte_array_view matrices_view = matrices;
-				ssb = shader_storage_buffer(matrices_view);
+				drawer.upload();
 			}
 		}
 
 		freshly_added_static_entities.clear();
 
-		auto mesh_blocks = gen_blocks<Multibuffer*>(
-			static_entities,
-			[](const RenderableEntity& e)
+		for(auto& drawcall : drawers)
 		{
-			return e.get_Multibuffer();
-		}
-		);
-
-		//LOG(INFO) << mesh_blocks.size();
-		//getchar();
-		size_t cnt = 0;
-		for (auto& block : mesh_blocks)
-		{
-			auto* buffer_ptr = std::get<0>(block);
-			const auto start_idx = std::get<1>(block);
-			const auto num_instances = std::get<2>(block);
-
-			auto& fbe = *((static_entities.at(start_idx)).lock());
-
-			auto& program = *(fbe.get_ShaderProgram());
-			auto& texptr = *(fbe.get_Texture());
-			auto& pointsuv = *(fbe.get_Multibuffer());
-			auto& sm = *(auto_spritemaps.at(cnt));
-
-			program.use();
-			cam.use(program);
-
-			/*LOG(INFO) << "drawing ssb with data from multibuffer " << buffer_ptr 
-				<< " and " << num_instances << "#instances from index " << start_idx;*/
-
-			auto& ssb = ssbs.at(buffer_ptr);
-
-			pointsuv.bind();
-			ssb.bind(42);
-			sm.bind();
-			
-			
-			glDrawArraysInstanced(pointsuv.type, 0, 4, num_instances);
-
-			glUseProgram(0);
-			cnt++;
+			drawcall.draw(cam);
 		}
 	}
 } /* rendering */ } /* core */ } /* eversim */
