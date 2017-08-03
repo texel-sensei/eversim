@@ -428,7 +428,11 @@ int main(int argc, char* argv[])
 		empty_canvas.place_texture(program, conjuration, glm::vec2(420, 420), glm::vec2(10, 10));
 		empty_canvas.place_texture(program, biggerkobold, glm::vec2(420, 420), glm::vec2(1, 1));
 		empty_canvas.draw(program, resolution, glm::vec2(0, 0), glm::vec2(1, 1));
-		renderer.draw(cam);
+
+		{
+			utility::scoped_timer tim(pd->get_reporter("Render loop"));
+			renderer.draw(cam);
+		}
 	
 		
 		//render
