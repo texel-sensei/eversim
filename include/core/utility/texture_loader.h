@@ -36,10 +36,10 @@ namespace eversim {
 				}
 			};
 
-			class texture_loader : public resource_manager<texture_loader, std::string, texture_packet>
+			class texture_loader final : public resource_manager<texture_loader, std::string, texture_packet>
 			{
-			public:
-				std::shared_ptr<value_type> load_file(std::string const& s) const
+			protected:
+				ptr_type load_file(std::string const& s) const override
 				{
 					LOG(INFO) << "Load file " << s << " to GPU";
 
