@@ -1,5 +1,6 @@
 #pragma once
 #include <system_error>
+#include <cassert>
 
 namespace eversim { namespace core {
 
@@ -46,10 +47,7 @@ namespace eversim { namespace core {
 
 #define EVERSIM_THROW(...) THROW_IMPL_GET_MACRO(__VA_ARGS__, EVERSIM_THROW_MESSAGE, EVERSIM_THROW_SIMPLE, FOO)(__VA_ARGS__)
 
-#define EVERSIM_ASSERT(cond) \
-	if(!(cond)) {\
-		EVERSIM_THROW(::eversim::core::generic_error::AssertionFailure, #cond);\
-	}
+#define EVERSIM_ASSERT(cond) assert(cond)
 
 namespace std {
 	template<>
