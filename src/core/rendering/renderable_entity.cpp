@@ -69,9 +69,25 @@ namespace eversim {	namespace core { namespace rendering {
 		data->draw();
 	}
 
+	const instanced_entity_information& RenderableEntity::get_instanced_entity_information() const
+	{
+		instanced_entity_information ifo;
+		get_instanced_entity_information(ifo);
+		return ifo;
+	}
+
+	void RenderableEntity::get_instanced_entity_information(instanced_entity_information& ifo) const
+	{
+		ifo.set_M(M);
+		ifo.set_texoffset(texoffset);
+		ifo.set_texsize(texsize);
+		ifo.set_spritesize(spritesize);
+	}
+
 	void  RenderableEntity::set_Position(glm::fvec2 pos)
 	{
 		M[2] = glm::fvec3(pos,1.f);
+		touch();
 	}
 
 	glm::fvec2  RenderableEntity::get_Position() const
@@ -83,6 +99,7 @@ namespace eversim {	namespace core { namespace rendering {
 	{
 		M[0] = { scale[0], 0, 0 };
 		M[1] = { 0, scale[1], 0};
+		touch();
 	}
 
 	glm::fvec2 RenderableEntity::get_Scale() const

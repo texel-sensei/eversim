@@ -75,23 +75,34 @@ namespace eversim {
 			void Framebuffer::bind() const
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-				glEnable(GL_BLEND); 
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
-			const glm::ivec2 Framebuffer::viewport() const
+
+			std::shared_ptr<FramebufferAutoUnbind> Framebuffer::bind_auto_unbind() const
+			{
+				bind();
+				return std::make_shared<FramebufferAutoUnbind>();
+			}
+
+			void Framebuffer::clear(const glm::fvec4 col) const
+			{
+				auto tmp = bind_auto_unbind();
+				glClearColor(col[0], col[1], col[2], col[3]);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			}
+
+			glm::ivec2 Framebuffer::viewport() const
 			{
 				return resolution;
 			}
-			const GLuint Framebuffer::get_fbo_id() const
+			GLuint Framebuffer::get_fbo_id() const
 			{
 				return fbo;
 			}
-			const GLuint Framebuffer::get_tex_id() const
+			GLuint Framebuffer::get_tex_id() const
 			{
 				return color_tex0.get_tex_id();
 			}
-			const GLuint Framebuffer::get_depth_id() const
+			GLuint Framebuffer::get_depth_id() const
 			{
 				return depth;
 			}

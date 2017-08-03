@@ -23,20 +23,20 @@ namespace eversim {
 			}
 
 			void canvas::place_texture(const ShaderProgram& program,
-				Texture& texture, 
+				TextureBase& texture, 
 				const glm::vec2 translation,
 				const glm::vec2 scale
 			)
 			{
-				program.use();
-
-				bind_framebuffer();
+				auto auto_fb_unbind = bind_framebuffer_auto_unbind();
 
 				switch_viewport tmp(0, 0, fbo.viewport()[0], fbo.viewport()[1]);
 
-				GLint loc = glGetUniformLocation(program.getID(), "tex");
+				program.use();
+
+				auto loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture.get_tex_id());
+				texture.bind();
 				glUniform1i(loc, 0);
 
 				loc = glGetUniformLocation(program.getID(), "target_resolution");
@@ -45,9 +45,9 @@ namespace eversim {
 				loc = glGetUniformLocation(program.getID(), "texture_size");
 				glUniform2f(loc, texture.get_resolution()[0], texture.get_resolution()[1]);
 
-				glm::mat4 T = glm::translate(glm::vec3(translation,0.f));
-				glm::mat4 S = glm::scale(glm::vec3(scale, 1));
-				glm::mat4 M = T*S;
+				auto T = glm::translate(glm::vec3(translation,0.f));
+				auto S = glm::scale(glm::vec3(scale, 1));
+				auto M = T*S;
 
 				loc = glGetUniformLocation(program.getID(), "M");
 				glUniformMatrix4fv(loc,1,GL_FALSE,&M[0][0]);
@@ -56,20 +56,17 @@ namespace eversim {
 
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 				glUseProgram(0);
 			}
 
 			void canvas::draw(const ShaderProgram& program, 
 				const glm::ivec2& target_resolution,
 				const glm::vec2 translation,
-				const glm::vec2 scale)
+				const glm::vec2 scale) const
 			{
-
 				program.use();
 
-				GLint loc = glGetUniformLocation(program.getID(), "tex");
+				auto loc = glGetUniformLocation(program.getID(), "tex");
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, fbo.get_tex_id());
 				glUniform1i(loc, 0);
@@ -80,9 +77,9 @@ namespace eversim {
 				loc = glGetUniformLocation(program.getID(), "texture_size");
 				glUniform2f(loc, fbo.viewport()[0], fbo.viewport()[1]);
 
-				glm::mat4 T = glm::translate(glm::vec3(translation, 0.f));
-				glm::mat4 S = glm::scale(glm::vec3(scale, 1));
-				glm::mat4 M = T*S;
+				auto T = glm::translate(glm::vec3(translation, 0.f));
+				auto S = glm::scale(glm::vec3(scale, 1));
+				auto M = T*S;
 
 				loc = glGetUniformLocation(program.getID(), "M");
 				glUniformMatrix4fv(loc, 1, GL_FALSE, &M[0][0]);
@@ -94,25 +91,19 @@ namespace eversim {
 				glUseProgram(0);
 			}
 
-			void canvas::bind_framebuffer()
+			void canvas::bind_framebuffer() const
 			{
 				fbo.bind();
 			}
 
-			void canvas::clear()
+			std::shared_ptr<FramebufferAutoUnbind> canvas::bind_framebuffer_auto_unbind() const
 			{
-				fbo.bind();
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				glClearColor(0.1, 0.1, 0.1, 1);
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				return fbo.bind_auto_unbind();
 			}
 
-			void canvas::clear(const glm::fvec4& col)
+			void canvas::clear(const glm::fvec4& col) const
 			{
-				fbo.bind();
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				glClearColor(col[0], col[1], col[2], col[3]);
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				fbo.clear(col);
 			}
 		}
 	}

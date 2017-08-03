@@ -47,7 +47,7 @@ namespace eversim {
 				Texture& operator=(Texture&& other) noexcept;
 
 				GLuint get_tex_id() const;
-				glm::ivec2 get_resolution() const;
+				glm::ivec2 get_resolution() const override;
 
 				void bind() const override;
 				static void unbind();
