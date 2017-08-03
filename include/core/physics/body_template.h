@@ -50,7 +50,7 @@ namespace eversim { namespace core { namespace physics {
 	 *	<num_constraints>
 	 *	<arity> <particle_id1> ... <id_N> <stiffness> <type> # constraint descriptor, num_constrains times
 	 */
-	class body_template_loader 
+	class body_template_loader final
 		: public utility::resource_manager<body_template_loader, std::string, body_template>
 	{
 	public:
@@ -59,7 +59,8 @@ namespace eversim { namespace core { namespace physics {
 
 		body_template parse(std::istream& data) const;
 		
-		std::shared_ptr<value_type> load_file(std::string const& path) const;
+	protected:
+		ptr_type load_file(std::string const& path) const override;
 	private:
 		std::unordered_map<std::string, factory_ptr> constraint_loaders;
 

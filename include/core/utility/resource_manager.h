@@ -36,11 +36,7 @@ namespace eversim { namespace core { namespace utility {
 	public:
 		using value_type = VT;
 		using key_type = KT;
-
-		struct file_not_found_error : std::runtime_error
-		{
-			using std::runtime_error::runtime_error;
-		};
+		using ptr_type = std::shared_ptr<value_type>;
 
 		void add_search_directory(std::string const& dir)
 		{
@@ -53,7 +49,7 @@ namespace eversim { namespace core { namespace utility {
 			if (!sp) {
 				const auto filename = as_derived().key_to_name(key);
 				const auto file = search(filename);
-				cache[key] = sp = as_derived().load_file(file.string());
+				cache[key] = sp = load_file(file.string());
 			}
 			return sp;
 		}
@@ -62,6 +58,9 @@ namespace eversim { namespace core { namespace utility {
 		{
 			return s;
 		}
+	protected:
+		~resource_manager(){}
+		virtual ptr_type load_file(std::string const& path) const = 0;
 
 	private:
 		std::vector<std::string> search_directories;
