@@ -20,9 +20,9 @@ namespace eversim {
 				bool valid = true;
 				bool touched = true;
 
-				ShaderProgram* program_ptr;
-				TextureBase* texture_ptr;
-				Multibuffer* buffer_ptr;
+				std::weak_ptr<ShaderProgram> program_ptr;
+				std::weak_ptr<TextureBase> texture_ptr;
+				std::weak_ptr<Multibuffer> buffer_ptr;
 
 				shader_storage_buffer ssb;
 
@@ -33,16 +33,16 @@ namespace eversim {
 			public:
 
 				DrawcallEntity(
-					ShaderProgram* program_ptr,
-					TextureBase* texture_ptr,
-					Multibuffer* buffer_ptr
+					std::weak_ptr<ShaderProgram> program_ptr,
+					std::weak_ptr<TextureBase> texture_ptr,
+					std::weak_ptr<Multibuffer> buffer_ptr
 				);
 
 				void touch();
 				void untouch();
 				bool get_touched() const;
 
-				const Multibuffer* get_Multibuffer() const
+				std::weak_ptr<Multibuffer> get_Multibuffer() const
 				{
 					return buffer_ptr;
 				}

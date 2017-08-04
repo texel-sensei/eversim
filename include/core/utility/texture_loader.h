@@ -55,7 +55,7 @@ namespace eversim {
 
 					std::vector<float> image_float;//(res[0] * res[1] *4);
 
-					auto idxf = [&](const int i ,const int j)
+					auto idxf = [&](const int i ,const int j) -> size_t
 					{
 						return i * w + j;
 					};

@@ -3,7 +3,6 @@
 
 #include "core/rendering/shader_program.h"
 #include "core/rendering/multibuffer.h"
-#include "core/rendering/texture.h"
 #include "core/rendering/spritemap.h"
 #include "core/rendering/texture_base_class.h"
 
@@ -27,79 +26,71 @@ namespace eversim {
 				//setter
 				void set_M(const glm::fmat3& M)
 				{
-					for (size_t i = 0; i < 3; ++i)
-						for (size_t j = 0; j < 3; ++j)
+					for (auto i = 0; i < 3; ++i)
+						for (auto j = 0; j < 3; ++j)
 							data[i][j] = M[i][j];
 				}
 
 				void set_texoffset(const glm::ivec2& texoffset)
 				{
-					data[0][3] = texoffset[0];
-					data[1][3] = texoffset[1];
+					data[0][3] = static_cast<float>(texoffset[0]);
+					data[1][3] = static_cast<float>(texoffset[1]);
 				}
 
 				void set_texsize(const glm::ivec2& texsize)
 				{
-					data[2][3] = texsize[0];
-					data[3][3] = texsize[1];
+					data[2][3] = static_cast<float>(texsize[0]);
+					data[3][3] = static_cast<float>(texsize[1]);
 				}
 
 				void set_spritesize(const glm::ivec2& spritesize)
 				{
-					data[3][0] = spritesize[0];
-					data[3][1] = spritesize[1];
+					data[3][0] = static_cast<float>(spritesize[0]);
+					data[3][1] = static_cast<float>(spritesize[1]);
 				}
 				//getter
 				glm::fmat3 get_M() const
 				{
 					glm::fmat3 M;
-					for (size_t i = 0; i < 3; ++i)
-						for (size_t j = 0; j < 3; ++j)
+					for (auto i = 0; i < 3; ++i)
+						for (auto j = 0; j < 3; ++j)
 							M[i][j] = data[i][j];
 					return M;
 				}
 
 				glm::ivec2 get_texoffset() const
 				{
-					return { data[0][3] , data[1][3] };
+					return { static_cast<int>(data[0][3]) ,static_cast<int>(data[1][3]) };
 				}
 
 				glm::ivec2 get_texsize() const
 				{
-					return { data[2][3] , data[3][3] };
+					return { static_cast<int>(data[2][3]) , static_cast<int>(data[3][3]) };
 				}
 
 				glm::ivec2 get_spritesize() const
 				{
-					return { data[3][0] , data[3][1] };
+					return { static_cast<int>(data[3][0]) , static_cast<int>(data[3][1]) };
 				}
 			};
-
-			/*
-			* unit sized quad 0/0 to 1/1
-			*/
-			extern std::unique_ptr<Multibuffer> default_quadmesh_ptr;
-			/*
-			 * default shader takes positions and uv coordinates
-			 * and texture
-			 */
-			extern ShaderProgram default_shader;
-			/*
-			 * default texture 4x4 basic color
-			 */
-			extern Texture default_texture;
 
 			class RenderableEntity {
 			private:
 				glm::ivec2 texoffset = glm::ivec2(0,0);
 				glm::ivec2 texsize, spritesize;
 				glm::fmat3 M = glm::fmat3(1.f);
-				ShaderProgram* program;
-				TextureBase* tex;
-				Multibuffer* data;
-				entity_type type=DYNAMIC;
 
-				RenderableEntity();
+				std::weak_ptr<ShaderProgram> program;
+				std::weak_ptr<TextureBase> tex;
+				std::weak_ptr<Multibuffer> data;
+
+				entity_type type;
+
+				explicit RenderableEntity(
+					std::shared_ptr<ShaderProgram> program,
+					std::shared_ptr<TextureBase> tex,
+					std::weak_ptr<Multibuffer>  data,
+					const entity_type t=DYNAMIC);
 
 				bool touched = false;
 				void touch();
@@ -110,28 +101,18 @@ namespace eversim {
 				void get_instanced_entity_information(instanced_entity_information& ifo) const;
 
 				glm::fmat3 get_M() const;
-				ShaderProgram* get_ShaderProgram() const;
-				TextureBase* get_Texture() const;
-				Multibuffer* get_Multibuffer() const;
+				std::weak_ptr<ShaderProgram> get_ShaderProgram() const;
+				std::weak_ptr<TextureBase> get_Texture() const;
+				std::weak_ptr<Multibuffer> get_Multibuffer() const;
 
 				void set_M(const glm::fmat3& m);
 
-				void set_ShaderProgram(ShaderProgram* p);
-				void set_ShaderProgram(ShaderProgram& p);
+				void set_ShaderProgram(std::shared_ptr<ShaderProgram> p);
 
-				void set_Texture(Texture* t);
-				void set_Texture(Texture& t);
-
-				void set_Texture(Spritemap* sm);
-				void set_Texture(Spritemap* sm,
+				void set_Texture(std::shared_ptr<TextureBase> p);
+				void set_Texture(std::shared_ptr<TextureBase> p,
 					const glm::ivec2& offset, const glm::ivec2& resolution);
-
-				void set_Texture(Spritemap& sm);
-				void set_Texture(Spritemap& sm, 
-					const glm::ivec2& offset, const glm::ivec2& resolution);
-
-				void set_Multibuffer(Multibuffer* b);
-				void set_Multibuffer(Multibuffer& b);
+				void set_Multibuffer(std::shared_ptr<Multibuffer> p);
 
 				void set_Position(glm::fvec2 pos);
 				glm::fvec2 get_Position() const;
@@ -139,11 +120,6 @@ namespace eversim {
 				void set_Scale(glm::fvec2 scale);
 				glm::fvec2 get_Scale() const;
 			
-				void default_Multibuffer();
-				void default_ShaderProgram();
-				void default_Texture();
-				void default_State();
-
 				bool get_touched() const;
 
 				void set_Type(const entity_type t);

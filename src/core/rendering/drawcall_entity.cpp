@@ -6,16 +6,15 @@ namespace eversim {
 
 			void DrawcallEntity::invalidate_if_expired()
 			{
-				/*valid = !(program_ptr == 1 ||
-					texture_ptr == ||
-					buffer_ptr.expired());*/
-				//TODO !!!
+				valid = !(program_ptr.expired() ||
+					texture_ptr.expired() ||
+					buffer_ptr.expired());
 			}
 
 			DrawcallEntity::DrawcallEntity(
-				ShaderProgram* program_ptr,
-				TextureBase* texture_ptr,
-				Multibuffer* buffer_ptr
+				std::weak_ptr<ShaderProgram> program_ptr,
+				std::weak_ptr<TextureBase> texture_ptr,
+				std::weak_ptr<Multibuffer> buffer_ptr
 			) : 
 				program_ptr(program_ptr),
 				texture_ptr(texture_ptr),
@@ -33,9 +32,9 @@ namespace eversim {
 					return;
 				} 
 
-				auto& program = *program_ptr;
-				auto& texture = *texture_ptr;
-				auto& buffer = *buffer_ptr;
+				auto& program = *program_ptr.lock();
+				auto& texture = *texture_ptr.lock();
+				auto& buffer = *buffer_ptr.lock();
 
 				program.use();
 				cam.use(program);
@@ -46,7 +45,8 @@ namespace eversim {
 
 				texture.bind();
 
-				glDrawArraysInstanced(buffer.type, buffer.first, buffer.count, entity_info.size());
+				glDrawArraysInstanced(buffer.type, buffer.first, 
+					buffer.count, static_cast<GLsizei>(entity_info.size()));
 
 				glUseProgram(0);
 			}

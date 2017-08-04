@@ -47,25 +47,25 @@ namespace eversim { namespace core { namespace rendering {
 		 * Create new RenderableEntity
 		 * returns the shared ptr, keeps a weak ptr
 		 */
-		entity_shptr register_entity(const entity_type type=DYNAMIC);
+		entity_shptr add_entity(const entity_type type=DYNAMIC);
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader 
 		* returns the shared ptr, keeps a shared ptr
 		* you can safely pass them
 		*/
-		texture_shptr register_texture(const std::string& path);
+		texture_shptr add_texture(const std::string& path);
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader and using the given filter funtion
 		* returns the shared ptr, keeps a shared ptr
 		* you can safely pass them
 		*/
-		texture_shptr register_texture(const std::string& path, filter filtering);
+		texture_shptr add_texture(const std::string& path, filter filtering);
 
-		spritemap_shptr register_spritemap(const size_t resolution);
+		spritemap_shptr add_spritemap(const size_t resolution);
 
-		spritemap_shptr register_spritemap(const size_t resolution, filter filtering);
+		spritemap_shptr add_spritemap(const size_t resolution, filter filtering);
 
 		/*
 		 * Removes every dead weak ptr
@@ -89,18 +89,22 @@ namespace eversim { namespace core { namespace rendering {
 		// will deinitialize SDL once an object of this class is destroyed
 		utility::final_action quit_sdl;
 
+		//Defaults for entities
+		std::shared_ptr<Multibuffer> default_buffer_ptr;
+		std::shared_ptr<Texture> default_texture_ptr;
+		std::shared_ptr<ShaderProgram> default_shader_ptr;
+
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
+
 		std::vector<entity_wkptr> dynamic_entities;
 		std::vector<entity_wkptr> static_entities;
 		std::vector<entity_wkptr> freshly_added_static_entities;
+
 		std::vector<texture_shptr> textures;
 		std::vector<spritemap_shptr> spritemaps;
 
 		std::vector<spritemap_shptr> auto_spritemaps;
-
-		std::map<Multibuffer*, shader_storage_buffer> ssbs;
-
 		std::vector<DrawcallEntity> drawers;
 
 		void setup(bool fullscreen);

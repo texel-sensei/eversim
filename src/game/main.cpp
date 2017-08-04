@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
 	//	2. rendering
 	auto player_entity = renderer.register_entity();
-	rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	auto kobold = renderer.register_texture("brick_gray0\\big_kobold.png");
 	player_entity->set_Texture(kobold);
 	player_entity->set_Position(player->position);
 
