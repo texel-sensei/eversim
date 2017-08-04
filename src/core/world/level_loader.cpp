@@ -1,5 +1,8 @@
 #include "core/world/level_loader.h"
 #include "core/world/level.h"
+#include "core/world/tile_descriptor.h"
+#include "core/world/errors.h"
+
 #include "core/utility/filesystem_wrapper.h"
 #include "core/utility/helper.h"
 
@@ -9,8 +12,6 @@
 
 #include <stdexcept>
 #include <fstream>
-#include "core/world/tile_descriptor.h"
-
 
 using namespace std;
 
@@ -72,15 +73,15 @@ namespace eversim { namespace core { namespace world {
 				auto id = load_big_endian(layout[res.y-y-1][x]);
 				if(idtable.find(id) == idtable.end())
 				{
-					throw runtime_error{
+					EVERSIM_THROW(level_error::UnknownID,
 						(boost::format("Unknown id %d at tile (%d,%d)") % id % x % y).str()
-					};
+					);
 				}
 				auto desc_name = idtable[id];
 				auto desc = descriptors.at(desc_name);
 				if(!desc)
 				{
-					throw runtime_error{ "Unknown tile descriptor! " + desc_name };
+					EVERSIM_THROW(level_error::UnknownTile, desc_name);
 				}
 				t.set_descriptor(desc);
 			}
@@ -114,7 +115,7 @@ namespace eversim { namespace core { namespace world {
 
 	void level_loader::register_tile_descriptor(tile_descriptor const* desc)
 	{
-		assert(desc);
+		EVERSIM_ASSERT(desc);
 		descriptors[desc->name] = desc;
 	}
 }}}

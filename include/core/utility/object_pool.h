@@ -1,4 +1,7 @@
 #pragma once
+
+#include "core/error.h"
+
 #include <bitset>
 #include <list>
 #include <vector>
@@ -225,6 +228,7 @@ namespace eversim { namespace core { namespace utility {
 			
 			size_t indexof(T const* ptr) const noexcept
 			{
+				// can't use EVERSIM_ASSERT here because indexof is noexcept
 				assert(ptr >= begin());
 				assert(ptr < end());
 				return ptr - begin();
@@ -307,7 +311,7 @@ namespace eversim { namespace core { namespace utility {
 			check_new_node();
 
 			auto& current_node = memory.back();
-			assert(current_pos != current_node.end());
+			EVERSIM_ASSERT(current_pos != current_node.end());
 
 			const auto ptr = current_pos++;
 			current_node.mark_slot(ptr, true);
@@ -317,13 +321,13 @@ namespace eversim { namespace core { namespace utility {
 		void deallocate(T* ptr)
 		{
 			auto pos = locate(ptr);
-			assert(pos != end());
+			EVERSIM_ASSERT(pos != end());
 			deallocate(ptr, *pos->current_node);
 		}
 
 		void deallocate(T* ptr, node& n)
 		{
-			assert(n.contains(ptr));
+			EVERSIM_ASSERT(n.contains(ptr));
 			size_--;
 			free_store.push_back(ptr);
 			n.mark_slot(ptr, false);

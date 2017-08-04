@@ -1,5 +1,6 @@
 #include "core/world/level.h"
 #include "core/world/tile.h"
+#include "core/world/errors.h"
 #include <glm/detail/type_mat.hpp>
 #include <easylogging++.h>
 
@@ -25,7 +26,7 @@ namespace eversim { namespace core { namespace world {
 				LOG(ERROR) << "Not enough data passed to level c'tor! Size is ("
 					<< size.x << ", " << size.y << ") [" << num_tiles <<
 					" tiles] but got only data for " << data.size() << " tiles!";
-				throw std::runtime_error{"Too few data in level c'tor!"};
+				EVERSIM_THROW(std::make_error_code(std::errc::invalid_argument), "Not enough data for level c'tor");
 			}
 			if(data.size() > num_tiles)
 			{
@@ -138,7 +139,7 @@ namespace eversim { namespace core { namespace world {
 
 	utility::array_view<const utility::line> level::get_collision_shape(unsigned char sides) const
 	{
-		assert(sides < 16);
+		EVERSIM_ASSERT(sides < 16);
 
 		// bitset == 15 means the tile is surrounded on all sides
 		// and does not have any collidable lines

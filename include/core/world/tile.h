@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/world/errors.h"
+
 #include "core/utility/array_view.h"
 
 #include <glm/vec2.hpp>
@@ -64,7 +66,7 @@ namespace eversim { namespace core { namespace world {
 
 		void set_descriptor(tile_descriptor const* desc)
 		{
-			assert(desc);
+			EVERSIM_ASSERT(desc);
 			descriptor = desc;
 		}
 

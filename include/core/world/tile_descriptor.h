@@ -16,6 +16,4 @@ namespace eversim { namespace core { namespace world {
 		std::string texture_name;
 	};
 
-	
-
 }}}

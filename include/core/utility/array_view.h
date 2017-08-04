@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/error.h"
+
 #include <cstdint>
 #include <type_traits>
 #include <cassert>
@@ -47,19 +49,19 @@ namespace eversim { namespace core { namespace utility {
 
 		reference operator[](size_t id) const noexcept
 		{
-			assert(id < size());
+			EVERSIM_ASSERT(id < size());
 			return data_[id];
 		}
 
 		reference back() noexcept
 		{
-			assert(size() > 0);
+			EVERSIM_ASSERT(size() > 0);
 			return data_[n - 1];
 		}
 
 		const_reference back() const noexcept
 		{
-			assert(size() > 0);
+			EVERSIM_ASSERT(size() > 0);
 			return data_[n - 1];
 		}
 
