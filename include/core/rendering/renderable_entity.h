@@ -106,7 +106,7 @@ namespace eversim {
 				void untouch();
 			public:
 
-				const instanced_entity_information& get_instanced_entity_information() const;
+				instanced_entity_information get_instanced_entity_information() const;
 				void get_instanced_entity_information(instanced_entity_information& ifo) const;
 
 				glm::fmat3 get_M() const;

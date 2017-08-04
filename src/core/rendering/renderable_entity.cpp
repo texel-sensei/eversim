@@ -14,7 +14,7 @@ namespace eversim {	namespace core { namespace rendering {
 		program(&default_shader), tex(&default_texture), data(&(*default_quadmesh_ptr))
 	{}
 
-	const instanced_entity_information& RenderableEntity::get_instanced_entity_information() const
+	instanced_entity_information RenderableEntity::get_instanced_entity_information() const
 	{
 		instanced_entity_information ifo;
 		get_instanced_entity_information(ifo);
