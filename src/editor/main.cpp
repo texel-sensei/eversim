@@ -38,6 +38,7 @@
 
 #include <random>
 #include <chrono>
+#include "core/world/tile_loader.h"
 
 //#include <float.h>
 //unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
@@ -49,7 +50,9 @@ INITIALIZE_EASYLOGGINGPP
 using namespace eversim::core;
 using namespace std;
 
-function<void(glm::ivec2, int)> mouse_click = [](auto, auto){};
+function<void(glm::ivec2, int)> mouse_click = [](auto, auto)
+{
+};
 
 bool direction_pressed[4];
 
@@ -230,22 +233,23 @@ int main(int argc, char* argv[])
 	//lukitest
 	floor_height = 0;
 
-	world::tile_descriptor dirt;
-	dirt.name = "dirt";
-	dirt.collision = world::collision_type::solid;
-	dirt.texture_name = "dirt0.png";
-	auto grass = dirt;
-	grass.name = "grass";
-	grass.texture_name = "grass.png";
-	auto bricks = dirt;
-	bricks.name = "bricks";
-	bricks.texture_name = "stone_brick1.png";
+	world::tile_loader tl;
+	tl.add_search_directory("../resources/tiles");
 
 	world::level_loader ll;
 	ll.add_search_directory("../resources/levels");
-	ll.register_tile_descriptor(&dirt);
-	ll.register_tile_descriptor(&grass);
-	ll.register_tile_descriptor(&bricks);
+
+	auto tile_names = ll.get_level_tiles("example_level");
+	auto tile_descriptors = vector<shared_ptr<world::tile_descriptor>>();
+
+	for (auto const& name : tile_names)
+	{
+		auto desc = tl.load(name);
+		desc->name = name;
+		tile_descriptors.push_back(desc);
+		ll.register_tile_descriptor(desc.get());
+	}
+
 	auto l = ll.load("example_level");
 	l->set_tile_size(0.5f);
 
@@ -299,7 +303,7 @@ int main(int argc, char* argv[])
 	);
 
 	rendering::Camera cam("default_cam",
-						  resolution,
+	                      resolution,
 	                      20.f);
 
 	rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
@@ -388,7 +392,7 @@ int main(int argc, char* argv[])
 	player_sm.add_texture(program, brickwall);
 
 	auto player_entity = renderer.register_entity();
-	player_entity->set_Texture(player_sm,glm::ivec2(0,32),glm::ivec2(32));
+	player_entity->set_Texture(player_sm, glm::ivec2(0, 32), glm::ivec2(32));
 
 
 	l->initialize_graphics(renderer);
@@ -397,7 +401,7 @@ int main(int argc, char* argv[])
 	cam.set_position({16.f,30.f});
 
 	empty_canvas.clear();
-	empty_canvas.place_texture(program, biggerkobold, { 420,380 }, {1,1});
+	empty_canvas.place_texture(program, biggerkobold, {420,380}, {1,1});
 
 	int cnt = 0;
 	while (handle_sdl_events())
@@ -412,7 +416,7 @@ int main(int argc, char* argv[])
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.623, 0.76, 0.729, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -433,8 +437,8 @@ int main(int argc, char* argv[])
 			utility::scoped_timer tim(pd->get_reporter("Render loop"));
 			renderer.draw(cam);
 		}
-	
-		
+
+
 		//render
 		ImGui::ShowTestWindow();
 
@@ -479,7 +483,7 @@ int main(int argc, char* argv[])
 
 			if (autostep || ImGui::Button("step"))
 			{
-				utility::scoped_timer tim(pd->get_reporter( "Physics loop" ));
+				utility::scoped_timer tim(pd->get_reporter("Physics loop"));
 				physics.integrate(dt);
 			}
 		}
@@ -500,7 +504,6 @@ int main(int argc, char* argv[])
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
-
 	}
 	return 0;
 }
