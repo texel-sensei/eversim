@@ -34,7 +34,7 @@ namespace eversim { namespace core { namespace physics {
 		return templ;
 	}
 
-	shared_ptr<body_template_loader::value_type> body_template_loader::load_file(std::string const& path) const
+	shared_ptr<body_template_loader::value_type> body_template_loader::load_file(std::string const& path)
 	{
 		auto data = ifstream(path);
 		return make_shared<body_template>(parse(data));

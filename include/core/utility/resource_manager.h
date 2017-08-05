@@ -60,7 +60,20 @@ namespace eversim { namespace core { namespace utility {
 		}
 	protected:
 		~resource_manager(){}
-		virtual ptr_type load_file(std::string const& path) const = 0;
+		virtual ptr_type load_file(std::string const& path) = 0;
+
+		fs::path search(fs::path const& desc) const
+		{
+			for (auto const& dir : search_directories)
+			{
+				auto full_path = dir / desc;
+				if (fs::exists(full_path))
+				{
+					return full_path;
+				}
+			}
+			EVERSIM_THROW(generic_error::FileNotFound, desc.string());
+		}
 
 	private:
 		std::vector<std::string> search_directories;
@@ -72,21 +85,7 @@ namespace eversim { namespace core { namespace utility {
 
 		T const& as_derived() const noexcept {
 			return static_cast<T const&>(*this);
-		}
-
-		fs::path search(fs::path const& desc) const
-		{
-			for(auto const& dir : search_directories)
-			{
-				auto full_path = dir / desc;
-				if(fs::exists(full_path))
-				{
-					return full_path;
-				}
-			}
-			EVERSIM_THROW(generic_error::FileNotFound, desc.string());
-		}
-		
+		}	
 	};
 
 } /*utility*/ } /*core*/ } /*eversim*/

@@ -14,12 +14,13 @@ namespace eversim { namespace core { namespace world {
 	public:
 		level_loader();
 
+		static std::map<uint32_t, std::string> load_id_table(std::istream& data);		
 
-		static std::map<uint32_t, std::string> load_id_table(std::istream& data);
 		void register_tile_descriptor(tile_descriptor const*);
 
+		std::vector<std::string> get_level_tiles(std::string const& name) const;
 	protected:
-		ptr_type load_file(std::string const& filename) const override;
+		ptr_type load_file(std::string const& filename) override;
 	private:
 		std::unordered_map<std::string, tile_descriptor const*> descriptors;
 	};

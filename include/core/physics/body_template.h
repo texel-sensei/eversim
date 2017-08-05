@@ -60,7 +60,7 @@ namespace eversim { namespace core { namespace physics {
 		body_template parse(std::istream& data) const;
 		
 	protected:
-		ptr_type load_file(std::string const& path) const override;
+		ptr_type load_file(std::string const& path) override;
 	private:
 		std::unordered_map<std::string, factory_ptr> constraint_loaders;
 
