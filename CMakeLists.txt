@@ -90,8 +90,10 @@ target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.64.0)
+find_package(Boost 1.64.0 COMPONENTS regex)
 include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIR_DEBUG})
+link_directories(${Boost_LIBRARY_DIR_RELEASE})
 
 #boost poly collection
 include_directories(${EXTERNALS}/poly_collection/include)
