@@ -1,4 +1,4 @@
 {
 	"parent_tile" : "basic_solid_tile",
-	"texture" : "bricks.png"
+	"texture" : "stone_brick1.png"
 }
