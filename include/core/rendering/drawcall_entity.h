@@ -21,12 +21,15 @@ namespace eversim {
 				bool touched = true;
 
 				std::weak_ptr<ShaderProgram> program_ptr;
-				std::weak_ptr<TextureBase> texture_ptr;
 				std::weak_ptr<Multibuffer> buffer_ptr;
 
+				Spritemap spritemap = Spritemap(512); //TODO
+				ShaderProgram& spriteprog;
 				shader_storage_buffer ssb;
 
 				std::vector<instanced_entity_information> entity_info;
+				std::map<size_t, TextureBase*> found_textures;
+				std::vector<std::weak_ptr<RenderableEntity>> entities;
 
 				void invalidate_if_expired();
 
@@ -34,8 +37,8 @@ namespace eversim {
 
 				DrawcallEntity(
 					std::weak_ptr<ShaderProgram> program_ptr,
-					std::weak_ptr<TextureBase> texture_ptr,
-					std::weak_ptr<Multibuffer> buffer_ptr
+					std::weak_ptr<Multibuffer> buffer_ptr,
+					ShaderProgram& spriteprog
 				);
 
 				void touch();
@@ -53,13 +56,8 @@ namespace eversim {
 				 * Add the data of the entity to the DrawcallEntity
 				 * returns the index of the entity data
 				 */
-				size_t add_entity_data(const RenderableEntity& entity);
-				size_t add_entity_data(
-					const RenderableEntity& entity,
-					const glm::ivec2 texoffset,
-					const glm::ivec2 texsize,
-					const glm::ivec2 spritesize
-					);
+				size_t add_entity(std::weak_ptr<RenderableEntity> entity);
+
 				instanced_entity_information get_entity_data(const size_t idx) const;
 
 				void upload();

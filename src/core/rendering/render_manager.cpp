@@ -171,7 +171,7 @@ namespace eversim { namespace core { namespace rendering {
 		auto ptr = entity_shptr(new RenderableEntity(
 			default_shader_ptr, default_texture_ptr, default_buffer_ptr,type));
 		if(type == STATIC)
-			freshly_added_static_entities.push_back(ptr);
+			dirty_entities.push_back(ptr);
 		 else
 			dynamic_entities.push_back(ptr);
 		return ptr;
@@ -259,32 +259,31 @@ namespace eversim { namespace core { namespace rendering {
 	void render_manager::draw(Camera& cam)
 	{
 		//Draw dynamic entities todo
-		for(auto& dynamic : dynamic_entities)
+		/*for(auto& dynamic : dynamic_entities)
 		{
 			if(!dynamic.expired())
 			{
 				auto& dynamic_entity = *dynamic.lock();
-				DrawcallEntity drawer(dynamic_entity.get_ShaderProgram(),
-					dynamic_entity.get_Texture(), dynamic_entity.get_Multibuffer());
+				DrawcallEntity drawer(
+					dynamic_entity.get_ShaderProgram(),
+					dynamic_entity.get_Multibuffer(),
+					*spriteprog
+				);
 
-				drawer.add_entity_data(dynamic_entity);
+				drawer.add_entity(dynamic);
 				drawer.upload();
 				drawer.draw(cam);
-
 			}
-		}
+		}*/
 
 		//Draw static entities
-		auto removed_statics = remove_expired_entities(static_entities);
-		remove_expired_entities(freshly_added_static_entities);
+		remove_expired_entities(dirty_entities);
+		sort_entities_by_mesh(dirty_entities);
 
-		sort_entities_by_mesh(static_entities);
-		sort_entities_by_mesh(freshly_added_static_entities);
-
-		if(freshly_added_static_entities.size() > 0)
+		if(dirty_entities.size() > 0)
 		{
 			auto mesh_blocks = gen_blocks<shared_ptr<Multibuffer>>(
-				freshly_added_static_entities,
+				dirty_entities,
 				[](const RenderableEntity& e)
 			{
 				return e.get_Multibuffer().lock();
@@ -300,26 +299,7 @@ namespace eversim { namespace core { namespace rendering {
 								
 				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
 
-				std::map<size_t, TextureBase*> found_textures;
-				for (auto i = start_idx; i < start_idx + num_instances; ++i)
-				{
-					auto& entity = *(freshly_added_static_entities.at(i)).lock();
-					auto* tex = &(*entity.get_Texture().lock());
-					found_textures[tex->get_unique_id()] = tex;
-				}
-
-				auto_spritemaps.push_back(std::make_shared<Spritemap>(512));
-				auto& sm_ptr = auto_spritemaps.back();
-				auto& sm = *(sm_ptr);
-
-				std::map<size_t, glm::ivec2> texture_offsets;
-				for (auto& tex : found_textures)
-				{
-					auto* texbaseptr = tex.second;
-					texture_offsets[texbaseptr->get_unique_id()] = sm.add_texture(*spriteprog, *texbaseptr);
-				}
-				
-				auto it = std::find_if(begin(drawers), end(drawers),
+				auto it = std::find_if(begin(static_drawers), end(static_drawers),
 					[&](const DrawcallEntity& drawer)
 				{
 					return drawer.get_Multibuffer().lock() == buffer_ptr;
@@ -328,19 +308,19 @@ namespace eversim { namespace core { namespace rendering {
 
 				DrawcallEntity* drawer_ptr = nullptr;
 
-				if (it == drawers.end())
+				if (it == static_drawers.end())
 				{
 					//not found, add
-					auto& entity = *(freshly_added_static_entities.at(start_idx)).lock();
+					auto& entity = *(dirty_entities.at(start_idx)).lock();
 
-					drawers.emplace_back(
+					static_drawers.emplace_back(
 						entity.get_ShaderProgram(),
-						sm_ptr,
-						entity.get_Multibuffer()
+						entity.get_Multibuffer(),
+						*spriteprog
 					);
-
-					drawer_ptr = &drawers.back();
-				} else
+					drawer_ptr = &static_drawers.back();
+				}
+				else
 				{
 					//found
 					drawer_ptr = &(*it);
@@ -348,27 +328,19 @@ namespace eversim { namespace core { namespace rendering {
 
 				if (drawer_ptr == nullptr) continue;
 				auto& drawer = *drawer_ptr;
+						
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
-					auto& entity = *(freshly_added_static_entities.at(i)).lock();
-
-					auto unique_id = entity.get_Texture().lock()->get_unique_id();
-					auto* tex = found_textures[unique_id];
-
-					drawer.add_entity_data(entity,
-						texture_offsets[unique_id],
-						tex->get_resolution(),
-						sm.get_resolution()
-					);
+					drawer.add_entity(dirty_entities.at(i));
 				}
 
 				drawer.upload();
 			}
 		}
 
-		freshly_added_static_entities.clear();
+		dirty_entities.clear();
 
-		for(auto& drawcall : drawers)
+		for(auto& drawcall : static_drawers)
 		{
 			drawcall.draw(cam);
 		}
