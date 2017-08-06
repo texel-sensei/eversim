@@ -151,58 +151,6 @@ namespace {
 	}
 }
 
-class floor_constraint : public physics::constraint {
-public:
-
-	explicit floor_constraint(physics::body_offset_ptr p, float height)
-		: constraint(1), height(height)
-	{
-		type = physics::constraint_type::inequality;
-		particles[0] = p;
-	}
-
-	float operator()() const override
-	{
-		assert(particles.size() == get_arity());
-		return particles[0]->projected_position.y - height;
-	}
-
-	vector<glm::vec2> grad() const override
-	{
-		return {glm::vec2{0.f,1.f}};
-	}
-
-private:
-	float height;
-};
-
-class wall_constraint : public physics::constraint {
-public:
-
-	explicit wall_constraint(physics::body_offset_ptr p, float X)
-		: constraint(1), X(X)
-	{
-		type = physics::constraint_type::inequality;
-		particles[0] = p;
-	}
-
-	float operator()() const override
-	{
-		assert(particles.size() == get_arity());
-		if (X > 0)
-			return X - particles[0]->projected_position.x;
-		return particles[0]->projected_position.x - X;
-	}
-
-	vector<glm::vec2> grad() const override
-	{
-		return {glm::vec2{-glm::sign(particles[0]->projected_position.x),0.f}};
-	}
-
-private:
-	float X;
-};
-
 int main(int argc, char* argv[])
 {
 	START_EASYLOGGINGPP(argc, argv);
@@ -264,20 +212,13 @@ int main(int argc, char* argv[])
 	physics.set_level(l.get());
 
 	windows.add_window<system::imgui::physics_inspector>(&physics, "physics", true);
+
 	auto boulder_templ = loader.load("cube.bdy");
 
-	auto add_floor_constraint = [&](physics::body* b)
-	{
-		for (auto& p : b->get_particles())
-		{
-			physics.insert_constraint(floor_constraint(
-				&p, floor_height
-			));
-		}
-	};
 
-	physics::body* player;
-	add_floor_constraint(player = physics.add_body(*boulder_templ, {0.1f, 0.3f}, 0.1f));
+	physics::body* player = physics.add_body(*boulder_templ, {0.1f, 0.3f}, 0.1f);
+
+
 
 	//Enable Debugging
 	glEnable(GL_DEBUG_OUTPUT);
@@ -528,8 +469,16 @@ int main(int argc, char* argv[])
 			renderer.do_draw(cam);
 		}
 
-		windows.end_frame();
-		ImGui::Render();
+		{
+			// It is not possible to time the window rendering and display it in the same frame
+			// so we just display each frame the time the last frame took
+			static utility::clock::duration old_time;
+			utility::scoped_timer tim([](auto t) {old_time = t; });
+
+			pd->register_time("window rendering", old_time);
+			windows.end_frame();
+			ImGui::Render();
+		}
 
 		SDL_GL_SwapWindow(window);
 
