@@ -125,4 +125,14 @@ namespace eversim {	namespace core { namespace rendering {
 		return type;
 	}
 
+	void RenderableEntity::set_Drawer(std::weak_ptr<DrawcallEntity> de,size_t idx)
+	{
+		assigned_drawer = make_pair(idx,de);
+	}
+
+	std::weak_ptr<DrawcallEntity> RenderableEntity::get_Drawer() const
+	{
+		return assigned_drawer.second;
+	}
+
 }}}

@@ -97,20 +97,14 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
 
-		std::vector<entity_wkptr> dynamic_entities;
-		//std::vector<entity_wkptr> static_entities;
-
-		std::vector<entity_wkptr> dirty_entities;
-
 		std::vector<texture_shptr> textures;
 		std::vector<spritemap_shptr> spritemaps;
 
-		//std::vector<spritemap_shptr> auto_spritemaps;
+		std::vector<std::shared_ptr<DrawcallEntity>> dynamic_drawers;
+		std::vector<std::shared_ptr<DrawcallEntity>> static_drawers;
 
-		std::vector<DrawcallEntity> dynamic_drawers;
-		std::vector<DrawcallEntity> static_drawers;
-
-		
+		std::vector<entity_wkptr> dynamic_entities;
+		std::vector<entity_wkptr> dirty_entities;
 
 		void setup(bool fullscreen);
 

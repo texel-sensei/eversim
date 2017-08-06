@@ -155,8 +155,8 @@ int main(int argc, char* argv[])
 	auto* player = physics.add_body(*player_body_template, { 16.f, 28.f }, 0.1f);
 
 	//	2. rendering
-	auto player_entity = renderer.register_entity();
-	auto kobold = renderer.register_texture("brick_gray0\\big_kobold.png");
+	auto player_entity = renderer.add_entity();
+	auto kobold = renderer.add_texture("brick_gray0\\big_kobold.png");
 	player_entity->set_Texture(kobold);
 	player_entity->set_Position(player->position);
 

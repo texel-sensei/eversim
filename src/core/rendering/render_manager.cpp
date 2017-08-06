@@ -309,37 +309,42 @@ namespace eversim { namespace core { namespace rendering {
 				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
 
 				auto it = std::find_if(begin(static_drawers), end(static_drawers),
-					[&](const DrawcallEntity& drawer)
-				{
-					return drawer.get_Multibuffer().lock() == buffer_ptr;
+					[&](std::shared_ptr<DrawcallEntity> drawer)
+				{					
+					return drawer->get_Multibuffer().lock() == buffer_ptr;
 				}
 				);
 
-				DrawcallEntity* drawer_ptr = nullptr;
+				std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
 
 				if (it == static_drawers.end())
 				{
 					//not found, add
 					auto& entity = *(dirty_entities.at(start_idx)).lock();
 
-					static_drawers.emplace_back(
+					static_drawers.push_back(make_shared<DrawcallEntity>(
 						entity.get_ShaderProgram(),
-						entity.get_Multibuffer()
+						entity.get_Multibuffer())
 					);
-					drawer_ptr = &static_drawers.back();
+					
+					drawer_ptr = static_drawers.back();
 				}
 				else
 				{
 					//found
-					drawer_ptr = &(*it);
+					drawer_ptr = *it;
 				}
-
+				
 				if (drawer_ptr == nullptr) continue;
+
 				auto& drawer = *drawer_ptr;
 						
 				for (auto i = start_idx; i < start_idx + num_instances; ++i)
 				{
-					drawer.add_entity(dirty_entities.at(i));
+					auto entity_wkptr = dirty_entities.at(i);
+					auto& entity = *entity_wkptr.lock();
+					auto idx = drawer.add_entity(dirty_entities.at(i));
+					entity.set_Drawer(drawer_ptr, idx);
 				}
 
 				drawer.upload();
@@ -350,7 +355,7 @@ namespace eversim { namespace core { namespace rendering {
 
 		for(auto& drawcall : static_drawers)
 		{
-			drawcall.draw(cam);
+			drawcall->draw(cam);
 		}
 	}
 } /* rendering */ } /* core */ } /* eversim */

@@ -12,6 +12,8 @@ namespace eversim {
 	namespace core {
 		namespace rendering {
 
+			class DrawcallEntity;
+
 			enum entity_type
 			{
 				DYNAMIC, STATIC
@@ -75,7 +77,9 @@ namespace eversim {
 			};
 
 			class RenderableEntity {
-			private:
+
+				std::pair<size_t,std::weak_ptr<DrawcallEntity>> assigned_drawer;
+				
 				glm::ivec2 texoffset = glm::ivec2(0,0);
 				glm::ivec2 texsize, spritesize;
 				glm::fmat3 M = glm::fmat3(1.f);
@@ -124,6 +128,9 @@ namespace eversim {
 
 				void set_Type(const entity_type t);
 				entity_type get_Type() const;
+
+				void set_Drawer(std::weak_ptr<DrawcallEntity>,size_t);
+				std::weak_ptr<DrawcallEntity> get_Drawer() const;
 
 				friend class render_manager;
 			};
