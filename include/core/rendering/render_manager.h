@@ -74,8 +74,7 @@ namespace eversim { namespace core { namespace rendering {
 		 */
 		void draw(Camera& cam);
 
-		void set_spritmap_program(ShaderProgram& program);
-		ShaderProgram* spriteprog;
+		
 
 	private:
 		struct line
@@ -93,6 +92,7 @@ namespace eversim { namespace core { namespace rendering {
 		std::shared_ptr<Multibuffer> default_buffer_ptr;
 		std::shared_ptr<Texture> default_texture_ptr;
 		std::shared_ptr<ShaderProgram> default_shader_ptr;
+		std::shared_ptr<ShaderProgram> spritemap_shader_ptr;
 
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;
@@ -109,6 +109,8 @@ namespace eversim { namespace core { namespace rendering {
 
 		std::vector<DrawcallEntity> dynamic_drawers;
 		std::vector<DrawcallEntity> static_drawers;
+
+		
 
 		void setup(bool fullscreen);
 

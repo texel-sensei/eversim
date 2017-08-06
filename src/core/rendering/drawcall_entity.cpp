@@ -17,12 +17,10 @@ namespace eversim {
 
 			DrawcallEntity::DrawcallEntity(
 				std::weak_ptr<ShaderProgram> program_ptr,
-				std::weak_ptr<Multibuffer> buffer_ptr,
-				ShaderProgram& spriteprog
+				std::weak_ptr<Multibuffer> buffer_ptr
 			) : 
 				program_ptr(program_ptr),
-				buffer_ptr(buffer_ptr),
-				spriteprog(spriteprog)
+				buffer_ptr(buffer_ptr)
 			{
 				invalidate_if_expired();
 			}
@@ -108,7 +106,7 @@ namespace eversim {
 				{
 					auto* texbaseptr = tex.second;
 					texture_offsets[texbaseptr->get_unique_id()] =
-						spritemap.add_texture(spriteprog, *texbaseptr);
+						spritemap.add_texture(*texbaseptr);
 				}
 
 				for (auto entity_ptr : entities)

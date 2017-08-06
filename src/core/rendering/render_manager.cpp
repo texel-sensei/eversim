@@ -2,6 +2,7 @@
 
 #include "core/utility/sdl.h"
 #include "core/utility/helper.h"
+#include "core/rendering/spritemap.h"
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -36,7 +37,8 @@ namespace eversim { namespace core { namespace rendering {
 		resolution(resolution),
 		default_buffer_ptr	(make_shared<Multibuffer>("default quad mesh")),
 		default_texture_ptr	(make_shared<Texture>(ivec2(4, 4))),
-		default_shader_ptr	(make_shared<ShaderProgram>("default uv shader"))
+		default_shader_ptr	(make_shared<ShaderProgram>("default uv shader")),
+		spritemap_shader_ptr(make_shared<ShaderProgram>("simple quad shader"))
 	{
 		setup(fullscreen);
 	
@@ -70,6 +72,18 @@ namespace eversim { namespace core { namespace rendering {
 		default_shader.link();
 
 		default_shader.logUnfiformslogAttributes();
+
+		auto& spritemap_shader = *spritemap_shader_ptr;
+		spritemap_shader.create();
+		spritemap_shader.attach
+		({
+			{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
+			{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
+			{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		});
+		spritemap_shader.link();
+
+		Spritemap::set_shader(spritemap_shader_ptr);
 	}
 
 	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)
@@ -251,11 +265,6 @@ namespace eversim { namespace core { namespace rendering {
 		});
 	}
 
-	void render_manager::set_spritmap_program(ShaderProgram& program)
-	{
-		spriteprog = &program;
-	}
-
 	void render_manager::draw(Camera& cam)
 	{
 		//Draw dynamic entities todo
@@ -315,8 +324,7 @@ namespace eversim { namespace core { namespace rendering {
 
 					static_drawers.emplace_back(
 						entity.get_ShaderProgram(),
-						entity.get_Multibuffer(),
-						*spriteprog
+						entity.get_Multibuffer()
 					);
 					drawer_ptr = &static_drawers.back();
 				}

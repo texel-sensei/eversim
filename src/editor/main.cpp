@@ -332,9 +332,7 @@ int main(int argc, char* argv[])
 		{"..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER}
 	});
 	program.link();
-
-	renderer.set_spritmap_program(program);
-
+	
 	rendering::ShaderProgram vertex_only_shaderprogram("simple shader");
 	vertex_only_shaderprogram.create();
 	vertex_only_shaderprogram.attach
@@ -382,10 +380,10 @@ int main(int argc, char* argv[])
 	auto player_sm_ptr = renderer.add_spritemap(64);
 	auto& player_sm = *player_sm_ptr;
 
-	player_sm.add_texture(program, conjuration);
-	player_sm.add_texture(program, divination);
-	player_sm.add_texture(program, kobold);
-	player_sm.add_texture(program, brickwall);
+	player_sm.add_texture(conjuration);
+	player_sm.add_texture(divination);
+	player_sm.add_texture(kobold);
+	player_sm.add_texture(brickwall);
 
 	auto player_entity = renderer.add_entity();
 	player_entity->set_Texture(player_sm_ptr,glm::ivec2(0,32),glm::ivec2(32));

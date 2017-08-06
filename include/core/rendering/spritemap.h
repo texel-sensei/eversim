@@ -24,6 +24,8 @@ namespace eversim {
 				utility::Areadivider divider;
 				void init();
 
+				static std::weak_ptr<ShaderProgram> program;
+
 			public:
 				/*
 				 * Creates a Spritemap with the maximum supported resolution
@@ -39,12 +41,17 @@ namespace eversim {
 				 * Add a texture to the best fitting area
 				 * returns false if the spritemap has no empty space left 
 				 */
-				glm::ivec2 add_texture(ShaderProgram& program, TextureBase& tex);
+				glm::ivec2 add_texture(TextureBase& tex);
 				GLuint get_texture_id() const { return canvas_tex.get_texture_id(); }
 				Texture& get_texture() { return canvas_tex.get_texture(); };
 
 				void bind() const override;
 				glm::ivec2 get_resolution() const override;
+
+				static void set_shader(std::weak_ptr<ShaderProgram> prog)
+				{
+					program = prog;
+				}
 			};
 		}
 	}

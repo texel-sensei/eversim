@@ -24,7 +24,6 @@ namespace eversim {
 				std::weak_ptr<Multibuffer> buffer_ptr;
 
 				Spritemap spritemap = Spritemap(512); //TODO
-				ShaderProgram& spriteprog;
 				shader_storage_buffer ssb;
 
 				std::vector<instanced_entity_information> entity_info;
@@ -37,8 +36,7 @@ namespace eversim {
 
 				DrawcallEntity(
 					std::weak_ptr<ShaderProgram> program_ptr,
-					std::weak_ptr<Multibuffer> buffer_ptr,
-					ShaderProgram& spriteprog
+					std::weak_ptr<Multibuffer> buffer_ptr
 				);
 
 				void touch();
