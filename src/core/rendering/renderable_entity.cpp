@@ -1,4 +1,5 @@
 #include "core/rendering/renderable_entity.h"
+#include "core/rendering/drawcall_entity.h"
 
 #include "core/utility/plattform.h"
 
@@ -104,6 +105,12 @@ namespace eversim {	namespace core { namespace rendering {
 	void RenderableEntity::touch()
 	{
 		touched = true;
+		auto idx = assigned_drawer.first;
+		auto drawer_ptr = assigned_drawer.second;
+		if(!drawer_ptr.expired())
+		{
+			drawer_ptr.lock()->touch(idx);
+		}
 	}
 	void RenderableEntity::untouch()
 	{

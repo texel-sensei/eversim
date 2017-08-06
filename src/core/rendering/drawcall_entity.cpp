@@ -52,14 +52,15 @@ namespace eversim {
 				glUseProgram(0);
 			}
 
+			void DrawcallEntity::touch(const size_t idx)
+			{
+				touch();
+				entity_touched.push_back(idx);
+			}
+
 			void DrawcallEntity::touch()
 			{
 				touched = true;
-			}
-
-			void DrawcallEntity::untouch()
-			{
-				touched = false;
 			}
 
 			bool DrawcallEntity::get_touched() const

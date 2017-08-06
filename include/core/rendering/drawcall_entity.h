@@ -18,7 +18,9 @@ namespace eversim {
 			{
 			private:
 				bool valid = true;
-				bool touched = true;
+
+				bool touched = false;
+				std::vector<size_t> entity_touched;
 
 				std::weak_ptr<ShaderProgram> program_ptr;
 				std::weak_ptr<Multibuffer> buffer_ptr;
@@ -40,7 +42,7 @@ namespace eversim {
 				);
 
 				void touch();
-				void untouch();
+				void touch(const size_t idx);
 				bool get_touched() const;
 
 				std::weak_ptr<Multibuffer> get_Multibuffer() const
