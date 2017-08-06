@@ -101,61 +101,37 @@ namespace eversim {
 
 				RenderableEntity();
 
-				void bind() const;
-				void draw() const;
-
 				bool touched = false;
-				void touch() { touched = true; }
-				void untouch() { touched = false; };
+				void touch();
+				void untouch();
 			public:
 
-				const instanced_entity_information& get_instanced_entity_information() const;
+				instanced_entity_information get_instanced_entity_information() const;
 				void get_instanced_entity_information(instanced_entity_information& ifo) const;
 
-				glm::fmat3 get_M() const { return M; };
-				ShaderProgram* get_ShaderProgram() const { return program; };
-				TextureBase* get_Texture() const { return tex; };
-				Multibuffer* get_Multibuffer() const { return data; };
+				glm::fmat3 get_M() const;
+				ShaderProgram* get_ShaderProgram() const;
+				TextureBase* get_Texture() const;
+				Multibuffer* get_Multibuffer() const;
 
-				void set_M(const glm::fmat3& m) { M = m; touch(); };
+				void set_M(const glm::fmat3& m);
 
-				void set_ShaderProgram(ShaderProgram* p) { program = p; touch(); };
-				void set_ShaderProgram(ShaderProgram& p) { set_ShaderProgram(&p); touch(); };
+				void set_ShaderProgram(ShaderProgram* p);
+				void set_ShaderProgram(ShaderProgram& p);
 
-				void set_Texture(Texture* t)
-				{
-					tex = t;
-					texsize = t->get_resolution();
-					spritesize = texsize;
-					touch();
-				};
-				void set_Texture(Texture& t) { set_Texture(&t); };
+				void set_Texture(Texture* t);
+				void set_Texture(Texture& t);
 
-				void set_Texture(Spritemap* sm)
-				{
-					tex = sm;
-					texsize = sm->get_texture().get_resolution();
-					spritesize = texsize;
-					touch();
-				};
+				void set_Texture(Spritemap* sm);
 				void set_Texture(Spritemap* sm,
-					const glm::ivec2& offset, const glm::ivec2& resolution)
-				{
-					tex = sm;
-					texoffset = offset;
-					texsize = resolution;
-					spritesize = sm->get_texture().get_resolution();
-					touch();
-				};
+					const glm::ivec2& offset, const glm::ivec2& resolution);
 
-				void set_Texture(Spritemap& sm) 
-						{ set_Texture(&sm); };
+				void set_Texture(Spritemap& sm);
 				void set_Texture(Spritemap& sm, 
-					const glm::ivec2& offset, const glm::ivec2& resolution)
-						{ set_Texture(&sm, offset, resolution);	};
+					const glm::ivec2& offset, const glm::ivec2& resolution);
 
-				void set_Multibuffer(Multibuffer* b) { data = b; touch(); };
-				void set_Multibuffer(Multibuffer& b) { data = &b; touch(); };
+				void set_Multibuffer(Multibuffer* b);
+				void set_Multibuffer(Multibuffer& b);
 
 				void set_Position(glm::fvec2 pos);
 				glm::fvec2 get_Position() const;
@@ -163,27 +139,15 @@ namespace eversim {
 				void set_Scale(glm::fvec2 scale);
 				glm::fvec2 get_Scale() const;
 			
-				void default_Multibuffer()
-				{
-					set_Multibuffer(*default_quadmesh_ptr);
-					touch();
-				}
-				void default_ShaderProgram()
-				{
-					set_ShaderProgram(default_shader);
-					touch();
-				}
-				void default_Texture()
-				{
-					set_Texture(default_texture);
-					touch();
-				}
+				void default_Multibuffer();
+				void default_ShaderProgram();
+				void default_Texture();
 				void default_State();
 
-				bool get_touched() const { return touched; }
+				bool get_touched() const;
 
-				void set_Type(const entity_type t) { type = t; }
-				entity_type get_Type() const { return type; }
+				void set_Type(const entity_type t);
+				entity_type get_Type() const;
 
 				friend class render_manager;
 			};
