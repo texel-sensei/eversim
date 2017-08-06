@@ -38,6 +38,7 @@
 
 #include <random>
 #include <chrono>
+#include "core/system/imgui/physics_inspector.h"
 
 //#include <float.h>
 //unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
@@ -262,6 +263,7 @@ int main(int argc, char* argv[])
 
 	physics.set_level(l.get());
 
+	windows.add_window<system::imgui::physics_inspector>(&physics, "physics", true);
 	auto boulder_templ = loader.load("cube.bdy");
 
 	auto add_floor_constraint = [&](physics::body* b)
@@ -301,6 +303,36 @@ int main(int argc, char* argv[])
 	rendering::Camera cam("default_cam",
 						  resolution,
 	                      20.f);
+
+	mouse_click = [&](glm::ivec2 pos, int button)
+	{
+		auto ss_pos = glm::vec2(pos) / glm::vec2(resolution);
+		ss_pos = ss_pos * 2.f - 1.f;
+		ss_pos.y *= -1.f;
+		const auto V = cam.get_view_matrix();
+		const auto P = cam.get_projection_matrix();
+		const auto inv = inverse(P*V);
+
+		const auto ws_pos = glm::vec2(inv * glm::vec3(ss_pos, 1));
+
+		LOG(INFO) << "Pressed button " << button;
+		if (button == 1)
+			physics.add_body(*boulder_templ, ws_pos, 0.1f);
+
+		if(button == 3)
+		{
+			for(auto& b : physics.get_bodies())
+			{
+				if(
+					glm::length(b.position - ws_pos) < 0.1f
+					&& &b != player
+				)
+				{
+					physics.remove_body(&b);
+				}
+			}
+		}
+	};
 
 	rendering::Texture brickwall("brick_gray0\\brick_gray0.png");
 	rendering::Texture brickwall_big("brick_gray0\\brick_gray0_big.png");
