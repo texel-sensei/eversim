@@ -12,7 +12,7 @@
 
 namespace eversim {
 	namespace core {
-		namespace utility {
+		namespace rendering {
 
 			struct texture_packet {
 				GLuint tex_id;
@@ -36,7 +36,7 @@ namespace eversim {
 				}
 			};
 
-			class texture_loader final : public resource_manager<texture_loader, std::string, texture_packet>
+			class texture_loader final : public utility::resource_manager<texture_loader, std::string, texture_packet>
 			{
 			protected:
 				ptr_type load_file(std::string const& s) const override

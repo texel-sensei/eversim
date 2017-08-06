@@ -308,6 +308,9 @@ int main(int argc, char* argv[])
 	rendering::Texture conjuration_big("brick_gray0\\conjuration_big.png");
 	rendering::Texture divination("brick_gray0\\divination.png");
 	rendering::Texture kobold("brick_gray0\\big_kobold.png");
+
+	
+
 	rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
 
 	auto conjuration_ptr = renderer.add_texture("brick_gray0\\divination.png");
@@ -357,8 +360,6 @@ int main(int argc, char* argv[])
 
 	glm::fmat3 M = glm::fmat3(1.f);
 
-	/*auto sm_ptr = renderer.add_spritemap(1024);
-	auto& sm = *sm_ptr;*/
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 	default_random_engine generator(seed);
 
@@ -372,21 +373,11 @@ int main(int argc, char* argv[])
 		&biggerkobold
 	});
 
-
-	//sm.add_texture(program, conjuration);
-
 	uniform_int_distribution<int> distribution(0, texes.size() - 1);
 
-	auto player_sm_ptr = renderer.add_spritemap(64);
-	auto& player_sm = *player_sm_ptr;
-
-	player_sm.add_texture(conjuration);
-	player_sm.add_texture(divination);
-	player_sm.add_texture(kobold);
-	player_sm.add_texture(brickwall);
-
 	auto player_entity = renderer.add_entity();
-	player_entity->set_Texture(player_sm_ptr,glm::ivec2(0,32),glm::ivec2(32));
+	auto player_texture = std::make_shared<rendering::Texture>("brick_gray0\\big_kobold.png");
+	player_entity->set_Texture(player_texture);
 
 
 	l->initialize_graphics(renderer);

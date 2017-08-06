@@ -2,7 +2,7 @@
 
 #include "core/rendering/texture_base_class.h"
 #include "core/rendering/texture.h"
-#include "core/utility/texture_loader.h"
+#include "core/rendering/texture_loader.h"
 #include "core/rendering/canvas.h"
 #include "core/rendering/shader_program.h"
 #include "core/utility/area.h"

@@ -101,8 +101,6 @@ namespace eversim {
 
 			void DrawcallEntity::upload()
 			{
-
-				std::map<size_t, glm::ivec2> texture_offsets;
 				for (auto& tex : found_textures)
 				{
 					auto* texbaseptr = tex.second;
@@ -110,6 +108,9 @@ namespace eversim {
 						spritemap.add_texture(*texbaseptr);
 				}
 
+				size_t idx = 0;
+
+				entity_info.resize(entities.size());
 				for (auto entity_ptr : entities)
 				{
 					if(entity_ptr.expired())
@@ -117,22 +118,47 @@ namespace eversim {
 						LOG(ERROR) << "expired entity";
 						continue;
 					}
-					auto& entity = *entity_ptr.lock();
+					
+					update_instanced_entity_information(idx);
 
-					entity_info.emplace_back();
-					auto& info = entity_info.back();
-					entity.get_instanced_entity_information(info);
-
-					auto unique_id = entity.get_Texture().lock()->get_unique_id();
-					auto* tex = found_textures[unique_id];
-
-					info.set_texoffset(texture_offsets[unique_id]);
-					info.set_texsize(tex->get_resolution());
-					info.set_spritesize(spritemap.get_resolution());
+					idx++;
 				}
 
 				utility::byte_array_view view(entity_info);
 				ssb = shader_storage_buffer(view);
+			}
+
+			void DrawcallEntity::update_instanced_entity_information(const size_t idx)
+			{
+				auto entity_wkptr = entities.at(idx);
+				if (entity_wkptr.expired()) return;
+				auto& entity = *entity_wkptr.lock();
+
+				auto unique_id = entity.get_Texture().lock()->get_unique_id();
+				auto* tex = found_textures[unique_id];
+
+				auto& info = entity_info.at(idx);
+				entity.get_instanced_entity_information(info);
+
+				info.set_texoffset(texture_offsets[unique_id]);
+				info.set_texsize(tex->get_resolution());
+				info.set_spritesize(spritemap.get_resolution());
+			}
+
+			void DrawcallEntity::update()
+			{
+				for(const auto idx : entity_touched)
+				{
+					update_instanced_entity_information(idx);
+
+					auto& info = entity_info.at(idx);
+
+					std::vector<instanced_entity_information> tmp = {info};
+					utility::byte_array_view view(tmp);
+					
+					ssb.update(view, idx);
+				}
+				entity_touched.clear();
 			}
 		}
 	}

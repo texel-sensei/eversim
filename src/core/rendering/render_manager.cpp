@@ -184,10 +184,11 @@ namespace eversim { namespace core { namespace rendering {
 	{
 		auto ptr = entity_shptr(new RenderableEntity(
 			default_shader_ptr, default_texture_ptr, default_buffer_ptr,type));
-		if(type == STATIC)
+		/*if(type == STATIC)
 			dirty_entities.push_back(ptr);
 		 else
-			dynamic_entities.push_back(ptr);
+			dynamic_entities.push_back(ptr);*/
+		dirty_entities.push_back(ptr);
 		return ptr;
 	}
 
@@ -276,7 +277,6 @@ namespace eversim { namespace core { namespace rendering {
 				DrawcallEntity drawer(
 					dynamic_entity.get_ShaderProgram(),
 					dynamic_entity.get_Multibuffer(),
-					*spriteprog
 				);
 
 				drawer.add_entity(dynamic);
@@ -355,6 +355,7 @@ namespace eversim { namespace core { namespace rendering {
 
 		for(auto& drawcall : static_drawers)
 		{
+			drawcall->update();
 			drawcall->draw(cam);
 		}
 	}

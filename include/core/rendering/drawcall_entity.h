@@ -30,9 +30,13 @@ namespace eversim {
 
 				std::vector<instanced_entity_information> entity_info;
 				std::map<size_t, TextureBase*> found_textures;
+				std::map<size_t, glm::ivec2> texture_offsets;
 				std::vector<std::weak_ptr<RenderableEntity>> entities;
 
 				void invalidate_if_expired();
+
+				void update_instanced_entity_information(const size_t idx);
+
 
 			public:
 
@@ -51,6 +55,7 @@ namespace eversim {
 				}
 
 				void draw(Camera& cam);
+				void update();
 
 				/*
 				 * Add the data of the entity to the DrawcallEntity
