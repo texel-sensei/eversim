@@ -56,7 +56,7 @@ namespace eversim { namespace core { namespace physics {
 		virtual ~constraint(){};
 
 		virtual float operator()() const = 0;
-		virtual std::vector<glm::vec2> grad() const = 0;
+		virtual void grad(utility::array_view<glm::vec2> out) const = 0;
 
 		constraint_type get_type() const noexcept { return type; }
 		size_t get_arity() const noexcept { return arity;}

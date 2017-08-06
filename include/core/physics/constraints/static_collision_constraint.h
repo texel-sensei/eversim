@@ -15,7 +15,7 @@ namespace eversim { namespace core { namespace physics {
 		explicit static_collision_constraint(world::tile const& t, particle const& p);
 
 		float operator()() const override;
-		std::vector<glm::vec2> grad() const override;
+		void grad(utility::array_view<glm::vec2> out) const override;
 		
 		glm::vec2 normal() const { return n; }
 		world::tile const* tile() const { return tile_; }

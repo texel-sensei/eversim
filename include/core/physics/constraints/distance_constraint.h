@@ -24,10 +24,13 @@ namespace eversim { namespace core { namespace physics {
 			return length(particles[0]->projected_position - particles[1]->projected_position) - distance;
 		}
 
-		std::vector<glm::vec2> grad() const override
+		void grad(utility::array_view<glm::vec2> out) const override
 		{
+			EVERSIM_ASSERT(out.size() == get_arity());
+
 			const auto n = normalize(particles[0]->projected_position - particles[1]->projected_position);
-			return{ n, -n };
+			out[0] = n;
+			out[1] = -n;
 		}
 
 		float get_distance() const

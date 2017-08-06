@@ -4,6 +4,7 @@
 #include "core/rendering/render_manager.h"
 
 #include <vector>
+#include "core/physics/constraints/angle_constraint.h"
 
 using namespace std;
 
@@ -74,12 +75,13 @@ namespace eversim { namespace core { namespace physics {
 		return dot(pos - entry, n);
 	}
 
-	vector<glm::vec2> static_collision_constraint::grad() const
+	void static_collision_constraint::grad(utility::array_view<glm::vec2> out) const
 	{
+		EVERSIM_ASSERT(out.size() == get_arity());
 		// (p.x - e.x)*n.x + (p.y - e.y)*n.y
 		// <=>
 		// p.x*n.x - e.x*n.x + p.y*n.y - e.y*n.y
 		const auto pos = particles[0]->projected_position;
-		return {pos*n};
+		out[0] = pos*n;
 	}
 }}}

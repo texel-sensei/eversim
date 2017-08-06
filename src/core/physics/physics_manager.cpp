@@ -324,14 +324,16 @@ namespace eversim { namespace core { namespace physics {
 				}
 			}
 
-			auto grad = c.grad();
+			static thread_local glm::vec2 cache[physics_manager::max_constraint_arity];
+			auto grad = utility::make_array_view(cache).slice_n(0, c.get_arity());
+			c.grad(grad);
 
 			const auto sum = [&]
 			{
 				auto sum = 0.f;
 				for (auto i = 0; i < c.get_arity(); ++i)
 				{
-					sum += c.particles[i]->inv_mass * length2(grad[i]);
+					sum += c.particles[i]->inv_mass * glm::length2(grad[i]);
 				}
 				return sum;
 			}();

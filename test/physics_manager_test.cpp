@@ -26,7 +26,7 @@ namespace {
 		}
 
 		float operator()() const override { return 0.f; }
-		vector<vec2> grad() const override { return {}; }
+		void grad(eversim::core::utility::array_view<glm::vec2>) const override {}
 	};
 
 	class mock_constraint_factory : public constraint_factory {
