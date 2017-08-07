@@ -1,27 +1,16 @@
-#include "core/system/imgui/physics_inspector.h"
+#include "editor/windows/physics_inspector.h"
 
 #include "core/physics/physics_manager.h"
-#include <boost/format.hpp>
-
-#include <imgui/imgui_internal.h>
 #include "core/utility/helper.h"
 
-bool IsItemActiveLastFrame()
-{
-	ImGuiContext& g = *GImGui;
-	if (g.ActiveIdPreviousFrame)
-		return g.ActiveIdPreviousFrame == g.CurrentWindow->DC.LastItemId;
-	return false;
-}
+#include <imgui/imgui_internal.h>
 
-bool IsItemJustReleased()
-{
-	return IsItemActiveLastFrame() && !ImGui::IsItemActive();
-}
+#include <boost/format.hpp>
 
 using namespace std;
+using namespace eversim::core;
 
-namespace eversim { namespace core { namespace system { namespace imgui {
+namespace eversim { namespace editor { namespace windows {
 
 	void physics_inspector::draw_content()
 	{
@@ -59,9 +48,9 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		auto name = "Bodies: "s + to_string(n) + "###body_cat";
 		if (!ImGui::CollapsingHeader(name.c_str()))
 			return;
-		
+
 		ImGui::Indent();
-		if(ImGui::Button("Cleanup bodies"))
+		if (ImGui::Button("Cleanup bodies"))
 		{
 			physics->cleanup_dead_bodies();
 		}
@@ -72,7 +61,7 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 			if (changed)
 				body_names[selected_body] = name_buffer;
 			ImGui::SameLine();
-			if(ImGui::Button("Delete"))
+			if (ImGui::Button("Delete"))
 			{
 				physics->remove_body(selected_body);
 				selected_body = nullptr;
@@ -115,4 +104,4 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		return it->second;
 	}
 
-}}}}
+}}}

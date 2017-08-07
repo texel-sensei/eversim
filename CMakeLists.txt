@@ -123,6 +123,7 @@ file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
+# core source groups
 source_group("utility" REGULAR_EXPRESSION /utility/)
 source_group("utility\\time" REGULAR_EXPRESSION /utility/time/)
 source_group("rendering" REGULAR_EXPRESSION /rendering/)
@@ -132,13 +133,19 @@ source_group("world" REGULAR_EXPRESSION /world/)
 source_group("system" REGULAR_EXPRESSION /system/)
 source_group("system\\imgui" REGULAR_EXPRESSION /system/imgui/)
 
-add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
-add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
-add_executable(editor ${EDITOR_HEADERS} ${EDITOR_SOURCES})
+#editor source groups
+source_group("imgui" REGULAR_EXPRESSION /editor/imgui/)
+source_group("core" REGULAR_EXPRESSION /editor/core/)
+source_group("windows" REGULAR_EXPRESSION /editor/windows/)
 
-link_libraries(${LIBS})
-target_link_libraries(game eversim ${LIBS})
-target_link_libraries(editor eversim ${LIBS})
+add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
+add_library(editor STATIC ${EDITOR_HEADERS} ${EDITOR_SOURCES})
+add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
+
+
+target_link_libraries(eversim ${LIBS})
+target_link_libraries(editor eversim)
+target_link_libraries(game editor eversim)
 
 #######################################################################
 #                             testing                                 #

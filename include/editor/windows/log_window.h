@@ -1,9 +1,9 @@
 #pragma once
-#include "core/system/imgui/base_window.h"
+#include "editor/core/base_window.h"
 
-namespace eversim { namespace core { namespace system { namespace imgui {
+namespace eversim { namespace editor { namespace windows {
 
-	class log_window : public base_window {
+	class log_window : public core::base_window {
 	public:
 		explicit log_window(std::string const& name = "log");
 		~log_window();
@@ -29,4 +29,4 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		void add_line(std::string const& line);
 	};
 
-}}}}
+}}}

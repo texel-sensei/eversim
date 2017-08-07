@@ -1,7 +1,7 @@
-#include "core/system/imgui/window_manager.h"
+#include "editor/core/window_manager.h"
 #include <boost/range/adaptor/map.hpp>
 
-namespace eversim { namespace core { namespace system { namespace imgui {
+namespace eversim { namespace editor { namespace core {
 
 	window_manager::window_manager()
 	{
@@ -9,7 +9,7 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 
 	void window_manager::begin_frame() const
 	{
-		if(is_menu_visible())
+		if (is_menu_visible())
 			draw_menu();
 	}
 
@@ -17,7 +17,7 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 	{
 		for (auto& w : windows | boost::adaptors::map_values)
 		{
-			if(w->is_visible())
+			if (w->is_visible())
 				w->draw();
 		}
 	}
@@ -39,11 +39,11 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		}
 
 		// draw window menues
-		for(auto& w : windows | boost::adaptors::map_values)
+		for (auto& w : windows | boost::adaptors::map_values)
 		{
-			if(w->is_visible() && w->has_menu())
+			if (w->is_visible() && w->has_menu())
 			{
-				if(ImGui::BeginMenu(w->get_name().c_str()))
+				if (ImGui::BeginMenu(w->get_name().c_str()))
 				{
 					w->draw_menu();
 					ImGui::EndMenu();
@@ -52,4 +52,4 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		}
 		ImGui::EndMainMenuBar();
 	}
-}}}}
+}}}

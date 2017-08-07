@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/system/imgui/base_window.h"
+#include "editor/core/base_window.h"
 
 #include <easylogging++.h>
 
@@ -8,18 +8,18 @@
 #include <memory>
 #include <map>
 
-namespace eversim { namespace core { namespace system { namespace imgui {
+namespace eversim { namespace editor { namespace core {
 
 	class window_manager {
 	public:
 		window_manager();
 
-		template<
+		template <
 			typename Window, typename... Args,
 			typename = std::enable_if_t<std::is_base_of_v<base_window, Window>>
 		>
 		Window* add_window(Args&&... args);
-	
+
 		void set_menu_visible(bool b) noexcept { menu_visible = b; }
 		bool is_menu_visible() const noexcept { return menu_visible; }
 
@@ -42,7 +42,7 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 
 		auto const& name = w->get_name();
 		auto it = windows.find(name);
-		if(it != windows.end())
+		if (it != windows.end())
 		{
 			LOG(ERROR) << "Added duplicate window to window manager! \"" << name << "\"";
 			throw std::runtime_error{"Duplicate window added!"};
@@ -52,4 +52,4 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		return ret;
 	}
 
-}}}}
+}}}

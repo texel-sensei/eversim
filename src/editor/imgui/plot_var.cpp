@@ -1,4 +1,4 @@
-#include "core/system/imgui/plot_var.h"
+#include "editor/imgui/plot_var.h"
 #include <imgui/imgui.h>
 #include <map>
 #include <vector>

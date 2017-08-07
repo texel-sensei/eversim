@@ -1,19 +1,22 @@
-#include "core/system/imgui/log_window.h"
+#include "editor/windows/log_window.h"
 #include <easylogging++.h>
 
-namespace eversim { namespace core { namespace system { namespace imgui {
+namespace eversim { namespace editor { namespace windows {
+	
+	using namespace editor::core;
 
-		class log_window::log_handler : public el::LogDispatchCallback {
-		public:
-			log_window* window = nullptr;
-			std::string name;
+	class log_window::log_handler : public el::LogDispatchCallback {
+	public:
+		log_window* window = nullptr;
+		std::string name;
 
-			void handle(const el::LogDispatchData* handlePtr) override{
-				const auto builder = handlePtr->logMessage()->logger()->logBuilder();
-				const auto append_newline = (handlePtr->dispatchAction() == el::base::DispatchAction::NormalLog);
-				window->add_line(builder->build(handlePtr->logMessage(), append_newline));
-			}
-		};
+		void handle(const el::LogDispatchData* handlePtr) override
+		{
+			const auto builder = handlePtr->logMessage()->logger()->logBuilder();
+			const auto append_newline = (handlePtr->dispatchAction() == el::base::DispatchAction::NormalLog);
+			window->add_line(builder->build(handlePtr->logMessage(), append_newline));
+		}
+	};
 
 	log_window::log_window(std::string const& name)
 		: base_window(name)
@@ -103,4 +106,4 @@ namespace eversim { namespace core { namespace system { namespace imgui {
 		}
 		ScrollToBottom = true;
 	}
-}}}}
+}}}

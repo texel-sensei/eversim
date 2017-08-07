@@ -1,4 +1,4 @@
-#include "core/system/imgui/bar_graph.h"
+#include "editor/imgui/bar_graph.h"
 #include <vector>
 #include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS

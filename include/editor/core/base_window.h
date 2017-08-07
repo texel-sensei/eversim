@@ -2,7 +2,7 @@
 #include <imgui/imgui.h>
 #include <string>
 
-namespace eversim {namespace core {namespace system {namespace imgui {
+namespace eversim {namespace editor {namespace core {
 	
 	enum class display_type {
 		window,
@@ -37,4 +37,4 @@ namespace eversim {namespace core {namespace system {namespace imgui {
 		void footer(display_type);
 	};
 
-} } } }
+} } } 
