@@ -28,10 +28,13 @@ namespace eversim {
 				Spritemap spritemap = Spritemap(512); //TODO
 				shader_storage_buffer ssb;
 
-				std::vector<instanced_entity_information> entity_info;
+				
 				std::map<size_t, TextureBase*> found_textures;
 				std::map<size_t, glm::ivec2> texture_offsets;
+
 				std::vector<std::weak_ptr<RenderableEntity>> entities;
+				std::vector<instanced_entity_information> entity_info;
+				size_t idx_add = 0;
 
 				void invalidate_if_expired();
 
@@ -62,6 +65,8 @@ namespace eversim {
 				 * returns the index of the entity data
 				 */
 				size_t add_entity(std::weak_ptr<RenderableEntity> entity);
+
+				void move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target);
 
 				instanced_entity_information get_entity_data(const size_t idx) const;
 

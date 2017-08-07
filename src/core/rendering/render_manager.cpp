@@ -303,8 +303,8 @@ namespace eversim { namespace core { namespace rendering {
 			{
 
 				auto buffer_ptr = std::get<0>(block);
-				const size_t start_idx = std::get<1>(block);
-				const size_t num_instances = std::get<2>(block);
+				const auto start_idx = std::get<1>(block);
+				const auto num_instances = std::get<2>(block);
 								
 				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
 
