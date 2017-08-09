@@ -32,6 +32,8 @@ namespace eversim {
 				std::map<size_t, TextureBase*> found_textures;
 				std::map<size_t, glm::ivec2> texture_offsets;
 
+
+				const size_t extra_space = 500;
 				std::vector<std::weak_ptr<RenderableEntity>> entities;
 				std::vector<instanced_entity_information> entity_info;
 				size_t idx_add = 0;
@@ -39,6 +41,8 @@ namespace eversim {
 				void invalidate_if_expired();
 
 				void update_instanced_entity_information(const size_t idx);
+
+				void reduce();
 
 
 			public:
@@ -67,9 +71,10 @@ namespace eversim {
 				size_t add_entity(std::weak_ptr<RenderableEntity> entity);
 
 				void move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target);
+				void remove_entity(size_t entity_idx);
 
 				instanced_entity_information get_entity_data(const size_t idx) const;
-
+				void remove_expired_entities();
 				void upload();
 			};
 

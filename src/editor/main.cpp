@@ -383,14 +383,35 @@ int main(int argc, char* argv[])
 	l->initialize_graphics(renderer);
 
 	player->position = {16.f, 28.f};
+
+
+	//player->position = { 0.f, 0.f };
+
 	cam.set_position({16.f,30.f});
 
 	empty_canvas.clear();
 	empty_canvas.place_texture(program, biggerkobold, { 420,380 }, {1,1});
 
-	int cnt = 0;
+	LOG(INFO) << "testitities\n\n\n";
+
+	
+
+	std::vector<std::shared_ptr<rendering::RenderableEntity>> tmp_es;
+
+	for (size_t i = 0; i < 10; i++)
+	{
+		tmp_es.push_back(renderer.add_entity());
+		tmp_es.back()->set_Position(glm::fvec2(i) + glm::fvec2(0, 2));
+		tmp_es.back()->set_Scale(glm::fvec2(i + 10) / 10.f);
+		tmp_es.back()->set_Texture(conjuration_ptr);
+	}
+
+		
+
+	auto cnt = 0;
 	while (handle_sdl_events())
 	{
+
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
 
@@ -406,7 +427,7 @@ int main(int argc, char* argv[])
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_MULTISAMPLE);
 
 
 		empty_canvas.clear();
@@ -489,6 +510,18 @@ int main(int argc, char* argv[])
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
+
+		if(tmp_es.size() > 0)
+		{
+			for(auto& entity_ptr : tmp_es)
+			{
+				auto& entity = *entity_ptr;
+				LOG(INFO) << "idx = " << entity.get_Drawer_idx();
+				
+			}
+			tmp_es.clear();
+			LOG(INFO) << "clearing entities";
+		}
 
 	}
 	return 0;

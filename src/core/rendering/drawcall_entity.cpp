@@ -23,6 +23,11 @@ namespace eversim {
 				buffer_ptr(buffer_ptr)
 			{
 				invalidate_if_expired();
+				if(valid)
+				{
+					entities.resize(extra_space);
+					entity_info.resize(extra_space);
+				}
 			}
 
 			void DrawcallEntity::draw(Camera& cam)
@@ -47,7 +52,7 @@ namespace eversim {
 				spritemap.bind();
 
 				glDrawArraysInstanced(buffer.type, buffer.first, 
-					buffer.count, static_cast<GLsizei>(entity_info.size()));
+					buffer.count, static_cast<GLsizei>(idx_add-1));
 
 				glUseProgram(0);
 			}
@@ -76,16 +81,19 @@ namespace eversim {
 					throw exception("DrawcallEntity: add_entity of expired entity");
 				}
 
+				touch();
+
 				const auto idx = idx_add;
 
 				if(idx_add >= entities.size())
 				{
-					constexpr size_t bigger = 10;
-					entities.resize(entities.size()+bigger); 
-					entity_info.resize(entity_info.size()+bigger);
+					entities.resize(entities.size()+extra_space);
+					entity_info.resize(entities.size());
 				}
 
-				entities.at(idx_add++) = entity_ptr;
+				entities.at(idx_add) = entity_ptr;
+
+				idx_add++;
 
 				auto& entity = *(entity_ptr.lock());
 
@@ -100,8 +108,19 @@ namespace eversim {
 				auto* tex = &(*(tex_wkptr.lock()));
 
 				found_textures[tex->get_unique_id()] = tex;
-
+			
 				return idx;
+			}
+
+			void DrawcallEntity::reduce()
+			{
+				idx_add--;
+				if (entities.size() > extra_space && idx_add+1 <= entities.size() - extra_space)
+				{
+					entities.resize(idx_add+1);
+					entity_info.resize(idx_add+1);
+				}
+				touch();
 			}
 
 			void DrawcallEntity::move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target)
@@ -114,9 +133,49 @@ namespace eversim {
 				auto idx = target.lock()->add_entity(entity_ptr);
 				entity.set_Drawer(target,idx);
 
-				std::swap(entities.at(idx_add-1), entities.at(entity_idx));
-				std::swap(entity_info.at(idx_add-1), entity_info.at(entity_idx));
-				idx_add--;
+				remove_entity(entity_idx);
+			}
+
+			void DrawcallEntity::remove_entity(size_t entity_idx)
+			{
+				if (entity_idx >= idx_add) return;
+
+				auto end_ptr = remove_if(begin(entity_touched), end(entity_touched),
+					[&]( size_t idx ) 
+				{
+					return idx == entity_idx;
+				});
+
+				entity_touched = std::vector<size_t>(begin(entity_touched), end_ptr);
+
+				if(entity_idx < idx_add-1)
+				{
+					std::swap(entities.at(idx_add-1), entities.at(entity_idx));
+					std::swap(entity_info.at(idx_add-1), entity_info.at(entity_idx));
+
+					auto entity_ptr = entities.at(entity_idx);
+
+					if (!entity_ptr.expired())
+					{
+						auto& entity = *entity_ptr.lock();
+						entity.set_Drawer(entity_idx);
+					}
+
+					entity_touched.push_back(entity_idx);
+				}
+
+				reduce();
+
+				
+			}
+
+			void DrawcallEntity::remove_expired_entities()
+			{
+				for(size_t entity_idx = 0; entity_idx < idx_add; entity_idx++)
+				{
+					if (entities.at(entity_idx).expired())
+						remove_entity(entity_idx);
+				}
 			}
 
 			instanced_entity_information DrawcallEntity::get_entity_data(const size_t idx) const
@@ -132,21 +191,21 @@ namespace eversim {
 					texture_offsets[texbaseptr->get_unique_id()] =
 						spritemap.add_texture(*texbaseptr);
 				}
-				
-				for(size_t i = 0; i < idx_add; ++i)
+
+				for (size_t i = 0; i < idx_add; ++i)
 				{
 					auto entity_ptr = entities.at(i);
-					if(entity_ptr.expired())
+					if (entity_ptr.expired())
 					{
 						LOG(ERROR) << "expired entity";
 						continue;
 					}
-					
+
 					update_instanced_entity_information(i);
 				}
 
 				utility::byte_array_view view(entity_info);
-				ssb = shader_storage_buffer(view);
+				ssb = shader_storage_buffer(view);			
 			}
 
 			void DrawcallEntity::update_instanced_entity_information(const size_t idx)
@@ -180,6 +239,7 @@ namespace eversim {
 					ssb.update(view, idx);
 				}
 				entity_touched.clear();
+				touched = false;
 			}
 		}
 	}

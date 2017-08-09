@@ -22,6 +22,13 @@ namespace eversim {	namespace core { namespace rendering {
 		type(t)
 	{}
 
+	RenderableEntity::~RenderableEntity()
+	{
+
+		if (assigned_drawer.first >= 0 && !assigned_drawer.second.expired())
+			assigned_drawer.second.lock()->remove_entity(assigned_drawer.first);
+	}
+
 	instanced_entity_information RenderableEntity::get_instanced_entity_information() const
 	{
 		instanced_entity_information ifo;
@@ -107,7 +114,7 @@ namespace eversim {	namespace core { namespace rendering {
 		touched = true;
 		auto idx = assigned_drawer.first;
 		auto drawer_ptr = assigned_drawer.second;
-		if(!drawer_ptr.expired())
+		if(assigned_drawer.first >= 0 && !drawer_ptr.expired())
 		{
 			drawer_ptr.lock()->touch(idx);
 		}
@@ -137,9 +144,19 @@ namespace eversim {	namespace core { namespace rendering {
 		assigned_drawer = make_pair(idx,de);
 	}
 
+	void RenderableEntity::set_Drawer(size_t idx)
+	{
+		assigned_drawer.first = idx;
+	}
+
 	std::weak_ptr<DrawcallEntity> RenderableEntity::get_Drawer() const
 	{
 		return assigned_drawer.second;
+	}
+
+	long long RenderableEntity::get_Drawer_idx() const
+	{
+		return assigned_drawer.first;
 	}
 
 }}}

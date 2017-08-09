@@ -103,7 +103,7 @@ void initialize_tiles(world::level_loader& loader)
 }
 
 struct loaders {
-	utility::texture_loader* tex;
+	rendering::texture_loader* tex;
 	world::level_loader* lev;
 	physics::body_template_loader* bdy;
 

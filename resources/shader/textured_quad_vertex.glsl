@@ -36,7 +36,15 @@ void main(void)
 	
 	mat3 MV = V * M;
 	mat3 MVP = P * V * M;
-	gl_Position = vec4(MVP * vec3(in_Position,1),1);
+	
+	vec3 sp = MVP * vec3(in_Position,1);
+	sp = sp/sp.z;
+	
+		
+	//TODO
+	sp = vec3(sp.x,sp.y,1);
+	
+	gl_Position = vec4(sp,1);
 	
 	ex_UV = texoffset + texsize * in_UV;
 	ex_UV /= spritesize;

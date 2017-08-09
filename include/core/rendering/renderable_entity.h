@@ -78,7 +78,8 @@ namespace eversim {
 
 			class RenderableEntity {
 
-				std::pair<size_t,std::weak_ptr<DrawcallEntity>> assigned_drawer;
+				std::pair<long long,std::weak_ptr<DrawcallEntity>> assigned_drawer 
+					= {-1,std::weak_ptr<DrawcallEntity>()};
 				
 				glm::ivec2 texoffset = glm::ivec2(0,0);
 				glm::ivec2 texsize, spritesize;
@@ -99,7 +100,11 @@ namespace eversim {
 				bool touched = false;
 				void touch();
 				void untouch();
+
+				void set_Drawer(size_t);
 			public:
+
+				~RenderableEntity();
 
 				instanced_entity_information get_instanced_entity_information() const;
 				void get_instanced_entity_information(instanced_entity_information& ifo) const;
@@ -130,9 +135,12 @@ namespace eversim {
 				entity_type get_Type() const;
 
 				void set_Drawer(std::weak_ptr<DrawcallEntity>,size_t);
+				
 				std::weak_ptr<DrawcallEntity> get_Drawer() const;
+				long long get_Drawer_idx() const;
 
 				friend class render_manager;
+				friend class DrawcallEntity;
 			};
 		}
 	}
