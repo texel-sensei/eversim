@@ -7,8 +7,16 @@ namespace eversim {namespace core{namespace system {
 	
 	class gameobject {
 		friend class game;
+		struct creation_key{};
 	public:		
+		explicit gameobject(creation_key, game*);
+
 		gameobject* get_parent() const { return parent; }
+
+		void add_child(gameobject* child);
+		void set_parent(gameobject* parent);
+
+		gameobject* clone() const;
 
 		void kill();
 
@@ -28,9 +36,8 @@ namespace eversim {namespace core{namespace system {
 
 		glm::vec2 position;
 		glm::vec2 scale;
-		float angle;
+		float angle = 0.f;
 
-		explicit gameobject(game*);
 
 		void update(utility::clock::duration);
 	};
