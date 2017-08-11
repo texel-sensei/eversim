@@ -1,5 +1,6 @@
 #include "editor/core/base_window.h"
 #include <imgui/imgui.h>
+#include "core/error.h"
 
 namespace eversim { namespace editor { namespace core {
 	base_window::base_window(std::string const& n, bool vis)
@@ -29,7 +30,8 @@ namespace eversim { namespace editor { namespace core {
 		case display_type::inplace:
 			ImGui::PushID(name.c_str());
 			return true;
-		default: ;
+		default: 
+			EVERSIM_THROW(eversim::core::generic_error::InvalidEnum);
 		}
 	}
 
@@ -46,7 +48,8 @@ namespace eversim { namespace editor { namespace core {
 		case display_type::inplace:
 			ImGui::PopID();
 			break;
-		default: ;
+		default: 
+			EVERSIM_THROW(eversim::core::generic_error::InvalidEnum);
 		}
 	}
 
