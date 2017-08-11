@@ -62,8 +62,12 @@ namespace eversim {namespace core {
 					return "assertion failed";
 				case generic_error::FileNotFound:
 					return "file not found";
+				case generic_error::InvalidArgument: 
+					return "Invalid argument";
+				case generic_error::InvalidEnum: 
+					return "Invalid enum value";
 				default:
-					return "unknown";
+					return "(unknown)";
 				}
 			}
 		};

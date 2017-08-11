@@ -29,7 +29,9 @@ namespace eversim { namespace core {
 	enum class generic_error {
 		// 0 means no error
 		AssertionFailure = 1,	// Some assertion failed
-		FileNotFound			// Couldn't open some file
+		FileNotFound,			// Couldn't open some file
+		InvalidArgument,		// Invalid argument passed
+		InvalidEnum,			// Invalid value of enum passed
 	};
 
 	std::error_code make_error_code(generic_error);
