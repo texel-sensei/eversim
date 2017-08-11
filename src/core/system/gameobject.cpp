@@ -5,6 +5,11 @@ namespace eversim { namespace core { namespace system {
 	gameobject* gameobject::clone() const
 	{
 		auto clone = the_game->create_empty();
+		
+		clone->position = this->position;
+		clone->scale = this->scale;
+		clone->angle = this->angle;
+
 		for(auto& child : children)
 		{
 			auto cloned_child = child->clone();

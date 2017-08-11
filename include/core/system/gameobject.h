@@ -16,6 +16,15 @@ namespace eversim {namespace core{namespace system {
 		void add_child(gameobject* child);
 		void set_parent(gameobject* parent);
 
+		glm::vec2 get_position() const { return position; }
+		void set_position(glm::vec2 p) { position = p; }
+
+		glm::vec2 get_scale() const { return scale; }
+		void set_scale(glm::vec2 s) { scale = s; }
+
+		float get_angle() const { return angle; }
+		void set_angle(float a) { angle = a; }
+
 		gameobject* clone() const;
 
 		void kill();
@@ -35,7 +44,7 @@ namespace eversim {namespace core{namespace system {
 		bool alive = true;
 
 		glm::vec2 position;
-		glm::vec2 scale;
+		glm::vec2 scale{1.f,1.f};
 		float angle = 0.f;
 
 
