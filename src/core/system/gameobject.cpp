@@ -1,5 +1,6 @@
 #include "core/system/gameobject.h"
 #include "core/system/game.h"
+#include <boost/range/adaptor/map.hpp>
 
 namespace eversim { namespace core { namespace system {
 	gameobject* gameobject::clone() const
@@ -9,6 +10,11 @@ namespace eversim { namespace core { namespace system {
 		clone->position = this->position;
 		clone->scale = this->scale;
 		clone->angle = this->angle;
+
+		for(auto& c : components | boost::adaptors::map_values)
+		{
+			clone->add_component(c->clone());
+		}
 
 		for(auto& child : children)
 		{
@@ -21,6 +27,29 @@ namespace eversim { namespace core { namespace system {
 	void gameobject::kill()
 	{
 		the_game->kill_object(this);
+	}
+
+	component* gameobject::add_component(std::unique_ptr<component> comp)
+	{
+		if(!comp)
+		{
+			EVERSIM_THROW(generic_error::InvalidArgument, "Null component not allowed!");
+		}
+
+		auto type = std::type_index(typeid(*comp));
+		if(has_component(type))
+		{
+			EVERSIM_THROW(game_error::DuplicateComponent, type.name());
+		}
+		components[type] = move(comp);
+		return comp.get();
+	}
+
+	component* gameobject::get_component(std::type_index type)
+	{
+		const auto it = components.find(type);
+		if (it == components.end()) return nullptr;
+		return it->second.get();
 	}
 
 	gameobject::gameobject(creation_key, game* the_game)
@@ -45,5 +74,17 @@ namespace eversim { namespace core { namespace system {
 
 	void gameobject::update(utility::clock::duration time_passed)
 	{
+	}
+
+	component const* gameobject::get_component(std::type_index type) const
+	{
+		const auto it = components.find(type);
+		if (it == components.end()) return nullptr;
+		return it->second.get();
+	}
+
+	bool gameobject::has_component(std::type_index type) const
+	{
+		return get_component(type);
 	}
 }}}
