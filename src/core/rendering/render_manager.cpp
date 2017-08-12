@@ -341,9 +341,10 @@ namespace eversim { namespace core { namespace rendering {
 					auto& entity = *entity_wkptr.lock();
 					auto idx = drawer.add_entity(dirty_entities.at(i));
 					entity.set_Drawer(drawer_ptr, idx);
+					LOG(INFO) << "set Drawer for entity " << idx;
 				}
 
-				drawer.upload();
+				//drawer.upload();
 			}
 		}
 
@@ -351,7 +352,7 @@ namespace eversim { namespace core { namespace rendering {
 		
 		for(auto& drawcall : static_drawers)
 		{
-			drawcall->update();
+			drawcall->upload();
 			drawcall->draw(cam);
 		}
 	}

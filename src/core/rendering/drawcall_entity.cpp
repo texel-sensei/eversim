@@ -38,7 +38,7 @@ namespace eversim {
 					LOG(ERROR) << "DrawcallEntity has expired weak_ptrs";
 					return;
 				} 
-
+				
 				auto& program = *program_ptr.lock();
 				auto& buffer = *buffer_ptr.lock();
 
@@ -52,8 +52,8 @@ namespace eversim {
 				spritemap.bind();
 
 				glDrawArraysInstanced(buffer.type, buffer.first, 
-					buffer.count, static_cast<GLsizei>(idx_add-1));
-
+					buffer.count, static_cast<GLsizei>(idx_add));
+				
 				glUseProgram(0);
 			}
 
@@ -108,6 +108,10 @@ namespace eversim {
 				auto* tex = &(*(tex_wkptr.lock()));
 
 				found_textures[tex->get_unique_id()] = tex;
+
+				//LOG(INFO) << "touched " << idx << " size => "<< idx_add ;
+
+				entity_touched.push_back(idx);
 			
 				return idx;
 			}
@@ -139,7 +143,7 @@ namespace eversim {
 			void DrawcallEntity::remove_entity(size_t entity_idx)
 			{
 				if (entity_idx >= idx_add) return;
-
+				
 				auto end_ptr = remove_if(begin(entity_touched), end(entity_touched),
 					[&]( size_t idx ) 
 				{
@@ -188,28 +192,49 @@ namespace eversim {
 				for (auto& tex : found_textures)
 				{
 					auto* texbaseptr = tex.second;
-					texture_offsets[texbaseptr->get_unique_id()] =
-						spritemap.add_texture(*texbaseptr);
-				}
+					auto uid = texbaseptr->get_unique_id();
 
-				for (size_t i = 0; i < idx_add; ++i)
-				{
-					auto entity_ptr = entities.at(i);
-					if (entity_ptr.expired())
+					auto count = added_textures.count(uid);
+
+					if(count == 0)
 					{
-						LOG(ERROR) << "expired entity";
-						continue;
+						texture_offsets[uid] = spritemap.add_texture(*texbaseptr);
+						added_textures.emplace(uid);
 					}
-
-					update_instanced_entity_information(i);
 				}
 
-				utility::byte_array_view view(entity_info);
-				ssb = shader_storage_buffer(view);			
+				for (const auto idx : entity_touched)
+				{
+					update_instanced_entity_information(idx);
+				}
+
+				if (ssb_size < entity_info.size())
+				{
+					LOG(INFO) << "creating ssb of size " << entity_info.size();
+					utility::byte_array_view view(entity_info);
+					ssb_size = entity_info.size();
+					ssb = shader_storage_buffer(view);
+				} else
+				{
+					for (const auto idx : entity_touched)
+					{
+						auto& info = entity_info.at(idx);
+						utility::byte_array_view view(
+							reinterpret_cast<utility::byte*>(&info),sizeof(info)
+						);
+						ssb.update(view, idx * sizeof(instanced_entity_information));
+					}
+				}
+
+				entity_touched.clear();
+				touched = false;
+
 			}
 
 			void DrawcallEntity::update_instanced_entity_information(const size_t idx)
 			{
+				if (idx >= idx_add) return;
+				
 				auto entity_wkptr = entities.at(idx);
 				if (entity_wkptr.expired()) return;
 				auto& entity = *entity_wkptr.lock();
@@ -223,23 +248,6 @@ namespace eversim {
 				info.set_texoffset(texture_offsets[unique_id]);
 				info.set_texsize(tex->get_resolution());
 				info.set_spritesize(spritemap.get_resolution());
-			}
-
-			void DrawcallEntity::update()
-			{
-				for(const auto idx : entity_touched)
-				{
-					update_instanced_entity_information(idx);
-
-					auto& info = entity_info.at(idx);
-
-					std::vector<instanced_entity_information> tmp = {info};
-					utility::byte_array_view view(tmp);
-					
-					ssb.update(view, idx);
-				}
-				entity_touched.clear();
-				touched = false;
 			}
 		}
 	}

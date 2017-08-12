@@ -314,6 +314,7 @@ int main(int argc, char* argv[])
 	rendering::Texture biggerkobold("brick_gray0\\big_kobold_just_bigger.png");
 
 	auto conjuration_ptr = renderer.add_texture("brick_gray0\\divination.png");
+	auto kobold_ptr = renderer.add_texture("brick_gray0\\big_kobold.png");
 
 	rendering::Texture brickwall_linear("brick_gray0\\brick_gray0.png",
 	                                    []()
@@ -384,33 +385,39 @@ int main(int argc, char* argv[])
 
 	player->position = {16.f, 28.f};
 
-
-	//player->position = { 0.f, 0.f };
-
 	cam.set_position({16.f,30.f});
 
 	empty_canvas.clear();
 	empty_canvas.place_texture(program, biggerkobold, { 420,380 }, {1,1});
 
-	LOG(INFO) << "testitities\n\n\n";
-
-	
-
 	std::vector<std::shared_ptr<rendering::RenderableEntity>> tmp_es;
 
-	for (size_t i = 0; i < 10; i++)
+	/*for (size_t i = 1; i < 6; i++)
 	{
 		tmp_es.push_back(renderer.add_entity());
 		tmp_es.back()->set_Position(glm::fvec2(i) + glm::fvec2(0, 2));
 		tmp_es.back()->set_Scale(glm::fvec2(i + 10) / 10.f);
 		tmp_es.back()->set_Texture(conjuration_ptr);
-	}
-
-		
+	}*/
 
 	auto cnt = 0;
 	while (handle_sdl_events())
 	{
+
+		if (cnt%60 == 0) {
+			size_t i = cnt / 60;
+			
+			LOG(INFO) << "push i = " << i;
+			tmp_es.push_back(renderer.add_entity());
+			tmp_es.back()->set_Position(glm::fvec2(i) + glm::fvec2(0, 2));
+			tmp_es.back()->set_Scale(glm::fvec2(i + 10) / 10.f);
+			tmp_es.back()->set_Texture(kobold_ptr);
+		}
+	
+		if(cnt == 300)
+		{
+			tmp_es.clear();
+		}
 
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
@@ -431,7 +438,7 @@ int main(int argc, char* argv[])
 
 
 		empty_canvas.clear();
-		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt++, 0), glm::vec2(3, 3));
+		empty_canvas.place_texture(program, brickwall, glm::vec2(cnt, 0), glm::vec2(3, 3));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(128, 128), glm::vec2(1, 1));
 		empty_canvas.place_texture(program, brickwall, glm::vec2(640, 640), glm::vec2(15, 15));
 		empty_canvas.place_texture(program, brickwall_linear, glm::vec2(320, 320), glm::vec2(10, 10));
@@ -446,6 +453,7 @@ int main(int argc, char* argv[])
 	
 		
 		//render
+		
 		ImGui::ShowTestWindow();
 
 		static float dt = 1 / 60.f;
@@ -510,8 +518,9 @@ int main(int argc, char* argv[])
 		ImGui::Render();
 
 		SDL_GL_SwapWindow(window);
-
-		if(tmp_es.size() > 0)
+		
+		cnt++;
+		/*if(tmp_es.size() > 0)
 		{
 			for(auto& entity_ptr : tmp_es)
 			{
@@ -521,7 +530,7 @@ int main(int argc, char* argv[])
 			}
 			tmp_es.clear();
 			LOG(INFO) << "clearing entities";
-		}
+		}*/
 
 	}
 	return 0;

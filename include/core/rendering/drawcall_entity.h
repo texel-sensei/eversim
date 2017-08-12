@@ -10,6 +10,8 @@
 
 #include <boost/align/aligned_allocator.hpp>
 
+#include <set>
+
 namespace eversim {
 	namespace core {
 		namespace rendering {
@@ -26,6 +28,9 @@ namespace eversim {
 				std::weak_ptr<Multibuffer> buffer_ptr;
 
 				Spritemap spritemap = Spritemap(512); //TODO
+				std::set<size_t> added_textures;
+
+				size_t ssb_size = 0;
 				shader_storage_buffer ssb;
 
 				
@@ -62,7 +67,6 @@ namespace eversim {
 				}
 
 				void draw(Camera& cam);
-				void update();
 
 				/*
 				 * Add the data of the entity to the DrawcallEntity
