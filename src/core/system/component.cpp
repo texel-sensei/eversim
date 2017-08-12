@@ -1,5 +1,6 @@
 #include "core/system/component.h"
 #include "core/system/errors.h"
+#include "core/system/gameobject.h"
 
 namespace eversim { namespace core { namespace system {
 	std::unique_ptr<component> component::clone() const
@@ -10,5 +11,10 @@ namespace eversim { namespace core { namespace system {
 			EVERSIM_THROW(game_error::ComponentMissingClone, typeid(*this).name());
 		}
 		return cloned_comp;
+	}
+
+	utility::clock::duration component::get_frametime() const
+	{
+		return owner->get_frametime();
 	}
 }}}

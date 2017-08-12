@@ -14,7 +14,6 @@ namespace {
 	class MockComponent : public component {
 		using component::component;
 	protected:
-		void update() override {}
 		unique_ptr<component> do_clone() const override { return make_unique<MockComponent>(*this); }
 	};
 }

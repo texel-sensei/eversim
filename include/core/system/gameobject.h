@@ -3,6 +3,7 @@
 #include "core/system/errors.h"
 #include "core/system/component.h"
 #include <glm/glm.hpp>
+#include <boost/range/any_range.hpp>
 #include <vector>
 #include <map>
 #include <memory>
@@ -46,19 +47,23 @@ namespace eversim {namespace core{namespace system {
 		Component const* get_component() const;
 		component const* get_component(std::type_index) const;
 		
+		boost::any_range<component&, boost::bidirectional_traversal_tag> components();
 
 		template<typename Component>
 		bool has_component() const;
 		bool has_component(std::type_index) const;
 
-		int get_num_components() const { return components.size(); }
+		int get_num_components() const { return components_.size(); }
+
+		void set_frametime(utility::clock::duration duration) { frametime = duration; }
+		utility::clock::duration get_frametime() const { return frametime; }
 
 	private:
 		game* the_game;
 
 		gameobject* parent = nullptr;
 		std::vector<gameobject*> children;
-		std::map<std::type_index, std::unique_ptr<component>> components;
+		std::map<std::type_index, std::unique_ptr<component>> components_;
 
 		bool alive = true;
 
@@ -66,8 +71,10 @@ namespace eversim {namespace core{namespace system {
 		glm::vec2 scale{1.f,1.f};
 		float angle = 0.f;
 
+		utility::clock::duration frametime;
 
-		void update(utility::clock::duration);
+		void update();
+		void post_physics_update();
 	};
 
 	template <typename Component, typename ... Args>
@@ -80,7 +87,7 @@ namespace eversim {namespace core{namespace system {
 		}
 		auto ptr = std::make_unique<Component>(this, std::forward<Args>(args)...);
 		auto ret = ptr.get();
-		components[typeid(Component)] = move(ptr);
+		components_[typeid(Component)] = move(ptr);
 		return ret;
 	}
 

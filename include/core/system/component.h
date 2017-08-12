@@ -1,4 +1,5 @@
 #pragma once
+#include "core/utility/time/clock.h"
 #include <memory>
 
 
@@ -16,8 +17,13 @@ namespace eversim {namespace core {namespace system {
 
 		std::unique_ptr<component> clone() const;
 
+		utility::clock::duration get_frametime() const;
+
+		virtual void update(){}
+		virtual void post_physics_update(){}
 	protected:
-		virtual void update() = 0;
+		gameobject& get_owner() { return *owner; }
+		gameobject const& get_owner() const { return *owner; }
 		virtual std::unique_ptr<component> do_clone() const = 0;
 	private:
 		gameobject* owner;

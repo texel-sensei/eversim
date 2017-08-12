@@ -11,7 +11,7 @@ namespace eversim { namespace core { namespace system {
 		clone->scale = this->scale;
 		clone->angle = this->angle;
 
-		for(auto& c : components | boost::adaptors::map_values)
+		for(auto& c : components_ | boost::adaptors::map_values)
 		{
 			clone->add_component(c->clone());
 		}
@@ -41,14 +41,14 @@ namespace eversim { namespace core { namespace system {
 		{
 			EVERSIM_THROW(game_error::DuplicateComponent, type.name());
 		}
-		components[type] = move(comp);
+		components_[type] = move(comp);
 		return comp.get();
 	}
 
 	component* gameobject::get_component(std::type_index type)
 	{
-		const auto it = components.find(type);
-		if (it == components.end()) return nullptr;
+		const auto it = components_.find(type);
+		if (it == components_.end()) return nullptr;
 		return it->second.get();
 	}
 
@@ -72,14 +72,26 @@ namespace eversim { namespace core { namespace system {
 		parent->add_child(this);
 	}
 
-	void gameobject::update(utility::clock::duration time_passed)
+	void gameobject::update()
 	{
+		for(auto& c : components())
+		{
+			c.update();
+		}
+	}
+
+	void gameobject::post_physics_update()
+	{
+		for(auto& c : components())
+		{
+			c.post_physics_update();
+		}
 	}
 
 	component const* gameobject::get_component(std::type_index type) const
 	{
-		const auto it = components.find(type);
-		if (it == components.end()) return nullptr;
+		const auto it = components_.find(type);
+		if (it == components_.end()) return nullptr;
 		return it->second.get();
 	}
 
@@ -87,4 +99,14 @@ namespace eversim { namespace core { namespace system {
 	{
 		return get_component(type);
 	}
+
+	boost::any_range<component&, boost::bidirectional_traversal_tag> gameobject::components()
+	{
+		return boost::adaptors::transform( components_,
+			[](auto& pair) -> component& {
+				return *pair.second;
+		});
+	}
+
+
 }}}

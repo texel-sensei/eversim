@@ -9,7 +9,7 @@ namespace eversim {namespace core{namespace system {
 		ComponentMissingClone	// Component class doesn't implement do_clone()
 	};
 
-	// Required to convert body_template_erorr to std::error_code
+	// Required to convert game_error to std::error_code
 	std::error_code make_error_code(game_error);
 
 } } }
