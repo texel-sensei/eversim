@@ -20,6 +20,9 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
+#include "core/system/game.h"
+#include "core/system/components/physics_component.h"
+#include "core/system/components/rendering_component.h"
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -259,6 +262,9 @@ int main(int argc, char* argv[])
 
 	physics.set_level(level.get());
 
+	// Create game
+	system::game the_game(&physics);
+
 	// Create editor windows
 	editor::core::window_manager windows;
 	auto* pd = windows.add_window<editor::windows::performance_display>();
@@ -266,21 +272,22 @@ int main(int argc, char* argv[])
 	windows.add_window<editor::windows::physics_inspector>(&physics);
 
 	// prepare player
-	//	1. physics
 	const auto player_body_template = body_loader.load("cube.bdy");
-	auto* player = physics.add_body(*player_body_template, {16.f, 28.f}, 0.1f);
 
-	//	2. rendering
-	auto player_entity = renderer.register_entity();
-	rendering::Texture kobold("brick_gray0\\big_kobold.png");
-	player_entity->set_Texture(kobold);
-	player_entity->set_Position(player->position);
+	auto player = the_game.create_empty();
+	player->set_position({ 16.f, 28.f });
+	player->set_scale({ .5f,.5f });
+
+	player->add_component<system::physics_component>(physics, *player_body_template);
+	auto rencomp = player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
+	rencomp->set_position_offset(-.5f * player->get_scale());
+
 
 	// setup camera
 	rendering::Camera cam("default_cam",
 	                      resolution,
 	                      20.f);
-	cam.set_position(player->position);
+	cam.set_position(player->get_position());
 
 	// do neccessary gl setup
 	glDisable(GL_CULL_FACE);
@@ -299,13 +306,20 @@ int main(int argc, char* argv[])
 		windows.begin_frame();
 
 		// read input speed
-		player->velocity += get_input_speed(2.f, dt);
+		player->get_component<system::physics_component>()->get_body().velocity += get_input_speed(2.f, dt);
 
-		{
-			// do physics
+		// pan camera to player
+		const auto old_cam_pos = cam.get_position();
+		cam.set_position(mix(player->get_position(), old_cam_pos, 0.9f));
 
-			utility::scoped_timer tim(pd->get_reporter("Physics loop"));
-			physics.integrate(dt);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.623, 0.76, 0.729, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// step game
+		{	
+			utility::scoped_timer tim(pd->get_reporter("Game update"));
+			the_game.step_frame();
 		}
 
 		// debug draw physics TODO: move into physics inspector!
@@ -314,17 +328,6 @@ int main(int argc, char* argv[])
 		{
 			rendering::draw_point(p.pos);
 		}
-
-		// pan camera to player
-		const auto old_cam_pos = cam.get_position();
-		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
-
-		// move player sprite to physics object
-		player_entity->set_Position(player->position - glm::vec2(0.5));
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.623, 0.76, 0.729, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		{
 			// draw game
