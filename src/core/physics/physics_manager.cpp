@@ -23,7 +23,7 @@ using namespace std;
 
 namespace eversim { namespace core { namespace physics {
 
-	body* physics_manager::add_body(body_template const& templ, glm::vec2 pos, float scale)
+	body* physics_manager::add_body(body_template const& templ, glm::vec2 pos, glm::vec2 scale)
 	{
 		// create body
 		auto* bdy = bodies.emplace();
