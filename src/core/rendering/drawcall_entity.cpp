@@ -60,7 +60,12 @@ namespace eversim {
 			void DrawcallEntity::touch(const size_t idx)
 			{
 				touch();
-				entity_touched.push_back(idx);
+				//TODO use std::set
+				auto it = find_if(begin(entity_touched), end(entity_touched),
+					[&](size_t i) { return idx == i; }
+				);
+				if(it == end(entity_touched))
+					entity_touched.push_back(idx);
 			}
 
 			void DrawcallEntity::touch()
@@ -110,8 +115,7 @@ namespace eversim {
 				found_textures[tex->get_unique_id()] = tex;
 
 				//LOG(INFO) << "touched " << idx << " size => "<< idx_add ;
-
-				entity_touched.push_back(idx);
+				touch(idx);
 			
 				return idx;
 			}
@@ -165,7 +169,7 @@ namespace eversim {
 						entity.set_Drawer(entity_idx);
 					}
 
-					entity_touched.push_back(entity_idx);
+					touch(entity_idx);
 				}
 
 				reduce();

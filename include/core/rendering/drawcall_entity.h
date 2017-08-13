@@ -85,6 +85,16 @@ namespace eversim {
 				instanced_entity_information get_entity_data(const size_t idx) const;
 				void remove_expired_entities();
 				void upload();
+
+				const std::vector<size_t>& get_touched_entities() const
+				{
+					return entity_touched;
+				}
+
+				std::weak_ptr<RenderableEntity> get_entity(const size_t idx) const
+				{
+					return entities.at(idx);
+				}
 			};
 
 		}

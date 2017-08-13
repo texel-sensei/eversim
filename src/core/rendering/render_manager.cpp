@@ -268,8 +268,53 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
+
+		auto entity_fits_to_drawer = []
+		(shared_ptr<DrawcallEntity>& d, RenderableEntity& e)
+		{
+			return
+				(&*(d->get_Multibuffer().lock()) == &*(e.get_Multibuffer().lock())) &&
+				(d->get_ShaderProgram().lock()->getID() == e.get_ShaderProgram().lock()->getID())
+				;
+		};
+
+		auto add_entity = []
+		(shared_ptr<DrawcallEntity>& d, weak_ptr<RenderableEntity>& e)
+		{
+			auto idx = d->add_entity(e);
+			e.lock()->set_Drawer(d, idx);
+		};
+
 		remove_expired_entities(dirty_entities);
 
+		//move every touched entity to other drawer if it does not fit anymore
+		for(auto& drawer_ptr : static_drawers)
+		{
+			auto& drawer = *drawer_ptr;
+
+			const auto& touched_entities = drawer.get_touched_entities();
+
+			vector<entity_wkptr> entities;
+
+			for(auto idx : touched_entities)
+			{
+				entities.push_back(drawer.get_entity(idx));
+			}
+
+			for(auto entity_ptr : entities)
+			{
+				if(!entity_ptr.expired())
+				{
+					auto idx = entity_ptr.lock()->get_Drawer_idx();
+					auto& entity = *entity_ptr.lock();
+					if(!entity_fits_to_drawer(drawer_ptr,entity))
+					{
+						drawer_ptr->remove_entity(idx);
+						dirty_entities.push_back(entity_ptr);
+					}
+				}
+			}
+		}
 		if(dirty_entities.size() > 0)
 		{
 			//Sort lexicographicly
@@ -293,22 +338,6 @@ namespace eversim { namespace core { namespace rendering {
 
 			std::vector<std::pair<size_t, size_t>> mesh_blocks;
 			std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
-
-			auto entity_fits_to_drawer = []
-			(shared_ptr<DrawcallEntity>& d, RenderableEntity& e)
-			{
-				return 
-				(&*(d->get_Multibuffer().lock()) == &*(e.get_Multibuffer().lock())) &&
-					(d->get_ShaderProgram().lock()->getID() == e.get_ShaderProgram().lock()->getID())
-				;
-			};
-
-			auto add_entity = []
-			(shared_ptr<DrawcallEntity>& d, weak_ptr<RenderableEntity>& e)
-			{
-				auto idx = d->add_entity(e);
-				e.lock()->set_Drawer(d, idx);
-			};
 
 			for (auto& wkptr : dirty_entities)
 			{

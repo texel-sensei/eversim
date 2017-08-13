@@ -414,11 +414,13 @@ int main(int argc, char* argv[])
 
 	vector<shared_ptr<rendering::RenderableEntity>> tmp_es;
 
+	auto quadmesh = player_entity->get_Multibuffer().lock();
+
 	auto cnt = 0;
 	while (handle_sdl_events())
 	{
 
-		if (cnt%60 == 0) {
+		/*if (cnt%60 == 0) {
 			size_t i = cnt / 60;
 			
 			LOG(INFO) << "push i = " << i;
@@ -433,7 +435,15 @@ int main(int argc, char* argv[])
 		{
 			tmp_es.clear();
 		}
+		*/
 
+		if(cnt%240 == 0)
+		{
+			player_entity->set_Multibuffer(test);
+		} else if(cnt%120 == 0)
+		{
+			player_entity->set_Multibuffer(quadmesh);
+		}
 
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
