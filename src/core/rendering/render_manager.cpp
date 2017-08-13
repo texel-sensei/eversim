@@ -225,7 +225,11 @@ namespace eversim { namespace core { namespace rendering {
 		auto end_ptr = std::remove_if(begin(es), end(es),
 			[](entity_wkptr& wptr)
 		{
-			return wptr.expired();
+
+			if (wptr.expired()) return true;
+
+			return wptr.lock()->get_ShaderProgram().expired() ||
+				wptr.lock()->get_Multibuffer().expired();
 		});
 
 		es = std::vector<entity_wkptr>(begin(es), end_ptr);
@@ -264,87 +268,79 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
-		//Draw dynamic entities todo
-		/*for(auto& dynamic : dynamic_entities)
-		{
-			if(!dynamic.expired())
-			{
-				auto& dynamic_entity = *dynamic.lock();
-				DrawcallEntity drawer(
-					dynamic_entity.get_ShaderProgram(),
-					dynamic_entity.get_Multibuffer(),
-				);
-
-				drawer.add_entity(dynamic);
-				drawer.upload();
-				drawer.draw(cam);
-			}
-		}*/
-
-		//Draw static entities
 		remove_expired_entities(dirty_entities);
-		sort_entities_by_mesh(dirty_entities);
 
 		if(dirty_entities.size() > 0)
 		{
-			auto mesh_blocks = gen_blocks<shared_ptr<Multibuffer>>(
-				dirty_entities,
-				[](const RenderableEntity& e)
+			//Sort lexicographicly
+			sort(begin(dirty_entities), end(dirty_entities),
+				[](entity_wkptr aptr, entity_wkptr bptr) {
+					auto& a = *aptr.lock();
+					auto& b = *bptr.lock();
+
+					auto amptr = &*(a.get_Multibuffer().lock());
+					auto bmptr = &*(b.get_Multibuffer().lock());
+
+					auto shader_id_a = a.get_ShaderProgram().lock()->getID();
+					auto shader_id_b = b.get_ShaderProgram().lock()->getID();
+
+					if (amptr == bmptr) {
+						return shader_id_a < shader_id_b;
+					}
+					return amptr < bmptr;
+				}
+			);
+
+			std::vector<std::pair<size_t, size_t>> mesh_blocks;
+			std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
+
+			auto entity_fits_to_drawer = []
+			(shared_ptr<DrawcallEntity>& d, RenderableEntity& e)
 			{
-				return e.get_Multibuffer().lock();
-			}
-				);
+				return 
+				(&*(d->get_Multibuffer().lock()) == &*(e.get_Multibuffer().lock())) &&
+					(d->get_ShaderProgram().lock()->getID() == e.get_ShaderProgram().lock()->getID())
+				;
+			};
 
-			for (auto& block : mesh_blocks)
+			auto add_entity = []
+			(shared_ptr<DrawcallEntity>& d, weak_ptr<RenderableEntity>& e)
 			{
+				auto idx = d->add_entity(e);
+				e.lock()->set_Drawer(d, idx);
+			};
 
-				auto buffer_ptr = std::get<0>(block);
-				const auto start_idx = std::get<1>(block);
-				const auto num_instances = std::get<2>(block);
-								
-				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
-
-				auto it = std::find_if(begin(static_drawers), end(static_drawers),
-					[&](std::shared_ptr<DrawcallEntity> drawer)
-				{					
-					return drawer->get_Multibuffer().lock() == buffer_ptr;
-				}
-				);
-
-				std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
-
-				if (it == static_drawers.end())
-				{
-					//not found, add
-					auto& entity = *(dirty_entities.at(start_idx)).lock();
-
-					static_drawers.push_back(make_shared<DrawcallEntity>(
-						entity.get_ShaderProgram(),
-						entity.get_Multibuffer())
-					);
-					
-					drawer_ptr = static_drawers.back();
-				}
-				else
-				{
-					//found
-					drawer_ptr = *it;
-				}
+			for (auto& wkptr : dirty_entities)
+			{
+				auto& entity = *wkptr.lock();
 				
-				if (drawer_ptr == nullptr) continue;
-
-				auto& drawer = *drawer_ptr;
-						
-				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				if(drawer_ptr != nullptr && entity_fits_to_drawer(drawer_ptr,entity))
 				{
-					auto entity_wkptr = dirty_entities.at(i);
-					auto& entity = *entity_wkptr.lock();
-					auto idx = drawer.add_entity(dirty_entities.at(i));
-					entity.set_Drawer(drawer_ptr, idx);
-					LOG(INFO) << "set Drawer for entity " << idx;
-				}
+					add_entity(drawer_ptr,wkptr);
+				} else
+				{
+					auto it = std::find_if(begin(static_drawers), end(static_drawers),
+						[&](std::shared_ptr<DrawcallEntity>& drawer)
+					{
+						return entity_fits_to_drawer(drawer, entity);
+					}
+					);
 
-				//drawer.upload();
+					if(it == end(static_drawers))
+					{
+						static_drawers.push_back(make_shared<DrawcallEntity>(
+							entity.get_ShaderProgram(),
+							entity.get_Multibuffer())
+						);
+						drawer_ptr = static_drawers.back();
+					} else
+					{
+						drawer_ptr = *it;
+					}
+
+
+					add_entity(drawer_ptr, wkptr);	
+				}
 			}
 		}
 

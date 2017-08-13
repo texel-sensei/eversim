@@ -66,6 +66,11 @@ namespace eversim {
 					return buffer_ptr;
 				}
 
+				std::weak_ptr<ShaderProgram> get_ShaderProgram() const
+				{
+					return program_ptr;
+				}
+
 				void draw(Camera& cam);
 
 				/*
