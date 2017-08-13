@@ -2,6 +2,7 @@
 #include "core/rendering/drawcall_entity.h"
 
 #include "core/utility/plattform.h"
+#include "core/utility/matrix_helper.h"
 
 #include <easylogging++.h>
 
@@ -38,25 +39,28 @@ namespace eversim {	namespace core { namespace rendering {
 
 	void RenderableEntity::get_instanced_entity_information(instanced_entity_information& ifo) const
 	{
-		ifo.set_M(M);
+		ifo.set_M(get_M());
 		ifo.set_texoffset(texoffset);
 		ifo.set_texsize(texsize);
 		ifo.set_spritesize(spritesize);
 	}
 
-	fmat3 RenderableEntity::get_M() const { return M; };
+	fmat3 RenderableEntity::get_M() const
+	{
+		auto M = mat3();
+
+		M = utility::scale(scale) * M;
+		M = utility::translation(center_of_rotation) * utility::rotation(rotation) * utility::translation(-center_of_rotation) * M;
+		M = utility::translation(position) * M;
+
+		return M;
+	};
 
 	weak_ptr<ShaderProgram> RenderableEntity::get_ShaderProgram() const { return program; };
 
 	weak_ptr<TextureBase> RenderableEntity::get_Texture() const { return tex; };
 
 	weak_ptr<Multibuffer> RenderableEntity::get_Multibuffer() const { return data; };
-
-	void RenderableEntity::set_M(const fmat3& m)
-	{
-		M = m; 
-		touch();
-	};
 
 	void RenderableEntity::set_ShaderProgram(std::shared_ptr<ShaderProgram> p)
 	{
@@ -88,25 +92,44 @@ namespace eversim {	namespace core { namespace rendering {
 
 	void RenderableEntity::set_Position(fvec2 pos)
 	{
-		M[2] = fvec3(pos,1.f);
+		position = pos;
 		touch();
 	}
 
 	glm::fvec2  RenderableEntity::get_Position() const
 	{
-		return { M[2][0], M[2][1] };
+		return position;
 	}
 
-	void RenderableEntity::set_Scale(glm::fvec2 scale)
+	void RenderableEntity::set_Scale(glm::fvec2 sc)
 	{
-		M[0] = { scale[0], 0, 0 };
-		M[1] = { 0, scale[1], 0};
+		scale = sc;
 		touch();
 	}
 
 	glm::fvec2 RenderableEntity::get_Scale() const
 	{
-		return { M[0][0], M[1][1] };
+		return scale;
+	}
+
+	void RenderableEntity::set_Rotation(float rot)
+	{
+		rotation = rot;
+	}
+
+	float RenderableEntity::get_Rotation() const
+	{
+		return rotation;
+	}
+
+	void RenderableEntity::set_Center(glm::fvec2 c)
+	{
+		center_of_rotation = c;
+	}
+
+	glm::fvec2 RenderableEntity::get_Center() const
+	{
+		return center_of_rotation;
 	}
 
 	void RenderableEntity::touch()

@@ -83,7 +83,11 @@ namespace eversim {
 				
 				glm::ivec2 texoffset = glm::ivec2(0,0);
 				glm::ivec2 texsize, spritesize;
-				glm::fmat3 M = glm::fmat3(1.f);
+				
+				glm::fvec2 position = glm::fvec2(0);
+				glm::fvec2 scale = glm::fvec2(1);
+				float rotation = 0.f;
+				glm::fvec2 center_of_rotation = glm::fvec2(0);
 
 				std::weak_ptr<ShaderProgram> program;
 				std::weak_ptr<TextureBase> tex;
@@ -114,8 +118,6 @@ namespace eversim {
 				std::weak_ptr<TextureBase> get_Texture() const;
 				std::weak_ptr<Multibuffer> get_Multibuffer() const;
 
-				void set_M(const glm::fmat3& m);
-
 				void set_ShaderProgram(std::shared_ptr<ShaderProgram> p);
 
 				void set_Texture(std::shared_ptr<TextureBase> p);
@@ -128,6 +130,12 @@ namespace eversim {
 
 				void set_Scale(glm::fvec2 scale);
 				glm::fvec2 get_Scale() const;
+
+				void set_Rotation(float rotation);
+				float get_Rotation() const;
+
+				void set_Center(glm::fvec2);
+				glm::fvec2 get_Center() const;
 			
 				bool get_touched() const;
 

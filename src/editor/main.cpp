@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
 	while (handle_sdl_events())
 	{
 
-		if (cnt%60 == 0) {
+		/*if (cnt%60 == 0) {
 			size_t i = cnt / 60;
 			
 			LOG(INFO) << "push i = " << i;
@@ -417,7 +417,8 @@ int main(int argc, char* argv[])
 		if(cnt == 300)
 		{
 			tmp_es.clear();
-		}
+		}*/
+
 
 		const auto old_cam_pos = cam.get_position();
 		cam.set_position(mix(player->position, old_cam_pos, 0.9f));
@@ -503,6 +504,8 @@ int main(int argc, char* argv[])
 		}
 
 		player_entity->set_Position(player->position - glm::fvec2(0.5, 0.5));
+		player_entity->set_Rotation(player_entity->get_Rotation() + 0.01);
+		player_entity->set_Center(glm::fvec2(0.5));
 
 		for (auto&& p : physics.get_particles())
 		{
