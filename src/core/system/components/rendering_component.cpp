@@ -4,6 +4,9 @@
 #include "core/rendering/render_manager.h"
 #include "core/rendering/renderable_entity.h"
 
+#include "core/utility/matrix_helper.h"
+
+#include <glm/gtc/matrix_transform.inl>
 
 
 namespace eversim { namespace core { namespace system {
@@ -16,6 +19,7 @@ namespace eversim { namespace core { namespace system {
 	{
 		display = mng.register_entity();
 		display->set_Texture(*mng.register_texture(texture_name));
+		offset = -.5f*owner->get_scale();
 		update_transform();
 	}
 
@@ -26,9 +30,17 @@ namespace eversim { namespace core { namespace system {
 
 	void rendering_component::update_transform()
 	{
-		display->set_Position(get_owner().get_position() + offset);
-		display->set_Scale(get_owner().get_scale());
-		// todo: rotation?!?
+		using namespace glm;
+		using namespace utility;
+
+		const auto& obj = get_owner();
+		auto M = mat3();
+
+		M = scale(obj.get_scale()) * M;
+		M = translation(-offset) * rotation(obj.get_angle()) * translation(offset) * M;
+		M = translation(obj.get_position() + offset) * M;
+
+		display->set_M(M);
 	}
 
 }}}
