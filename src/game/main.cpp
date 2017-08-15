@@ -186,7 +186,7 @@ void initialize_tiles(world::level_loader& loader)
 }
 
 struct loaders {
-	utility::texture_loader* tex;
+	rendering::texture_loader* tex;
 	world::level_loader* lev;
 	physics::body_template_loader* bdy;
 
@@ -200,19 +200,6 @@ struct loaders {
 
 void init_rendering(rendering::render_manager& renderer)
 {
-	// create program for spritemap creation
-	static rendering::ShaderProgram program("simple quad shader");
-	program.create();
-	program.attach
-	({
-		{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
-	});
-	program.link();
-
-	renderer.set_spritmap_program(program);
-
 	// setup dirty hack renderer global
 	rendering::myrenderer = &renderer;
 }
@@ -271,8 +258,8 @@ int main(int argc, char* argv[])
 	auto* player = physics.add_body(*player_body_template, {16.f, 28.f}, 0.1f);
 
 	//	2. rendering
-	auto player_entity = renderer.register_entity();
-	rendering::Texture kobold("brick_gray0\\big_kobold.png");
+	auto player_entity = renderer.add_entity();
+	auto kobold = renderer.add_texture("brick_gray0\\big_kobold.png");
 	player_entity->set_Texture(kobold);
 	player_entity->set_Position(player->position);
 

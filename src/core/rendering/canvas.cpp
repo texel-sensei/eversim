@@ -40,10 +40,10 @@ namespace eversim {
 				glUniform1i(loc, 0);
 
 				loc = glGetUniformLocation(program.getID(), "target_resolution");
-				glUniform2f(loc, fbo.viewport()[0], fbo.viewport()[1]);
+				glUniform2f(loc, static_cast<GLfloat>(fbo.viewport()[0]), static_cast<GLfloat>(fbo.viewport()[1]));
 
 				loc = glGetUniformLocation(program.getID(), "texture_size");
-				glUniform2f(loc, texture.get_resolution()[0], texture.get_resolution()[1]);
+				glUniform2f(loc, static_cast<GLfloat>(texture.get_resolution()[0]), static_cast<GLfloat>(texture.get_resolution()[1]));
 
 				auto T = glm::translate(glm::vec3(translation,0.f));
 				auto S = glm::scale(glm::vec3(scale, 1));
@@ -72,10 +72,10 @@ namespace eversim {
 				glUniform1i(loc, 0);
 
 				loc = glGetUniformLocation(program.getID(), "target_resolution");
-				glUniform2f(loc, target_resolution[0], target_resolution[1]);
+				glUniform2f(loc, static_cast<GLfloat>(target_resolution[0]), static_cast<GLfloat>(target_resolution[1]));
 
 				loc = glGetUniformLocation(program.getID(), "texture_size");
-				glUniform2f(loc, fbo.viewport()[0], fbo.viewport()[1]);
+				glUniform2f(loc, static_cast<GLfloat>(fbo.viewport()[0]), static_cast<GLfloat>(fbo.viewport()[1]));
 
 				auto T = glm::translate(glm::vec3(translation, 0.f));
 				auto S = glm::scale(glm::vec3(scale, 1));

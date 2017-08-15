@@ -2,6 +2,7 @@
 
 #include "core/utility/sdl.h"
 #include "core/utility/helper.h"
+#include "core/rendering/spritemap.h"
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,9 +13,11 @@
 #include <limits>
 
 #include <boost/align/aligned_allocator.hpp>
+#include "core/system/program.h"
 
 
 using namespace std;
+using namespace glm;
 
 #undef max
 
@@ -31,12 +34,16 @@ namespace eversim { namespace core { namespace rendering {
 	}
 
 	render_manager::render_manager(glm::ivec2 resolution, bool fullscreen) :
-		resolution(resolution)
+		resolution(resolution),
+		default_buffer_ptr	(make_shared<Multibuffer>("default quad mesh")),
+		default_texture_ptr	(make_shared<Texture>(ivec2(4, 4))),
+		default_shader_ptr	(make_shared<ShaderProgram>("default uv shader")),
+		spritemap_shader_ptr(make_shared<ShaderProgram>("simple quad shader"))
 	{
 		setup(fullscreen);
-		default_quadmesh_ptr = std::make_unique<Multibuffer>("default quad mesh");
-		auto& default_quadmesh = *default_quadmesh_ptr;
-		default_quadmesh.attach(
+	
+		auto& default_buffer = *default_buffer_ptr;
+		default_buffer.attach(
 		{
 			{ 1,1 },
 			{ 0,1 },
@@ -44,7 +51,7 @@ namespace eversim { namespace core { namespace rendering {
 			{ 1,0 },
 		}
 		);
-		default_quadmesh.attach(
+		default_buffer.attach(
 		{
 			{ 1,1 },
 			{ 0,1 },
@@ -52,9 +59,10 @@ namespace eversim { namespace core { namespace rendering {
 			{ 1,0 }
 		}
 		);
-		default_quadmesh.set_draw_mode(GL_QUADS, 0, 4);
-		default_quadmesh.create_and_upload();
+		default_buffer.set_draw_mode(GL_QUADS, 0, 4);
+		default_buffer.create_and_upload();
 
+		auto& default_shader = *default_shader_ptr;
 		default_shader.create();
 		default_shader.attach
 		({
@@ -64,6 +72,18 @@ namespace eversim { namespace core { namespace rendering {
 		default_shader.link();
 
 		default_shader.logUnfiformslogAttributes();
+
+		auto& spritemap_shader = *spritemap_shader_ptr;
+		spritemap_shader.create();
+		spritemap_shader.attach
+		({
+			{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
+			{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
+			{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
+		});
+		spritemap_shader.link();
+
+		Spritemap::set_shader(spritemap_shader_ptr);
 	}
 
 	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)
@@ -160,30 +180,22 @@ namespace eversim { namespace core { namespace rendering {
 
 	}
 
-	entity_shptr render_manager::register_entity(const entity_type type)
+	entity_shptr render_manager::add_entity(const entity_type type)
 	{
-		auto ptr = entity_shptr(new RenderableEntity);
-		if(type == STATIC)
-		{
-			static_entities.push_back(ptr);
-			freshly_added_static_entities.push_back(ptr);
-			ptr->set_Type(STATIC);
-		} else if (type == DYNAMIC)
-		{
-			dynamic_entities.push_back(ptr);
-			ptr->set_Type(DYNAMIC);
-		}
+		auto ptr = entity_shptr(new RenderableEntity(
+			default_shader_ptr, default_texture_ptr, default_buffer_ptr,type));
+		dirty_entities.push_back(ptr);
 		return ptr;
 	}
 
-	texture_shptr  render_manager::register_texture(const std::string& path)
+	texture_shptr  render_manager::add_texture(const std::string& path)
 	{
 		auto ptr = std::make_shared<Texture>(path);
 		textures.push_back(ptr);
 		return ptr;
 	}
 
-	texture_shptr  render_manager::register_texture(const std::string& path,
+	texture_shptr  render_manager::add_texture(const std::string& path,
 		filter filtering)
 	{
 		auto ptr = std::make_shared<Texture>(path,filtering);
@@ -191,18 +203,18 @@ namespace eversim { namespace core { namespace rendering {
 		return ptr;
 	}
 
-	spritemap_shptr  render_manager::register_spritemap(const size_t resolution)
+	spritemap_shptr  render_manager::add_spritemap(const size_t res)
 	{
-		auto ptr = std::make_shared<Spritemap>(resolution);
+		auto ptr = std::make_shared<Spritemap>(res);
 		spritemaps.push_back(ptr);
 		return ptr;
 	}
 
-	spritemap_shptr  render_manager::register_spritemap(const size_t resolution,
+	spritemap_shptr  render_manager::add_spritemap(const size_t res,
 		filter filtering)
 	{
 		LOG(ERROR) << "TODO spritemap with filterfunction";
-		auto ptr = std::make_shared<Spritemap>(resolution);
+		auto ptr = std::make_shared<Spritemap>(res);
 		spritemaps.push_back(ptr);
 		return ptr;
 	}
@@ -213,7 +225,11 @@ namespace eversim { namespace core { namespace rendering {
 		auto end_ptr = std::remove_if(begin(es), end(es),
 			[](entity_wkptr& wptr)
 		{
-			return wptr.expired();
+
+			if (wptr.expired()) return true;
+
+			return wptr.lock()->get_ShaderProgram().expired() ||
+				wptr.lock()->get_Multibuffer().expired();
 		});
 
 		es = std::vector<entity_wkptr>(begin(es), end_ptr);
@@ -228,10 +244,10 @@ namespace eversim { namespace core { namespace rendering {
 			auto& ra = *(a.lock());
 			auto& rb = *(b.lock());
 
-			if (ra.get_ShaderProgram() == nullptr || rb.get_ShaderProgram() == nullptr)
+			if (ra.get_ShaderProgram().expired() || rb.get_ShaderProgram().expired())
 				return false;
 
-			return ra.get_ShaderProgram()->getID() < rb.get_ShaderProgram()->getID();
+			return ra.get_ShaderProgram().lock()->getID() < rb.get_ShaderProgram().lock()->getID();
 		});
 	}
 
@@ -243,136 +259,128 @@ namespace eversim { namespace core { namespace rendering {
 			auto& ra = *(a.lock());
 			auto& rb = *(b.lock());
 
-			if (ra.get_Multibuffer() == nullptr || rb.get_Multibuffer() == nullptr)
+			if (ra.get_Multibuffer().expired() || rb.get_Multibuffer().expired())
 				return false;
 
-			return ra.get_Multibuffer() < rb.get_Multibuffer();
+			return ra.get_Multibuffer().lock() < rb.get_Multibuffer().lock();
 		});
-	}
-
-	void render_manager::set_spritmap_program(ShaderProgram& program)
-	{
-		spriteprog = &program;
 	}
 
 	void render_manager::draw(Camera& cam)
 	{
-		//Draw dynamic entities todo
-		for(auto& dynamic : dynamic_entities)
+
+		auto entity_fits_to_drawer = []
+		(shared_ptr<DrawcallEntity>& d, RenderableEntity& e)
 		{
-			if(!dynamic.expired())
+			return
+				(&*(d->get_Multibuffer().lock()) == &*(e.get_Multibuffer().lock())) &&
+				(d->get_ShaderProgram().lock()->getID() == e.get_ShaderProgram().lock()->getID())
+				;
+		};
+
+		auto add_entity = []
+		(shared_ptr<DrawcallEntity>& d, weak_ptr<RenderableEntity>& e)
+		{
+			auto idx = d->add_entity(e);
+			e.lock()->set_Drawer(d, idx);
+		};
+
+		remove_expired_entities(dirty_entities);
+
+		//move every touched entity to other drawer if it does not fit anymore
+		for(auto& drawer_ptr : static_drawers)
+		{
+			auto& drawer = *drawer_ptr;
+
+			const auto& touched_entities = drawer.get_touched_entities();
+
+			vector<entity_wkptr> entities;
+
+			for(auto idx : touched_entities)
 			{
-				auto& dynamic_entity = *dynamic.lock();
-				DrawcallEntity drawer(dynamic_entity.get_ShaderProgram(),
-					dynamic_entity.get_Texture(), dynamic_entity.get_Multibuffer());
+				entities.push_back(drawer.get_entity(idx));
+			}
 
-				drawer.add_entity_data(dynamic_entity);
-				drawer.upload();
-				drawer.draw(cam);
-
+			for(auto entity_ptr : entities)
+			{
+				if(!entity_ptr.expired())
+				{
+					auto idx = entity_ptr.lock()->get_Drawer_idx();
+					auto& entity = *entity_ptr.lock();
+					if(!entity_fits_to_drawer(drawer_ptr,entity) ||
+						!drawer.contains_texture(entity.get_Texture().lock()->get_unique_id())
+						)
+					{
+						drawer_ptr->remove_entity(idx);
+						dirty_entities.push_back(entity_ptr);
+					}
+				}
 			}
 		}
-
-		//Draw static entities
-		auto removed_statics = remove_expired_entities(static_entities);
-		remove_expired_entities(freshly_added_static_entities);
-
-		sort_entities_by_mesh(static_entities);
-		sort_entities_by_mesh(freshly_added_static_entities);
-
-		if(freshly_added_static_entities.size() > 0)
+		if(dirty_entities.size() > 0)
 		{
-			auto mesh_blocks = gen_blocks<Multibuffer*>(
-				freshly_added_static_entities,
-				[](const RenderableEntity& e)
+			//Sort lexicographicly
+			sort(begin(dirty_entities), end(dirty_entities),
+				[](entity_wkptr aptr, entity_wkptr bptr) {
+					auto& a = *aptr.lock();
+					auto& b = *bptr.lock();
+
+					auto amptr = &*(a.get_Multibuffer().lock());
+					auto bmptr = &*(b.get_Multibuffer().lock());
+
+					auto shader_id_a = a.get_ShaderProgram().lock()->getID();
+					auto shader_id_b = b.get_ShaderProgram().lock()->getID();
+
+					if (amptr == bmptr) {
+						return shader_id_a < shader_id_b;
+					}
+					return amptr < bmptr;
+				}
+			);
+
+			std::vector<std::pair<size_t, size_t>> mesh_blocks;
+			std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
+
+			for (auto& wkptr : dirty_entities)
 			{
-				return e.get_Multibuffer();
-			}
-				);
-
-			for (auto& block : mesh_blocks)
-			{
-
-				Multibuffer* buffer_ptr = std::get<0>(block);
-				const size_t start_idx = std::get<1>(block);
-				const size_t num_instances = std::get<2>(block);
-
-				auto& fbe = *(freshly_added_static_entities.at(start_idx).lock());
+				auto& entity = *wkptr.lock();
 				
-				LOG(INFO) << "Multibufferptr = " << buffer_ptr;
-
-				//auto it = ssbs.find(buffer_ptr);
-				
-				std::map<size_t, TextureBase*> found_textures;
-				for (auto i = start_idx; i < start_idx + num_instances; ++i)
+				if(drawer_ptr != nullptr && entity_fits_to_drawer(drawer_ptr,entity))
 				{
-					auto& entity = *(freshly_added_static_entities.at(i)).lock();
-					auto* tex = entity.get_Texture();
-					found_textures[tex->get_unique_id()] = tex;
-				}
-
-				auto_spritemaps.push_back(std::make_shared<Spritemap>(512));
-				auto& sm = *(auto_spritemaps.back());
-
-				std::map<size_t, glm::ivec2> texture_offsets;
-				for (auto& tex : found_textures)
-				{
-					auto* texbaseptr = tex.second;
-					texture_offsets[texbaseptr->get_unique_id()] = sm.add_texture(*spriteprog, *texbaseptr);
-				}
-				
-				auto it = std::find_if(begin(drawers), end(drawers),
-					[&](const DrawcallEntity& drawer)
-				{
-					return drawer.get_Multibuffer() == buffer_ptr;
-				}
-				);
-
-				DrawcallEntity* drawer_ptr = nullptr;
-
-				if (it == drawers.end())
-				{
-					//not found, add
-					auto& entity = *(freshly_added_static_entities.at(start_idx)).lock();
-
-					drawers.emplace_back(
-						entity.get_ShaderProgram(),
-						&sm,
-						entity.get_Multibuffer()
-					);
-
-					drawer_ptr = &drawers.back();
+					add_entity(drawer_ptr,wkptr);
 				} else
 				{
-					//found
-					drawer_ptr = &(*it);
-				}
-
-				if (drawer_ptr == nullptr) continue;
-				auto& drawer = *drawer_ptr;
-				for (auto i = start_idx; i < start_idx + num_instances; ++i)
-				{
-					auto& entity = *(freshly_added_static_entities.at(i)).lock();
-
-					auto unique_id = entity.get_Texture()->get_unique_id();
-					auto* tex = found_textures[unique_id];
-
-					drawer.add_entity_data(entity,
-						texture_offsets[unique_id],
-						tex->get_resolution(),
-						sm.get_resolution()
+					auto it = std::find_if(begin(static_drawers), end(static_drawers),
+						[&](std::shared_ptr<DrawcallEntity>& drawer)
+					{
+						return entity_fits_to_drawer(drawer, entity);
+					}
 					);
-				}
 
-				drawer.upload();
+					if(it == end(static_drawers))
+					{
+						static_drawers.push_back(make_shared<DrawcallEntity>(
+							entity.get_ShaderProgram(),
+							entity.get_Multibuffer())
+						);
+						drawer_ptr = static_drawers.back();
+					} else
+					{
+						drawer_ptr = *it;
+					}
+
+
+					add_entity(drawer_ptr, wkptr);	
+				}
 			}
 		}
 
-		freshly_added_static_entities.clear();
-
-		for(auto& drawcall : drawers)
+		dirty_entities.clear();
+		
+		for(auto& drawcall : static_drawers)
 		{
-			drawcall.draw(cam);
+			drawcall->upload();
+			drawcall->draw(cam);
 		}
 	}
 } /* rendering */ } /* core */ } /* eversim */
