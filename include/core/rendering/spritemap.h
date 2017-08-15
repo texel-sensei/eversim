@@ -12,16 +12,35 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <utility>
 
 namespace eversim {
 	namespace core {
 		namespace rendering {
+
 			class Spritemap : public TextureBase {
+
+			public:
+				struct placed_texture
+				{
+				public:
+					glm::ivec2 pos, size;
+					GLuint uid;
+
+					placed_texture(const glm::ivec2& p, const glm::ivec2& s, const GLuint& i) :
+						pos(p), size(s), uid(i)
+					{}
+				};
+
 			private:
 				glm::ivec2 resolution;
 				canvas canvas_tex;
 
 				utility::Areadivider divider;
+
+				std::vector<placed_texture> placed_textures;
+
 				void init();
 
 				static std::weak_ptr<ShaderProgram> program;
@@ -47,6 +66,13 @@ namespace eversim {
 
 				void bind() const override;
 				glm::ivec2 get_resolution() const override;
+
+				const std::vector<placed_texture>& get_placed_textures() const 
+				{
+					return placed_textures;
+				}
+
+				bool contains_texture(const GLuint& uid) const;
 
 				static void set_shader(std::weak_ptr<ShaderProgram> prog)
 				{

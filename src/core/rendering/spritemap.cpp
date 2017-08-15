@@ -42,10 +42,20 @@ namespace eversim {
 				}
 					
 				auto pos = divider.place_rectangle(tex.get_resolution());
-				if (pos != glm::ivec2(-1))
+				if (pos != glm::ivec2(-1)) {
 					canvas_tex.place_texture(*program.lock(), tex, pos, glm::vec2(1, 1));
+					placed_textures.emplace_back(pos,tex.get_resolution(),tex.get_unique_id());
+				}
 				
 				return pos;
+			}
+
+			bool  Spritemap::contains_texture(const GLuint& uid) const
+			{
+				auto it = find_if(begin(placed_textures), end(placed_textures), 
+					[uid](const placed_texture& pt) { return pt.uid == uid; }
+				);
+				return it != end(placed_textures);
 			}
 
 			void Spritemap::bind() const

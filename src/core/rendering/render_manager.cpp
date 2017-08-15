@@ -307,7 +307,9 @@ namespace eversim { namespace core { namespace rendering {
 				{
 					auto idx = entity_ptr.lock()->get_Drawer_idx();
 					auto& entity = *entity_ptr.lock();
-					if(!entity_fits_to_drawer(drawer_ptr,entity))
+					if(!entity_fits_to_drawer(drawer_ptr,entity) ||
+						!drawer.contains_texture(entity.get_Texture().lock()->get_unique_id())
+						)
 					{
 						drawer_ptr->remove_entity(idx);
 						dirty_entities.push_back(entity_ptr);

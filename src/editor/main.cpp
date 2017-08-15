@@ -419,30 +419,14 @@ int main(int argc, char* argv[])
 	auto cnt = 0;
 	while (handle_sdl_events())
 	{
-
-		/*if (cnt%60 == 0) {
-			size_t i = cnt / 60;
-			
-			LOG(INFO) << "push i = " << i;
-			tmp_es.push_back(renderer.add_entity());
-			tmp_es.back()->set_Position(glm::fvec2(i) + glm::fvec2(0, 2));
-			tmp_es.back()->set_Scale(glm::fvec2(i + 10) / 10.f);
-			tmp_es.back()->set_Texture(kobold_ptr);
-			tmp_es.back()->set_Multibuffer(test);
-		}
-	
-		if(cnt == 300)
-		{
-			tmp_es.clear();
-		}
-		*/
-
 		if(cnt%240 == 0)
 		{
 			player_entity->set_Multibuffer(test);
+			player_entity->set_Texture(kobold_ptr);
 		} else if(cnt%120 == 0)
 		{
 			player_entity->set_Multibuffer(quadmesh);
+			player_entity->set_Texture(conjuration_ptr);
 		}
 
 		const auto old_cam_pos = cam.get_position();

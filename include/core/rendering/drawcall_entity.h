@@ -95,6 +95,11 @@ namespace eversim {
 				{
 					return entities.at(idx);
 				}
+
+				bool contains_texture(const GLuint& uid) const
+				{
+					return spritemap.contains_texture(uid);
+				}
 			};
 
 		}
