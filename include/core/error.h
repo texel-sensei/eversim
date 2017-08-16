@@ -1,6 +1,8 @@
 #pragma once
+#include <enum.h>
 #include <system_error>
 #include <cassert>
+
 
 namespace eversim { namespace core {
 
@@ -26,13 +28,16 @@ namespace eversim { namespace core {
 		std::string message;
 	};
 
-	enum class generic_error {
-		// 0 means no error
-		AssertionFailure = 1,	// Some assertion failed
-		FileNotFound			// Couldn't open some file
-	};
+	BETTER_ENUM(generic_error, uint8_t, \
+		AssertionFailure = 1,			\
+		FileNotFound,					\
+		InvalidArgument,				\
+		InvalidEnum						\
+	)
 
-	std::error_code make_error_code(generic_error);
+	// Because BETTER_ENUM uses an enum embedded into a type, a direct conversion doesn't work.
+	// so we need to take this embedded enum as argument
+	std::error_code make_error_code(generic_error::_enumerated);
 
 }
 }
@@ -40,10 +45,10 @@ namespace eversim { namespace core {
 #define THROW_IMPL_GET_MACRO(_1,_2,NAME,...) NAME
 
 #define EVERSIM_THROW_MESSAGE(errc, message) \
-	throw ::eversim::core::eversim_error{errc, message, GET_SOURCE_LOCATION_F()}
+	throw ::eversim::core::eversim_error(errc, message, GET_SOURCE_LOCATION_F())
 
 #define EVERSIM_THROW_SIMPLE(errc) \
-	throw ::eversim::core::eversim_error{errc, GET_SOURCE_LOCATION_F()}
+	throw ::eversim::core::eversim_error(errc, GET_SOURCE_LOCATION_F())
 
 #define EVERSIM_THROW(...) THROW_IMPL_GET_MACRO(__VA_ARGS__, EVERSIM_THROW_MESSAGE, EVERSIM_THROW_SIMPLE, FOO)(__VA_ARGS__)
 
@@ -51,5 +56,5 @@ namespace eversim { namespace core {
 
 namespace std {
 	template<>
-	struct is_error_code_enum<eversim::core::generic_error> : true_type {};
+	struct is_error_code_enum<eversim::core::generic_error::_enumerated> : true_type {};
 }
