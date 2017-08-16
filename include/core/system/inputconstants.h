@@ -6,12 +6,24 @@
 
 namespace eversim {	namespace core { namespace system {
 
-	enum InputConstants
+	namespace InputConstants
 	{
-		CONFIRM = 0,
-		ABORT,
-		JUMP,
-		DUCK
-	};
+		enum ACTION
+		{
+			CONFIRM = 0,
+			ABORT,
+			JUMP
+		};
+
+		enum STATE
+		{
+			DUCK = 0
+		};
+
+		enum RANGE
+		{
+			STEER_PLAYER = 0
+		};
+	}
 
 }}}
