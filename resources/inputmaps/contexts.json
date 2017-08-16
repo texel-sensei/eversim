@@ -1,0 +1,11 @@
+//Valid inputs for each context
+{
+  "game": {
+    "JUMP": true,
+    "DUCK": true
+  },
+  "menue": {
+    "ABORT": true,
+    "CONFIRM": true
+  }
+}

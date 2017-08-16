@@ -49,7 +49,7 @@ namespace eversim {	namespace core { namespace rendering {
 	{
 		auto M = mat3();
 
-		M = utility::scale(scale) * M;
+		M = utility::scale(glm::fvec2(1.001f)) * utility::scale(scale) * M;
 		M = utility::translation(center_of_rotation) * utility::rotation(rotation) * utility::translation(-center_of_rotation) * M;
 		M = utility::translation(position) * M;
 
