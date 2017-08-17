@@ -1,6 +1,7 @@
 #include "core/world/level_loader.h"
 #include "core/world/level.h"
 #include "core/world/tile_descriptor.h"
+#include "core/world/tile_loader.h"
 #include "core/world/errors.h"
 
 #include "core/utility/filesystem_wrapper.h"
@@ -24,7 +25,7 @@ namespace eversim { namespace core { namespace world { namespace {
 	}
 }
 
-level_loader::level_loader()
+level_loader::level_loader(tile_loader_ptr tl) : tile_loader_(tl)
 {
 	register_tile_descriptor(&blank_tile);
 }
@@ -77,8 +78,25 @@ shared_ptr<level> level_loader::load_file(string const& filename)
 					(boost::format("Unknown id %d at tile (%d,%d)") % id % x % y).str()
 				);
 			}
-			auto desc_name = idtable[id];
-			auto desc = descriptors.at(desc_name);
+			const auto desc_name = idtable[id];
+			const auto desc_it = descriptors.find(desc_name);
+
+			tile_descriptor const* desc = nullptr;
+			if(desc_it != descriptors.end())
+			{
+				desc = desc_it->second;
+			}else if(tile_loader_)
+			{
+				const auto ptr = tile_loader_->load(desc_name);
+				if(ptr.use_count() == 1)
+				{
+					// loader currently can't set the name of the tile descriptor by itself
+					ptr->name = desc_name;
+				}
+				desc = ptr.get();
+				lvl->add_tile_descriptor(ptr);
+			}
+
 			if (!desc)
 			{
 				EVERSIM_THROW(level_error::UnknownTile, desc_name);

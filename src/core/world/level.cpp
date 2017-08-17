@@ -188,6 +188,11 @@ namespace eversim { namespace core { namespace world {
 		return v;
 	}
 
+	void level::add_tile_descriptor(tile_desc_ptr ptr)
+	{
+		tile_descriptors.insert(ptr);
+	}
+
 	void level::calculate_collision_shapes()
 	{
 		for (auto x = 0; x < get_num_tiles().x; ++x)

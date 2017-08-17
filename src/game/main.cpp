@@ -1,28 +1,31 @@
-#include "core/rendering/texture.h"
-#include "core/rendering/render_manager.h"
-
-#include "core/world/tile_descriptor.h"
-#include "core/world/level_loader.h"
-#include "core/world/level.h"
-
-#include "core/physics/constraints/angle_constraint.h"
-#include "core/physics/body_template.h"
-#include "core/physics/constraints/distance_constraint.h"
-#include "core/physics/physics_manager.h"
-
 #include "editor/windows/log_window.h"
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
 
 #include "editor/core/window_manager.h"
 
+#include "core/rendering/texture.h"
+#include "core/rendering/render_manager.h"
+
+#include "core/world/level_loader.h"
+#include "core/world/tile_loader.h"
+#include "core/world/level.h"
+#include "core/world/tile_descriptor.h"
+
+#include "core/physics/constraints/angle_constraint.h"
+#include "core/physics/body_template.h"
+#include "core/physics/constraints/distance_constraint.h"
+#include "core/physics/physics_manager.h"
+
+#include "core/system/components/physics_component.h"
+#include "core/system/components/rendering_component.h"
+#include "core/system/game.h"
+
 #include <easylogging++.h>
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
-#include "core/system/game.h"
-#include "core/system/components/physics_component.h"
-#include "core/system/components/rendering_component.h"
+
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -169,34 +172,17 @@ glm::vec2 get_input_speed(float speedmult, float dt)
 	return vel * speedmult * dt;
 }
 
-void initialize_tiles(world::level_loader& loader)
-{
-	dirt.name = "dirt";
-	dirt.collision = world::collision_type::solid;
-	dirt.texture_name = "dirt0.png";
-
-	grass.name = "grass";
-	grass.collision = world::collision_type::solid;
-	grass.texture_name = "grass.png";
-
-	bricks.name = "bricks";
-	bricks.collision = world::collision_type::solid;
-	bricks.texture_name = "stone_brick1.png";
-
-	loader.register_tile_descriptor(&dirt);
-	loader.register_tile_descriptor(&grass);
-	loader.register_tile_descriptor(&bricks);
-}
-
 struct loaders {
 	rendering::texture_loader* tex;
 	world::level_loader* lev;
+	world::tile_loader* til;
 	physics::body_template_loader* bdy;
 
 	void add_directory(string const& path) const
 	{
 		tex->add_search_directory(path + "/sprites");
 		lev->add_search_directory(path + "/levels");
+		til->add_search_directory(path + "/tiles");
 		bdy->add_search_directory(path + "/physics");
 	}
 };
@@ -224,15 +210,15 @@ int main(int argc, char* argv[])
 	io.DisplaySize.y = float(resolution.y);
 
 	// create loaders
-	world::level_loader level_loader;
-	initialize_tiles(level_loader);
+	auto tile_loader = make_shared<world::tile_loader>();
+	world::level_loader level_loader{tile_loader};
 
 	physics::body_template_loader body_loader;
 	body_loader.register_factory("distance", make_unique<physics::distance_constraint_factory>());
 	body_loader.register_factory("angle", make_unique<physics::angle_constraint_factory>());
 
 	// add search directories	
-	auto ldrs = loaders{&rendering::Texture::loader, &level_loader, &body_loader};
+	auto ldrs = loaders{&rendering::Texture::loader, &level_loader, tile_loader.get(), &body_loader};
 	ldrs.add_directory("../resources");
 	ldrs.add_directory("./resources");
 
