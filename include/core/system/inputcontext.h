@@ -14,15 +14,18 @@ namespace eversim { namespace core { namespace system {
 	class InputContext
 	{
 	private:
-		std::map<RawInputConstants::button,InputConstants::button> buttons;
-		std::map<RawInputConstants::button,InputConstants::state> states;
-		std::map<RawInputConstants::range,InputConstants::range> ranges;
+		// map <RawInput,MappedInput>
+		std::map<uint8_t,uint8_t> buttons;
+		std::map<uint8_t,uint8_t> states;
+		std::map<uint8_t,uint8_t> ranges;
+
 	public:
 		const std::string name;
 
-		InputContext(const std::string&);
+		explicit InputContext(const std::string&);
 
 		void register_action(const std::string& type,const std::string& action, const std::string& rawcode);
+		void list_actions() const;
 	};
 
 

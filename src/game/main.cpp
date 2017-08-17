@@ -223,7 +223,10 @@ int main(int argc, char* argv[])
 	io.DisplaySize.y = float(resolution.y);
 
 	//init inputhandler
-	eversim::core::system::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
+	auto contexts = eversim::core::system::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
+
+	for (const auto& context : contexts)
+		context.list_actions();
 
 	// create loaders
 	world::level_loader level_loader;
