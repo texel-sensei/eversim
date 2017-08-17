@@ -17,8 +17,8 @@ namespace eversim { namespace core { namespace system {
 	)
 		: component(owner)
 	{
-		display = mng.register_entity();
-		display->set_Texture(*mng.register_texture(texture_name));
+		display = mng.add_entity();
+		display->set_Texture(mng.add_texture(texture_name));
 		offset = -.5f*owner->get_scale();
 		update_transform();
 	}
@@ -34,13 +34,11 @@ namespace eversim { namespace core { namespace system {
 		using namespace utility;
 
 		const auto& obj = get_owner();
-		auto M = mat3();
-
-		M = scale(obj.get_scale()) * M;
-		M = translation(-offset) * rotation(obj.get_angle()) * translation(offset) * M;
-		M = translation(obj.get_position() + offset) * M;
-
-		display->set_M(M);
+		
+		display->set_Position(obj.get_position() + offset);
+		display->set_Scale(obj.get_scale());
+		display->set_Center(offset);
+		display->set_Rotation(obj.get_angle());
 	}
 
 }}}

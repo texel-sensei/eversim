@@ -54,8 +54,8 @@ namespace eversim { namespace core { namespace world {
 		auto const& tex_name = descriptor->texture_name;
 		if (tex_name.empty())
 			return;
-		display = mng.register_entity(rendering::STATIC);
-		display->set_Texture(mng.register_texture(tex_name).get());
+		display = mng.add_entity(rendering::STATIC);
+		display->set_Texture(mng.add_texture(tex_name));
 
 		display->set_Position(position() - glm::vec2(size()/2));
 		display->set_Scale(glm::vec2(size()));

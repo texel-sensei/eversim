@@ -189,7 +189,7 @@ void initialize_tiles(world::level_loader& loader)
 }
 
 struct loaders {
-	utility::texture_loader* tex;
+	rendering::texture_loader* tex;
 	world::level_loader* lev;
 	physics::body_template_loader* bdy;
 
@@ -203,19 +203,6 @@ struct loaders {
 
 void init_rendering(rendering::render_manager& renderer)
 {
-	// create program for spritemap creation
-	static rendering::ShaderProgram program("simple quad shader");
-	program.create();
-	program.attach
-	({
-		{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
-		{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
-	});
-	program.link();
-
-	renderer.set_spritmap_program(program);
-
 	// setup dirty hack renderer global
 	rendering::myrenderer = &renderer;
 }

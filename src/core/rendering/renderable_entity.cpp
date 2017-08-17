@@ -1,18 +1,34 @@
 #include "core/rendering/renderable_entity.h"
+#include "core/rendering/drawcall_entity.h"
 
 #include "core/utility/plattform.h"
+#include "core/utility/matrix_helper.h"
 
 #include <easylogging++.h>
 
+using namespace std;
+using namespace glm;
+
 namespace eversim {	namespace core { namespace rendering {
 
-	std::unique_ptr<Multibuffer> default_quadmesh_ptr = nullptr;
-	Texture default_texture(glm::ivec2(4,4));
-	ShaderProgram default_shader("default uv shader");
 
-	RenderableEntity::RenderableEntity() : 
-		program(&default_shader), tex(&default_texture), data(&(*default_quadmesh_ptr))
+	RenderableEntity::RenderableEntity(
+		std::shared_ptr<ShaderProgram> program,
+		std::shared_ptr<TextureBase> tex,
+		std::weak_ptr<Multibuffer>  data,
+		const entity_type t) :
+		program(program),
+		tex(tex),
+		data(data),
+		type(t)
 	{}
+
+	RenderableEntity::~RenderableEntity()
+	{
+
+		if (assigned_drawer.first >= 0 && !assigned_drawer.second.expired())
+			assigned_drawer.second.lock()->remove_entity(assigned_drawer.first);
+	}
 
 	instanced_entity_information RenderableEntity::get_instanced_entity_information() const
 	{
@@ -23,133 +39,108 @@ namespace eversim {	namespace core { namespace rendering {
 
 	void RenderableEntity::get_instanced_entity_information(instanced_entity_information& ifo) const
 	{
-		ifo.set_M(M);
+		ifo.set_M(get_M());
 		ifo.set_texoffset(texoffset);
 		ifo.set_texsize(texsize);
 		ifo.set_spritesize(spritesize);
 	}
 
-	glm::fmat3 RenderableEntity::get_M() const { return M; };
-
-	ShaderProgram* RenderableEntity::get_ShaderProgram() const { return program; };
-
-	TextureBase* RenderableEntity::get_Texture() const { return tex; };
-
-	Multibuffer* RenderableEntity::get_Multibuffer() const { return data; };
-
-	void RenderableEntity::set_M(const glm::fmat3& m)
+	fmat3 RenderableEntity::get_M() const
 	{
-		M = m; 
-		touch();
+		auto M = mat3();
+
+		M = utility::scale(scale) * M;
+		M = utility::translation(center_of_rotation) * utility::rotation(rotation) * utility::translation(-center_of_rotation) * M;
+		M = utility::translation(position) * M;
+
+		return M;
 	};
 
-	void RenderableEntity::set_ShaderProgram(ShaderProgram* p)
+	weak_ptr<ShaderProgram> RenderableEntity::get_ShaderProgram() const { return program; };
+
+	weak_ptr<TextureBase> RenderableEntity::get_Texture() const { return tex; };
+
+	weak_ptr<Multibuffer> RenderableEntity::get_Multibuffer() const { return data; };
+
+	void RenderableEntity::set_ShaderProgram(std::shared_ptr<ShaderProgram> p)
 	{
-		program = p; 
+		program = p;
 		touch();
-	};
-
-	void RenderableEntity::set_ShaderProgram(ShaderProgram& p)
+	}
+	
+	void RenderableEntity::set_Texture(std::shared_ptr<TextureBase> p)
 	{
-		set_ShaderProgram(&p); 
+		tex = p;
 		touch();
-	};
+	}
 
-	void RenderableEntity::set_Texture(Texture* t)
+	void RenderableEntity::set_Texture(std::shared_ptr<TextureBase> p,
+		const ivec2& offset, const ivec2& resolution)
 	{
-		tex = t;
-		texsize = t->get_resolution();
-		spritesize = texsize;
-		touch();
-	};
-
-	void RenderableEntity::set_Texture(Texture& t) { set_Texture(&t); };
-
-	void RenderableEntity::set_Texture(Spritemap* sm)
-	{
-		tex = sm;
-		texsize = sm->get_texture().get_resolution();
-		spritesize = texsize;
-		touch();
-	};
-
-	void RenderableEntity::set_Texture(Spritemap* sm,
-		const glm::ivec2& offset, const glm::ivec2& resolution)
-	{
-		tex = sm;
+		tex = p;
 		texoffset = offset;
 		texsize = resolution;
-		spritesize = sm->get_texture().get_resolution();
+		spritesize = p->get_resolution();
 		touch();
-	};
+	}
 
-	void RenderableEntity::set_Texture(Spritemap& sm)
+	void RenderableEntity::set_Multibuffer(std::shared_ptr<Multibuffer> p)
 	{
-		set_Texture(&sm);
-	};
-
-	void RenderableEntity::set_Texture(Spritemap& sm,
-		const glm::ivec2& offset, const glm::ivec2& resolution)
-	{
-		set_Texture(&sm, offset, resolution);
-	};
-
-	void RenderableEntity::set_Multibuffer(Multibuffer* b)
-	{
-		data = b; 
+		data = p;
 		touch();
-	};
+	}
 
-	void RenderableEntity::set_Multibuffer(Multibuffer& b)
+	void RenderableEntity::set_Position(fvec2 pos)
 	{
-		data = &b; 
-		touch();
-	};
-
-	void  RenderableEntity::set_Position(glm::fvec2 pos)
-	{
-		M[2] = glm::fvec3(pos,1.f);
+		position = pos;
 		touch();
 	}
 
 	glm::fvec2  RenderableEntity::get_Position() const
 	{
-		return { M[2][0], M[2][1] };
+		return position;
 	}
 
-	void RenderableEntity::set_Scale(glm::fvec2 scale)
+	void RenderableEntity::set_Scale(glm::fvec2 sc)
 	{
-		M[0] = { scale[0], 0, 0 };
-		M[1] = { 0, scale[1], 0};
+		scale = sc;
 		touch();
 	}
 
 	glm::fvec2 RenderableEntity::get_Scale() const
 	{
-		return { M[0][0], M[1][1] };
+		return scale;
 	}
 
-	void RenderableEntity::default_Multibuffer()
+	void RenderableEntity::set_Rotation(float rot)
 	{
-		set_Multibuffer(*default_quadmesh_ptr);
-		touch();
+		rotation = rot;
 	}
 
-	void RenderableEntity::default_ShaderProgram()
+	float RenderableEntity::get_Rotation() const
 	{
-		set_ShaderProgram(default_shader);
-		touch();
+		return rotation;
 	}
 
-	void RenderableEntity::default_Texture()
+	void RenderableEntity::set_Center(glm::fvec2 c)
 	{
-		set_Texture(default_texture);
-		touch();
+		center_of_rotation = c;
+	}
+
+	glm::fvec2 RenderableEntity::get_Center() const
+	{
+		return center_of_rotation;
 	}
 
 	void RenderableEntity::touch()
 	{
 		touched = true;
+		auto idx = assigned_drawer.first;
+		auto drawer_ptr = assigned_drawer.second;
+		if(assigned_drawer.first >= 0 && !drawer_ptr.expired())
+		{
+			drawer_ptr.lock()->touch(idx);
+		}
 	}
 	void RenderableEntity::untouch()
 	{
@@ -171,10 +162,24 @@ namespace eversim {	namespace core { namespace rendering {
 		return type;
 	}
 
-	void RenderableEntity::default_State()
+	void RenderableEntity::set_Drawer(std::weak_ptr<DrawcallEntity> de,size_t idx)
 	{
-		default_Multibuffer();
-		default_ShaderProgram();
-		default_Texture();
+		assigned_drawer = make_pair(idx,de);
 	}
+
+	void RenderableEntity::set_Drawer(size_t idx)
+	{
+		assigned_drawer.first = idx;
+	}
+
+	std::weak_ptr<DrawcallEntity> RenderableEntity::get_Drawer() const
+	{
+		return assigned_drawer.second;
+	}
+
+	long long RenderableEntity::get_Drawer_idx() const
+	{
+		return assigned_drawer.first;
+	}
+
 }}}

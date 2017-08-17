@@ -1,5 +1,5 @@
 #include "core/rendering/texture.h"
-#include "core/utility/texture_loader.h"
+#include "core/rendering/texture_loader.h"
 
 #include <easylogging++.h>
 
@@ -14,7 +14,7 @@ namespace eversim {
 	namespace core {
 		namespace rendering {
 
-			utility::texture_loader Texture::loader;
+			texture_loader Texture::loader;
 
 			Texture::Texture()
 			{}

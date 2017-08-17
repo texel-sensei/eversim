@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/utility/plattform.h"
-#include "core/utility/texture_loader.h"
+#include "core/rendering/texture_loader.h"
 #include "core/rendering/texture_base_class.h"
 
 #include <glm/glm.hpp>
@@ -26,12 +26,12 @@ namespace eversim {
 
 				bool valid = false;
 				GLuint tex_id = 0;	
-				std::shared_ptr<utility::texture_packet> tex_ptr;
+				std::shared_ptr<texture_packet> tex_ptr;
 				glm::ivec2 resolution;
 
 			public:
 
-				static utility::texture_loader loader;
+				static texture_loader loader;
 
 				Texture();
 				explicit Texture(const glm::ivec2& resolution,

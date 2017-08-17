@@ -56,26 +56,17 @@ namespace eversim {namespace core {
 
 			string message(int _Errval) const override
 			{
-				switch (static_cast<generic_error>(_Errval))
-				{
-				case generic_error::AssertionFailure:
-					return "assertion failed";
-				case generic_error::FileNotFound:
-					return "file not found";
-				case generic_error::InvalidArgument: 
-					return "Invalid argument";
-				case generic_error::InvalidEnum: 
-					return "Invalid enum value";
-				default:
+				if(!generic_error::_is_valid(_Errval)){
 					return "(unknown)";
 				}
+				return generic_error::_from_integral(_Errval)._to_string();
 			}
 		};
 
 		const eversim_error_category general_error;
 	}
 
-	error_code make_error_code(generic_error err)
+	error_code make_error_code(generic_error::_enumerated err)
 	{
 		return { static_cast<int>(err), general_error };
 	}
