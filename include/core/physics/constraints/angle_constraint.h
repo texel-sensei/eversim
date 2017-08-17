@@ -25,8 +25,10 @@ namespace eversim { namespace core { namespace physics {
 			return angle - target_angle;
 		}
 
-		std::vector<glm::vec2> grad() const override
+		void grad(utility::array_view<glm::vec2> out) const override
 		{
+			EVERSIM_ASSERT(out.size() == get_arity());
+
 			const auto a = particles[0]->projected_position;
 			const auto b = particles[1]->projected_position;
 			const auto c = particles[2]->projected_position;
@@ -61,11 +63,9 @@ namespace eversim { namespace core { namespace physics {
 			const auto k = grad_acos(cos_angle);
 			// acosf(dot(v1,v2)) => grad_acos(dot(..)) * grad(dot(..))
 
-			return {
-				k*grad_endpoint(a,c),
-				k*grad_B_dot,
-				k*grad_endpoint(c,a)
-			};
+			out[0] = k*grad_endpoint(a, c);
+			out[1] = k*grad_B_dot;
+			out[2] = k*grad_endpoint(c, a);
 		}
 
 	private:

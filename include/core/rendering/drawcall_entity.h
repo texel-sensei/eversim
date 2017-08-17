@@ -10,6 +10,8 @@
 
 #include <boost/align/aligned_allocator.hpp>
 
+#include <set>
+
 namespace eversim {
 	namespace core {
 		namespace rendering {
@@ -18,33 +20,55 @@ namespace eversim {
 			{
 			private:
 				bool valid = true;
-				bool touched = true;
 
-				ShaderProgram* program_ptr;
-				TextureBase* texture_ptr;
-				Multibuffer* buffer_ptr;
+				bool touched = false;
+				std::vector<size_t> entity_touched;
 
+				std::weak_ptr<ShaderProgram> program_ptr;
+				std::weak_ptr<Multibuffer> buffer_ptr;
+
+				Spritemap spritemap = Spritemap(512); //TODO
+				std::set<size_t> added_textures;
+
+				size_t ssb_size = 0;
 				shader_storage_buffer ssb;
 
+				
+				std::map<size_t, TextureBase*> found_textures;
+				std::map<size_t, glm::ivec2> texture_offsets;
+
+
+				const size_t extra_space = 500;
+				std::vector<std::weak_ptr<RenderableEntity>> entities;
 				std::vector<instanced_entity_information> entity_info;
+				size_t idx_add = 0;
 
 				void invalidate_if_expired();
+
+				void update_instanced_entity_information(const size_t idx);
+
+				void reduce();
+
 
 			public:
 
 				DrawcallEntity(
-					ShaderProgram* program_ptr,
-					TextureBase* texture_ptr,
-					Multibuffer* buffer_ptr
+					std::weak_ptr<ShaderProgram> program_ptr,
+					std::weak_ptr<Multibuffer> buffer_ptr
 				);
 
 				void touch();
-				void untouch();
+				void touch(const size_t idx);
 				bool get_touched() const;
 
-				const Multibuffer* get_Multibuffer() const
+				std::weak_ptr<Multibuffer> get_Multibuffer() const
 				{
 					return buffer_ptr;
+				}
+
+				std::weak_ptr<ShaderProgram> get_ShaderProgram() const
+				{
+					return program_ptr;
 				}
 
 				void draw(Camera& cam);
@@ -53,16 +77,29 @@ namespace eversim {
 				 * Add the data of the entity to the DrawcallEntity
 				 * returns the index of the entity data
 				 */
-				size_t add_entity_data(const RenderableEntity& entity);
-				size_t add_entity_data(
-					const RenderableEntity& entity,
-					const glm::ivec2 texoffset,
-					const glm::ivec2 texsize,
-					const glm::ivec2 spritesize
-					);
-				instanced_entity_information get_entity_data(const size_t idx) const;
+				size_t add_entity(std::weak_ptr<RenderableEntity> entity);
 
+				void move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target);
+				void remove_entity(size_t entity_idx);
+
+				instanced_entity_information get_entity_data(const size_t idx) const;
+				void remove_expired_entities();
 				void upload();
+
+				const std::vector<size_t>& get_touched_entities() const
+				{
+					return entity_touched;
+				}
+
+				std::weak_ptr<RenderableEntity> get_entity(const size_t idx) const
+				{
+					return entities.at(idx);
+				}
+
+				bool contains_texture(const GLuint& uid) const
+				{
+					return spritemap.contains_texture(uid);
+				}
 			};
 
 		}

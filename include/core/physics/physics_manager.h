@@ -32,7 +32,7 @@ namespace eversim { namespace core { namespace physics {
 		using body_container = utility::object_pool<body>;
 		using particle_list = std::vector<particle*>;
 
-		body* add_body(body_template const&, glm::vec2 pos, float scale = 1.f);
+		body* add_body(body_template const&, glm::vec2 pos, glm::vec2 scale = glm::vec2(1.f));
 		void remove_body(body* b);
 
 		void set_level(world::level const* l);
