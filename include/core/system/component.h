@@ -19,6 +19,8 @@ namespace eversim {namespace core {namespace system {
 
 		utility::clock::duration get_frametime() const;
 
+		utility::clock::time_point get_current_time() const;
+
 		virtual void update(){}
 		virtual void post_physics_update(){}
 	protected:

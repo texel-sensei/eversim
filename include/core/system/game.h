@@ -26,7 +26,6 @@ namespace eversim {namespace core {namespace system {
 		void kill_object(gameobject*);
 
 		void step_frame();
-		void add_resources_directory(std::string const& path);
 
 		size_t get_num_gameobjects() const { return objects.size(); }
 
@@ -35,6 +34,11 @@ namespace eversim {namespace core {namespace system {
 		void step_physics(utility::clock::duration time_passed);
 		void update_gameobjects(utility::clock::duration time_passed);
 		void post_physics_update();
+
+		/*
+		 * Returns the current time. The returned value stays the same for the whole frame.
+		 */
+		utility::clock::time_point get_time() const;
 	private:
 		physics::physics_manager* physics;
 		std::shared_ptr<utility::clock> game_clock;
@@ -42,7 +46,7 @@ namespace eversim {namespace core {namespace system {
 		utility::object_pool<gameobject> objects;
 		std::unordered_set<gameobject*> dead_objects;
 
-		utility::clock::time_point last_frame_finished;
+		utility::clock::time_point frame_started;
 		utility::clock::duration physics_timestep = 8ms;
 		utility::clock::duration physics_time_accumulator = 0ms;
 

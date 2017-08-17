@@ -9,7 +9,7 @@ namespace eversim { namespace core { namespace system {
 		: physics(physics), game_clock(game_clock)
 	{
 		EVERSIM_ASSERT(physics);
-		last_frame_finished = game_clock->now();
+		frame_started = game_clock->now();
 	}
 
 	gameobject* game::create_empty()
@@ -31,15 +31,15 @@ namespace eversim { namespace core { namespace system {
 	void game::step_frame()
 	{
 		const auto now = game_clock->now();
-		const auto time_passed = now - last_frame_finished;
+		const auto time_passed = now - frame_started;
+		frame_started = game_clock->now();
+
 
 		update_gameobjects(time_passed);
 		step_physics(time_passed);
 		post_physics_update();
 
 		cleanup_dead();
-
-		last_frame_finished = game_clock->now();
 	}
 
 	void game::cleanup_dead()
@@ -93,7 +93,10 @@ namespace eversim { namespace core { namespace system {
 		}
 	}
 
-	void game::add_resources_directory(std::string const& path)
+	utility::clock::time_point game::get_time() const
 	{
+		return frame_started;
 	}
+
+
 }}}

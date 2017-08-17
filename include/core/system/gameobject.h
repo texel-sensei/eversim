@@ -58,6 +58,7 @@ namespace eversim {namespace core{namespace system {
 		void set_frametime(utility::clock::duration duration) { frametime = duration; }
 		utility::clock::duration get_frametime() const { return frametime; }
 
+		game& get_game() const { return *the_game; }
 	private:
 		game* the_game;
 
