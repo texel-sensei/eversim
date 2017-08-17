@@ -14,6 +14,8 @@
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
 
+#include "core/system/contextloader.h"
+
 #include "editor/core/window_manager.h"
 
 #include <easylogging++.h>
@@ -219,6 +221,9 @@ int main(int argc, char* argv[])
 	auto& io = ImGui::GetIO();
 	io.DisplaySize.x = float(resolution.x);
 	io.DisplaySize.y = float(resolution.y);
+
+	//init inputhandler
+	eversim::core::system::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
 
 	// create loaders
 	world::level_loader level_loader;

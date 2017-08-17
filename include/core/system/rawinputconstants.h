@@ -1,5 +1,13 @@
 #pragma once
 
+#include "enum.h"
+
+#include <SDL2/SDL.h>
+#include <imgui_impl_sdl_gl3.h>
+
+#include <map>
+
+
 /*
 * Enums for every possible rawinput
 */
@@ -8,8 +16,7 @@ namespace eversim { namespace core { namespace system {
 
 	namespace RawInputConstants
 	{
-		enum Button
-		{
+		BETTER_ENUM(button, uint8_t,
 			GAMEPAD_BUTTON_A = 0,
 			GAMEPAD_BUTTON_B,
 			GAMEPAD_BUTTON_X,
@@ -18,17 +25,39 @@ namespace eversim { namespace core { namespace system {
 			GAMEPAD_BUTTON_RB,
 			GAMEPAD_BUTTON_START,
 			GAMEPAD_BUTTON_SELECT
-		};
+		)
 
-		enum Axis
-		{
+		BETTER_ENUM(range, uint8_t,
 			GAMEPAD_ANALOGUE_LEFT_STICK_X = 0,
 			GAMEPAD_ANALOGUE_LEFT_STICK_Y,
 			GAMEPAD_ANALOGUE_RIGHT_STICK_X,
 			GAMEPAD_ANALOGUE_RIGHT_STICK_Y,
 			GAMEPAD_ANALOGUE_LT,
 			GAMEPAD_ANALOGUE_RT
+		)
+
+		const std::map<SDL_GameControllerButton, button> sdl_button_map =
+		{
+			{SDL_CONTROLLER_BUTTON_A,button::GAMEPAD_BUTTON_A},
+			{SDL_CONTROLLER_BUTTON_B,button::GAMEPAD_BUTTON_B},
+			{SDL_CONTROLLER_BUTTON_X,button::GAMEPAD_BUTTON_X},
+			{SDL_CONTROLLER_BUTTON_Y,button::GAMEPAD_BUTTON_Y},
+			{SDL_CONTROLLER_BUTTON_LEFTSHOULDER,button::GAMEPAD_BUTON_LB},
+			{SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,button::GAMEPAD_BUTTON_RB},
+			{SDL_CONTROLLER_BUTTON_START,button::GAMEPAD_BUTTON_START},
+			{SDL_CONTROLLER_BUTTON_GUIDE,button::GAMEPAD_BUTTON_SELECT} //is this mapping correct ??
+		};
+
+		const std::map<SDL_GameControllerAxis, range> sdl_range_map =
+		{
+			{ SDL_CONTROLLER_AXIS_LEFTX ,range::GAMEPAD_ANALOGUE_LEFT_STICK_X },
+			{ SDL_CONTROLLER_AXIS_LEFTY ,range::GAMEPAD_ANALOGUE_LEFT_STICK_Y },
+			{ SDL_CONTROLLER_AXIS_RIGHTX ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_X },
+			{ SDL_CONTROLLER_AXIS_RIGHTY ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_Y },
+			{ SDL_CONTROLLER_AXIS_TRIGGERLEFT ,range::GAMEPAD_ANALOGUE_LT },
+			{ SDL_CONTROLLER_AXIS_TRIGGERRIGHT ,range::GAMEPAD_ANALOGUE_RT }
 		};
 	}
 
+	
 }}}
