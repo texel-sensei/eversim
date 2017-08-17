@@ -266,8 +266,7 @@ int main(int argc, char* argv[])
 	player->set_scale({ .5f,.5f });
 
 	player->add_component<system::physics_component>(physics, *player_body_template);
-	auto rencomp = player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
-	rencomp->set_position_offset(-.5f * player->get_scale());
+	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
 
 
 	// setup camera
