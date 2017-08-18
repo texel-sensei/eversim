@@ -22,6 +22,7 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
+#include "core/input/inputhandler.h"
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -31,6 +32,7 @@ using namespace eversim;
 using namespace eversim::core;
 
 world::tile_descriptor dirt, grass, bricks;
+std::shared_ptr<input::InputHandler> inputhandler_ptr = nullptr;
 
 bool direction_pressed[4];
 
@@ -62,9 +64,13 @@ bool handle_sdl_events()
 	SDL_Event event;
 	auto should_continue = true;
 	auto& io = ImGui::GetIO();
+
 	while (SDL_PollEvent(&event))
 	{
 		ImGui_ImplSdlGL3_ProcessEvent(&event);
+
+		inputhandler_ptr->handle_event(event);
+
 		auto skip_key = io.WantCaptureKeyboard || io.WantTextInput;
 		switch (event.type)
 		{
@@ -82,6 +88,9 @@ bool handle_sdl_events()
 			break;
 		}
 	}
+
+	inputhandler_ptr->execute();
+
 	return should_continue;
 }
 
@@ -223,10 +232,13 @@ int main(int argc, char* argv[])
 	io.DisplaySize.y = float(resolution.y);
 
 	//init inputhandler
-	auto contexts = eversim::core::input::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
 
-	for (const auto& context : contexts)
-		context.list_actions();
+	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
+	inputhandler_ptr->push_context("game"); 
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::JUMP,
+		[]() { LOG(INFO) << "pressed A for jumping"; }
+	);
 
 	// create loaders
 	world::level_loader level_loader;

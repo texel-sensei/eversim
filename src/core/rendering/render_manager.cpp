@@ -148,6 +148,16 @@ namespace eversim { namespace core { namespace rendering {
 			cerr << "SDL_Init Error: " << SDL_GetError();
 			throw sdl::sdl_error{ "Failed to init SDL!" };
 		}
+
+
+		LOG(INFO) << "num joysticks " << SDL_NumJoysticks();
+		if(SDL_NumJoysticks() > 0)
+		{
+			joy = SDL_JoystickOpen(0);
+			if (joy) LOG(INFO) << "opened " << joy;
+		}
+
+
 		quit_sdl = &SDL_Quit;
 
 		auto flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;

@@ -4,7 +4,9 @@
     "MENU": [ "GAMEPAD_BUTTON_START", "button" ],
     "DUCK": [ "GAMEPAD_BUTTON_X", "state" ],
     "STEER_X": [ "GAMEPAD_ANALOGUE_LEFT_STICK_X", "range" ],
-    "STEER_Y": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y", "range" ]
+    "STEER_Y": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y", "range" ],
+    "FART_LEFT": [ "GAMEPAD_BUTTON_LB", "button" ],
+    "FART_RIGHT": [ "GAMEPAD_BUTTON_RB", "button" ]
   },
   "menu": {
     "BACK": [ "GAMEPAD_BUTTON_B" , "button"],

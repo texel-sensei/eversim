@@ -106,6 +106,8 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<entity_wkptr> dynamic_entities;
 		std::vector<entity_wkptr> dirty_entities;
 
+		SDL_Joystick* joy = nullptr;
+
 		void setup(bool fullscreen);
 
 		/*

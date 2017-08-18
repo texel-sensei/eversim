@@ -11,14 +11,16 @@ namespace eversim {	namespace core { namespace input {
 	namespace InputConstants
 	{
 		BETTER_ENUM(type, uint8_t,
-			button=0, state, range
+			button = 0, state, range
 		)
 
 		BETTER_ENUM(button, uint8_t,
 			CONFIRM = 0,
 			BACK,
 			JUMP,
-			MENU
+			MENU,
+			FART_LEFT,
+			FART_RIGHT
 		)
 
 		BETTER_ENUM(state, uint8_t,
