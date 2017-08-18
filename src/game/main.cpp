@@ -14,7 +14,7 @@
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
 
-#include "core/system/contextloader.h"
+#include "core/input/contextloader.h"
 
 #include "editor/core/window_manager.h"
 
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 	io.DisplaySize.y = float(resolution.y);
 
 	//init inputhandler
-	auto contexts = eversim::core::system::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
+	auto contexts = eversim::core::input::InputContextLoader::generate_contexts_from_json("../resources/inputmaps/contexts.json");
 
 	for (const auto& context : contexts)
 		context.list_actions();

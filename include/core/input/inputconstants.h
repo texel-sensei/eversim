@@ -6,7 +6,7 @@
  * Enums for every possible action in every context
  */
 
-namespace eversim {	namespace core { namespace system {
+namespace eversim {	namespace core { namespace input {
 
 	namespace InputConstants
 	{

@@ -1,14 +1,14 @@
 #pragma once
 
 #include "enum.h"
-#include "core/system/inputconstants.h"
-#include "core/system/rawinputconstants.h"
+#include "core/input/inputconstants.h"
+#include "core/input/rawinputconstants.h"
 
 #include <string>
 #include <map>
 
 
-namespace eversim { namespace core { namespace system {
+namespace eversim { namespace core { namespace input {
 	
 	
 	class InputContext

@@ -133,6 +133,7 @@ source_group("rendering" REGULAR_EXPRESSION /rendering/)
 source_group("physics" REGULAR_EXPRESSION /physics/)
 source_group("physics\\constraints" REGULAR_EXPRESSION /physics/constraints/)
 source_group("world" REGULAR_EXPRESSION /world/)
+source_group("input" REGULAR_EXPRESSION /input/)
 source_group("system" REGULAR_EXPRESSION /system/)
 source_group("system\\imgui" REGULAR_EXPRESSION /system/imgui/)
 

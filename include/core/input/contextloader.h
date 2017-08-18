@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/system/inputcontext.h"
+#include "core/input/inputcontext.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -10,7 +10,7 @@
 
 namespace eversim {
 	namespace core {
-		namespace system {
+		namespace input {
 
 			template <typename T>
 			std::vector<T> as_vector(boost::property_tree::ptree const& pt, boost::property_tree::ptree::key_type const& key)

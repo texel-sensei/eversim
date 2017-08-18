@@ -12,7 +12,7 @@
 * Enums for every possible rawinput
 */
 
-namespace eversim { namespace core { namespace system {
+namespace eversim { namespace core { namespace input {
 
 	namespace RawInputConstants
 	{

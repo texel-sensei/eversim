@@ -1,8 +1,8 @@
-#include "core/system/inputcontext.h"
+#include "core/input/inputcontext.h"
 
 #include <easylogging++.h>
 
-namespace eversim {	namespace core { namespace system {
+namespace eversim {	namespace core { namespace input {
 
 	InputContext::InputContext(const std::string& n) : name(n)
 	{
@@ -50,19 +50,69 @@ namespace eversim {	namespace core { namespace system {
 		LOG(INFO) << "Context \"" << name << "\"";
 		for(auto& button : buttons)
 		{
-			LOG(INFO) << "\t\t" << RawInputConstants::button::_from_integral(button.first)._to_string() << 
+			const auto raw_enum = RawInputConstants::button::_from_integral(button.first);
+			auto it = RawInputConstants::sdl_button_map.end();
+
+			for(it = RawInputConstants::sdl_button_map.begin(); it != RawInputConstants::sdl_button_map.end(); ++it)
+			{
+				if(it->second == raw_enum)
+				{
+					break;
+				}
+			}
+	
+			if(it == RawInputConstants::sdl_button_map.end())
+			{
+				LOG(ERROR) << "sdl to raw mapping not found";
+				continue;
+			}
+			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first << 
 				" -> " << InputConstants::button::_from_integral(button.second)._to_string();
 		}
 
 		for (auto& state : states)
 		{
-			LOG(INFO) << "\t\t" << RawInputConstants::button::_from_integral(state.first)._to_string() <<
+			const auto raw_enum = RawInputConstants::button::_from_integral(state.first);
+			auto it = RawInputConstants::sdl_button_map.end();
+
+			for (it = RawInputConstants::sdl_button_map.begin(); it != RawInputConstants::sdl_button_map.end(); ++it)
+			{
+				if (it->second == raw_enum)
+				{
+					break;
+				}
+			}
+
+			if (it == RawInputConstants::sdl_button_map.end())
+			{
+				LOG(ERROR) << "sdl to raw mapping not found";
+				continue;
+			}
+
+			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first <<
 				" -> " << InputConstants::state::_from_integral(state.second)._to_string();
 		}
 
 		for (auto& range : ranges)
 		{
-			LOG(INFO) << "\t\t" << RawInputConstants::range::_from_integral(range.first)._to_string() <<
+			const auto raw_enum = RawInputConstants::button::_from_integral(range.first);
+			auto it = RawInputConstants::sdl_range_map.end();
+
+			for (it = RawInputConstants::sdl_range_map.begin(); it != RawInputConstants::sdl_range_map.end(); ++it)
+			{
+				if (it->second == raw_enum)
+				{
+					break;
+				}
+			}
+
+			if (it == RawInputConstants::sdl_range_map.end())
+			{
+				LOG(ERROR) << "sdl to raw mapping not found";
+				continue;
+			}
+
+			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first <<
 				" -> " << InputConstants::range::_from_integral(range.second)._to_string();
 		}
 	}

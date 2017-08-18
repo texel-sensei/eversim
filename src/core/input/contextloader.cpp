@@ -1,8 +1,8 @@
-#include "core/system/contextloader.h"
+#include "core/input/contextloader.h"
 
 #include <easylogging++.h>
 
-namespace eversim {	namespace core { namespace system {
+namespace eversim {	namespace core { namespace input {
 
 using namespace std;
 namespace pt = boost::property_tree;
