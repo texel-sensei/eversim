@@ -128,24 +128,29 @@ file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
+add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
+add_library(editor STATIC ${EDITOR_HEADERS} ${EDITOR_SOURCES})
+add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
+
 # core source groups
-source_group("utility" REGULAR_EXPRESSION /utility/)
-source_group("utility\\time" REGULAR_EXPRESSION /utility/time/)
-source_group("rendering" REGULAR_EXPRESSION /rendering/)
-source_group("physics" REGULAR_EXPRESSION /physics/)
-source_group("physics\\constraints" REGULAR_EXPRESSION /physics/constraints/)
-source_group("world" REGULAR_EXPRESSION /world/)
-source_group("system" REGULAR_EXPRESSION /system/)
-source_group("system\\imgui" REGULAR_EXPRESSION /system/imgui/)
+foreach(_file IN ITEMS ${CORE_HEADERS} ${CORE_SOURCES})
+	get_filename_component(_file_path "${_file}" PATH)
+	file(RELATIVE_PATH _file_path_rel "${CMAKE_CURRENT_SOURCE_DIR}" "${_file_path}")
+	string(REPLACE "/core/" ";" _tuple ${_file_path_rel})
+	list(LENGTH _tuple _len)
+	if(${_len} EQUAL 1)
+		set(_tuple "core")
+	endif()
+	list(REVERSE _tuple)
+	string(REPLACE ";" "\\\\" _name "${_tuple}")
+	string(REPLACE "/" "\\\\" _name "${_name}")
+	source_group("${_name}" FILES "${_file}")
+endforeach()
 
 #editor source groups
 source_group("imgui" REGULAR_EXPRESSION /editor/imgui/)
 source_group("core" REGULAR_EXPRESSION /editor/core/)
 source_group("windows" REGULAR_EXPRESSION /editor/windows/)
-
-add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
-add_library(editor STATIC ${EDITOR_HEADERS} ${EDITOR_SOURCES})
-add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
 
 
 target_link_libraries(eversim ${LIBS})
