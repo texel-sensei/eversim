@@ -15,6 +15,9 @@
 #include <glm/detail/type_mat.hpp>
 #include <glm/gtx/norm.hpp>
 
+#include <boost/range/adaptor/indirected.hpp>
+#include <boost/range/join.hpp>
+
 #include <algorithm>
 #include <bitset>
 
@@ -194,22 +197,14 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
-	void physics_manager::draw_constraints(bitset<max_constraint_arity> to_render)
+	auto physics_manager::get_constraints() const
+		-> boost::any_range<constraint const&, boost::forward_traversal_tag>
 	{
-		for (auto const& c : constraints)
-		{
-			if (!to_render[c.get_arity()-1])
-				continue;
-			for (int i = 0; i < c.get_arity(); ++i)
-			{
-				for (int j = 0; j < i; ++j)
-				{
-					auto p1 = c.particles[i];
-					auto p2 = c.particles[j];
-					rendering::draw_line(p1->projected_position, p2->projected_position);
-				}
-			}
-		}
+		using namespace boost;
+		using namespace boost::range;
+		const auto r1 = join(constraints, collision_constraints);
+		const auto r2 = join(r1, static_collision_constraints);
+		return r2;
 	}
 
 	void physics_manager::add_constraint(unique_ptr<constraint> c)

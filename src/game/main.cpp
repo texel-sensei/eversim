@@ -34,8 +34,6 @@ using namespace std;
 using namespace eversim;
 using namespace eversim::core;
 
-world::tile_descriptor dirt, grass, bricks;
-
 bool direction_pressed[4];
 
 bool handle_keypress(SDL_Keysym sym, bool down)
@@ -295,7 +293,18 @@ int main(int argc, char* argv[])
 		}
 
 		// debug draw physics TODO: move into physics inspector!
-		physics.draw_constraints();
+		
+		for(auto&& c : physics.get_constraints())
+		{
+			if(c.get_arity() <= 1)
+			{
+				continue;
+			}
+			auto const& p1 = c.particles[0]->projected_position;
+			auto const& p2 = c.particles[1]->projected_position;
+			rendering::draw_line(p1, p2);
+		}
+
 		for (auto&& p : physics.get_particles())
 		{
 			rendering::draw_point(p.pos);

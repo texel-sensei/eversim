@@ -12,6 +12,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/poly_collection/base_collection.hpp>
 #include <boost/range.hpp>
+#include <boost/range/any_range.hpp>
 
 #include <bitset>
 #include <vector>
@@ -96,8 +97,8 @@ namespace eversim { namespace core { namespace physics {
 		void atomic_step(float dt);
 		std::string get_step_name() const;
 		bool finished_frame() const { return current_state == simulation_state::external; }
-		void draw_constraints(std::bitset<max_constraint_arity> to_render = ~0UL);
-		
+		boost::any_range<constraint const&, boost::forward_traversal_tag> get_constraints() const;
+
 	private:
 		int solver_iterations = 5;
 
