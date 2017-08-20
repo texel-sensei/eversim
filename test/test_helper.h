@@ -30,3 +30,15 @@ inline glm_equals is_approx(float x, float y)
 {
 	return glm_equals({ x,y });
 }
+
+namespace Catch {
+	template<typename F>
+	struct StringMaker<glm::tvec2<F>> {
+		static std::string convert(glm::tvec2<F> const& v)
+		{
+			using namespace std;
+			using namespace std::literals;
+			return "("s + to_string(v.x) + ", " + to_string(v.y) + ")";
+		}
+	};
+}
