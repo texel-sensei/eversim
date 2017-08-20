@@ -2,6 +2,7 @@
 
 #include "core/world/level.h"
 #include "core/world/tile_descriptor.h"
+
 #include <catch.hpp>
 
 using namespace eversim::core::world;
@@ -273,4 +274,21 @@ TEST_CASE("level collision shape building", "[world][level]")
 		const auto zeros = bits.size() - bits.count();
 		REQUIRE(v.size() == zeros);
 	}
+}
+
+TEST_CASE("tile: world to tile coordinates", "[world][tile]")
+{
+	using namespace glm;
+	auto l = level({ 3,3 });
+	l.set_tile_size(2.5);
+	auto const& t = l.get_tile_by_index({ 1,1 });
+
+	const auto center = t.position();
+	REQUIRE_THAT(t.to_tile_coordinates(center), is_approx(0, 0));
+	REQUIRE_THAT(t.to_tile_coordinates(center + vec2(0.125,0)), is_approx(0.1, 0));
+	REQUIRE_THAT(t.to_tile_coordinates(center - vec2(0.125, 0)), is_approx(-0.1, 0));
+	
+	const auto upper_left = center + vec2(-1.249, 1.249);
+	REQUIRE(&l.get_tile_by_pos(upper_left) == &t);
+	REQUIRE_THAT(t.to_tile_coordinates(upper_left), is_approx(-0.9992f, 0.9992f));
 }

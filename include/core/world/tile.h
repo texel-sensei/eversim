@@ -33,6 +33,15 @@ namespace eversim { namespace core { namespace world {
 
 		bool point_inside(glm::vec2 p) const;
 
+		/*
+		 * Returns the tile coordinates of a worldspace point.
+		 * Tile coordinates inside the tile span [-1,1]^2. The center is at
+		 * (0,0), the top right corner is (1,1) and the lower left corner is at (-1,-1).
+		 * 
+		 * Values that are >1 or <-1 mean the point lies outside the tile.
+		 */
+		glm::vec2 to_tile_coordinates(glm::vec2 p) const;
+
 		// Returns nullptr if neighbour is invalid
 		tile const* get_neighbour(glm::ivec2 delta) const;
 		bool has_collision() const noexcept;
@@ -57,6 +66,9 @@ namespace eversim { namespace core { namespace world {
 
 		glm::ivec2 index() const { return idx; }
 
+		/*
+		 * This is the full width/height of the tile, from the left (top) edge to the right (bottom) edge.
+		 */
 		float size() const { return size_; }
 
 		tile_descriptor const* get_descriptor() const

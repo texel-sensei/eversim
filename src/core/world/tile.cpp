@@ -19,6 +19,11 @@ namespace eversim { namespace core { namespace world {
 		return p.x >= min.x && p.x < max.x && p.y >= min.y && p.y < max.y;
 	}
 
+	glm::vec2 tile::to_tile_coordinates(glm::vec2 p) const
+	{
+		return (p - position()) / (size()/2);
+	}
+
 	tile const* tile::get_neighbour(glm::ivec2 delta) const
 	{
 		const auto idx = index() + delta;
