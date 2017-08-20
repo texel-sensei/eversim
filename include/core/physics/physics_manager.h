@@ -141,7 +141,7 @@ namespace eversim { namespace core { namespace physics {
 		void finalize_changes(float dt);
 		void call_events();
 
+		void check_tile_collisions(particle const& particle, const world::tile const& tile);
 		void particle_tile_collision(particle& p);
-		void handle_simple_tile_collision(particle& p, world::tile const& t);
 	};
 }}}

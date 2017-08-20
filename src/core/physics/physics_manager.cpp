@@ -429,6 +429,8 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
+
+
 	void physics_manager::particle_tile_collision(particle& p)
 	{
 		assert(level);
@@ -436,26 +438,56 @@ namespace eversim { namespace core { namespace physics {
 		const auto pos = p.projected_position;
 
 		auto const& t = level->get_tile_by_pos(pos);
-		switch (t.get_descriptor()->collision)
+
+		const auto tile_coord = t.to_tile_coordinates(pos);
+		int dx = (tile_coord.x > 0) ? 1 : -1;
+		int dy = (tile_coord.y > 0) ? 1 : -1;
+
+		world::tile const* tiles[] = {
+			&t,
+			t.get_neighbour({ dx, 0 }),
+			t.get_neighbour({  0,dy }),
+			t.get_neighbour({ dx,dy }),
+		};
+		
+		for(auto const* tile : tiles)
 		{
-		case world::collision_type::none: return;
-		case world::collision_type::solid:
-			handle_simple_tile_collision(p, t);
-			break;
-		case world::collision_type::extra: throw runtime_error{ "Extra collision not yet implemented!" };
-		default: throw runtime_error{ "Invalid tile collision descriptor" };
+			if(!tile || !tile->has_collision())
+				continue;
+
+			check_tile_collisions(p, *tile);
 		}
 	}
 
-	void physics_manager::handle_simple_tile_collision(particle& p, world::tile const& t)
+	void physics_manager::check_tile_collisions(particle const& particle, const world::tile& tile)
 	{
-		if(t.point_inside(p.projected_position) && t.get_collision_shape().size() > 0) {
-			try{
-				static_collision_constraints.emplace_back(t, p);
-			}catch(std::exception const& e)
+		const auto mpos = particle.pos - tile.position();
+		const auto mprojpos = particle.projected_position - tile.position();
+		const auto ray = utility::line{ mpos, mprojpos };
+
+		for(auto const& side : tile.get_collision_shape())
+		{
+			const auto normal = side.normal();
+
+			if (dot(particle.vel, normal) > 0)
+				continue;
+
+			if(auto intersection = ray.intersect(side))
 			{
-				LOG(ERROR) << "Got exception: " << e.what();
+				const auto entry = ray.lerp(*intersection) + tile.position();
+
+				static_collision_constraints.emplace_back(tile, particle, normal, entry);
+			}
+
+			const auto dist = side.distance_to_point(mpos);
+			if(dist < 0.1f * tile.size())
+			{
+				const auto entry = side.closest_point(mpos) + tile.position();
+
+				static_collision_constraints.emplace_back(tile, particle, normal, entry);
 			}
 		}
+		
 	}
+
 }}}
