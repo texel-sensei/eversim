@@ -20,13 +20,13 @@ namespace eversim {	namespace core { namespace input {
 
 	void InputContext::register_action(const std::string& type, const std::string& action, const std::string& rawcode)
 	{
-		auto type_enum = InputConstants::type::_from_string(type.c_str());
+		auto type_enum = InputConstants::input_type::_from_string(type.c_str());
 
 		//LOG(INFO) << type << " " << action << " " << rawcode;
 
 		switch(type_enum)
 		{
-		case InputConstants::type::button :
+		case InputConstants::input_type::BUTTON :
 		{
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::button::_from_string(action.c_str());
@@ -34,7 +34,7 @@ namespace eversim {	namespace core { namespace input {
 			buttons[+raw_enum] = +action_enum;
 		}
 			break;
-		case InputConstants::type::state :
+		case InputConstants::input_type::STATE :
 		{
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::state::_from_string(action.c_str());
@@ -42,7 +42,7 @@ namespace eversim {	namespace core { namespace input {
 			states[+raw_enum] = +action_enum;
 		}
 			break;
-		case InputConstants::type::range :
+		case InputConstants::input_type::RANGE :
 		{
 			const auto raw_enum = RawInputConstants::range::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::range::_from_string(action.c_str());
@@ -56,46 +56,49 @@ namespace eversim {	namespace core { namespace input {
 		}
 	}
 
-	bool InputContext::handle_event(SDL_Event& sdl_event)
+	InputConstants::input_type InputContext::get_input_type(const RawInputConstants::button& button) const
 	{
-		switch(sdl_event.type)
+		{auto action_it = buttons.find(button);
+		if (action_it != buttons.end()) {
+
+		}}
+
+		if (buttons.find(button) != buttons.end()) return InputConstants::input_type::BUTTON;
+		if(states.find(button) != states.end()) return InputConstants::input_type::STATE;
+		return InputConstants::input_type::INVALID;
+	}
+
+	bool InputContext::handle_event(const InputEvent& event)
+	{
+		switch(event.get_event_type())
 		{
-		case SDL_JOYBUTTONDOWN:
+		case RawInputConstants::raw_type::BUTTON:
+		{
+			auto button = event.get_button();
+			auto input_type = get_input_type(button);
+			if (input_type == +InputConstants::input_type::INVALID) return false;
+			if (input_type == +InputConstants::input_type::BUTTON)
 			{
-				auto sdl_button = static_cast<SDL_GameControllerButton>(sdl_event.cbutton.button);
-
-				auto it = RawInputConstants::sdl_button_map.find(sdl_button);
-				if (it != RawInputConstants::sdl_button_map.end()) {
-					auto button = it->second;
-					LOG(INFO) << RawInputConstants::button::_from_integral(button)._to_string();
-					{auto action_it = buttons.find(button);
-					if (action_it != buttons.end())
-					{
-						auto action = buttons.at(button);
-						LOG(INFO) << "\tbuttonaction " << InputConstants::button::_from_integral(action)._to_string();
-
-						button_states[action] = true;
-						return true;
-					}}
-					{auto action_it = states.find(button);
-					if (action_it != states.end())
-					{
-						auto action = states.at(button);
-						LOG(INFO) << "\tstateaction " << InputConstants::state::_from_integral(action)._to_string();
-
-						state_states[action] = true;
-						return true;
-					}}
-				}
+				auto action_it = buttons.find(button);
+				auto& action = action_it->second;
+				//LOG(INFO) << "\tbutton action " << InputConstants::button::_from_integral(action)._to_string();
+				button_states[action] = true;
+				return true;
 			}
-			break;
-		case SDL_JOYBUTTONUP:
 
-			break;
-		default:break;
+			if (input_type == +InputConstants::input_type::STATE)
+			{
+				auto action_it = states.find(button);
+				auto& action = action_it->second;
+				//LOG(INFO) << "\tstate action " << InputConstants::button::_from_integral(action)._to_string();
+				state_states[action] = true;
+				return true;
+			}
 		}
+		case RawInputConstants::raw_type::RANGE:
 
-		return false;
+		default: return false;
+		}
 	}
 
 	void InputContext::register_function(const InputConstants::button button,std::function<void()> f)

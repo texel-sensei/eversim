@@ -28,7 +28,8 @@ namespace eversim { namespace core { namespace input {
 			GAMEPAD_BUTTON_DPAD_LEFT,
 			GAMEPAD_BUTTON_DPAD_RIGHT,
 			GAMEPAD_BUTTON_DPAD_UP, 
-			GAMEPAD_BUTTON_DPAD_DOWN
+			GAMEPAD_BUTTON_DPAD_DOWN,
+			INVALID
 		)
 
 		BETTER_ENUM(range, uint8_t,
@@ -37,8 +38,29 @@ namespace eversim { namespace core { namespace input {
 			GAMEPAD_ANALOGUE_RIGHT_STICK_X,
 			GAMEPAD_ANALOGUE_RIGHT_STICK_Y,
 			GAMEPAD_ANALOGUE_LT,
-			GAMEPAD_ANALOGUE_RT
+			GAMEPAD_ANALOGUE_RT,
+			INVALID
 		)
+
+		BETTER_ENUM(raw_type, uint8_t,
+			BUTTON=0,
+			RANGE,
+			INVALID
+		)
+
+		BETTER_ENUM(event_type, uint8_t,
+			BUTTON_DOWN=0,
+			BUTTON_UP,
+			INVALID
+		)
+
+		const std::map<SDL_EventType,event_type> sdl_event_map =
+		{
+			{ SDL_JOYBUTTONDOWN , event_type::BUTTON_DOWN },
+			{ SDL_CONTROLLERBUTTONDOWN , event_type::BUTTON_DOWN },
+			{ SDL_JOYBUTTONUP , event_type::BUTTON_UP },
+			{ SDL_CONTROLLERBUTTONUP , event_type::BUTTON_UP }
+		};
 
 		const std::map<SDL_GameControllerButton, button> sdl_button_map =
 		{

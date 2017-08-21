@@ -240,6 +240,26 @@ int main(int argc, char* argv[])
 		[]() { LOG(INFO) << "pressed A for jumping"; }
 	);
 
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DLEFT,
+		[]() { LOG(INFO) << "pressed DPAD LEFT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DRIGHT,
+		[]() { LOG(INFO) << "pressed DPAD RIGHT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DUP,
+		[]() { LOG(INFO) << "pressed DPAD UP"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DDOWN,
+		[]() { LOG(INFO) << "pressed DPAD DOWN"; }
+	);
+
 	// create loaders
 	world::level_loader level_loader;
 	initialize_tiles(level_loader);

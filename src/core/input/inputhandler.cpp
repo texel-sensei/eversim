@@ -2,6 +2,9 @@
 
 #include "core/input/contextloader.h"
 
+
+#include "core/input/inputevent.h"
+
 #include <easylogging++.h>
 
 using namespace std;
@@ -59,18 +62,25 @@ namespace eversim {
 
 			void InputHandler::handle_event(SDL_Event& sdl_event)
 			{
-				for(auto& context_ptr : context_stack)
-				{
-					if(context_ptr.expired())
+				auto events = InputEvent::map_event(sdl_event);
+
+				for (auto& event : events) {
+
+					if (event.get_event_type() == +RawInputConstants::event_type::INVALID) return;
+
+					for (auto& context_ptr : context_stack)
 					{
-						LOG(ERROR) << "invalid context ptr";
-						continue;
+						if (context_ptr.expired())
+						{
+							LOG(ERROR) << "invalid context ptr";
+							continue;
+						}
+						auto& context = *context_ptr.lock();
+
+						if (context.handle_event(event))
+							break;
+
 					}
-					auto& context = *context_ptr.lock();
-
-					if (context.handle_event(sdl_event))
-						break;
-
 				}
 			}
 

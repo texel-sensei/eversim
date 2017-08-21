@@ -3,6 +3,7 @@
 #include "enum.h"
 #include "core/input/inputconstants.h"
 #include "core/input/rawinputconstants.h"
+#include "core/input/inputevent.h"
 
 #include <SDL2/SDL.h>
 
@@ -12,8 +13,9 @@
 
 
 namespace eversim { namespace core { namespace input {
-	
-	
+	class InputEvent;
+
+
 	class InputContext
 	{
 	private:
@@ -32,6 +34,8 @@ namespace eversim { namespace core { namespace input {
 		std::map<uint8_t, std::function<void()>> button_functions;
 		std::map<uint8_t, std::function<void()>> state_functions;
 		std::map<uint8_t, std::function<void()>> range_functions;
+
+		InputConstants::input_type get_input_type(const RawInputConstants::button& b) const;
 	public:
 		
 		InputContext(){}
@@ -48,7 +52,7 @@ namespace eversim { namespace core { namespace input {
 
 		void execute();
 
-		bool handle_event(SDL_Event& sdl_event);
+		bool handle_event(const InputEvent& event);
 
 		std::string get_name() const { return name; }
 	};
