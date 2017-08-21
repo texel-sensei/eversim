@@ -29,6 +29,7 @@ namespace eversim { namespace core { namespace input {
 		//map <MappedInput,state>
 		std::map<uint8_t, bool> button_states;
 		std::map<uint8_t, bool> state_states;
+		std::map<uint8_t, double> range_states;
 
 		// map <MappedInput,function>
 		std::map<uint8_t, std::function<void()>> button_functions;
@@ -36,6 +37,7 @@ namespace eversim { namespace core { namespace input {
 		std::map<uint8_t, std::function<void()>> range_functions;
 
 		InputConstants::input_type get_input_type(const RawInputConstants::button& b) const;
+		InputConstants::input_type get_input_type(const RawInputConstants::range& r) const;
 	public:
 		
 		InputContext(){}

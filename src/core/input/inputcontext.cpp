@@ -58,19 +58,20 @@ namespace eversim {	namespace core { namespace input {
 
 	InputConstants::input_type InputContext::get_input_type(const RawInputConstants::button& button) const
 	{
-		{auto action_it = buttons.find(button);
-		if (action_it != buttons.end()) {
-
-		}}
-
 		if (buttons.find(button) != buttons.end()) return InputConstants::input_type::BUTTON;
 		if(states.find(button) != states.end()) return InputConstants::input_type::STATE;
 		return InputConstants::input_type::INVALID;
 	}
 
+	InputConstants::input_type InputContext::get_input_type(const RawInputConstants::range& range) const
+	{
+		if (ranges.find(range) != ranges.end()) return InputConstants::input_type::RANGE;
+		return InputConstants::input_type::INVALID;
+	}
+
 	bool InputContext::handle_event(const InputEvent& event)
 	{
-		switch(event.get_event_type())
+		switch(event.get_raw_type())
 		{
 		case RawInputConstants::raw_type::BUTTON:
 		{
@@ -96,7 +97,19 @@ namespace eversim {	namespace core { namespace input {
 			}
 		}
 		case RawInputConstants::raw_type::RANGE:
-
+		{
+			auto range = event.get_range();
+			auto input_type = get_input_type(range);
+			if (input_type == +InputConstants::input_type::INVALID) return false;
+			if (input_type == +InputConstants::input_type::RANGE)
+			{
+				auto action_it = ranges.find(range);
+				auto& action = action_it->second;
+				range_states[action] = event.get_range_value();
+				//LOG(INFO) << "\trange action " << event.get_range_value() << " " << InputConstants::range::_from_integral(action)._to_string();
+				return true;
+			}
+		}
 		default: return false;
 		}
 	}

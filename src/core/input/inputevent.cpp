@@ -95,9 +95,6 @@ namespace eversim {
 
 					if (event.type != +RawInputConstants::event_type::INVALID)
 					{
-						//LOG(INFO) << "create InputEvent";
-						//LOG(INFO) << "\ttype = " << event.type._to_string();
-
 						if (sdl_event.type == SDL_JOYBUTTONDOWN ||
 							sdl_event.type == SDL_JOYBUTTONUP ||
 							sdl_event.type == SDL_CONTROLLERBUTTONDOWN ||
@@ -115,8 +112,16 @@ namespace eversim {
 
 							}
 						}
-
-
+						else if (sdl_event.type == SDL_JOYAXISMOTION) {
+							event.button_or_range = RawInputConstants::raw_type::RANGE;
+							event.range = RawInputConstants::sdl_range_map.at(static_cast<SDL_GameControllerAxis>(sdl_event.jaxis.axis));
+							event.range_value = static_cast<double>(
+								(static_cast<signed int>(sdl_event.jaxis.value) + 32768)) 
+								/ (32768.+32767.);
+							event.range_value *= 2.;
+							event.range_value -= 1.;
+							res.push_back(event);
+						}
 					}
 				}
 

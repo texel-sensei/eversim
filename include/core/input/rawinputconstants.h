@@ -51,6 +51,7 @@ namespace eversim { namespace core { namespace input {
 		BETTER_ENUM(event_type, uint8_t,
 			BUTTON_DOWN=0,
 			BUTTON_UP,
+			AXIS,
 			INVALID
 		)
 
@@ -59,7 +60,8 @@ namespace eversim { namespace core { namespace input {
 			{ SDL_JOYBUTTONDOWN , event_type::BUTTON_DOWN },
 			{ SDL_CONTROLLERBUTTONDOWN , event_type::BUTTON_DOWN },
 			{ SDL_JOYBUTTONUP , event_type::BUTTON_UP },
-			{ SDL_CONTROLLERBUTTONUP , event_type::BUTTON_UP }
+			{ SDL_CONTROLLERBUTTONUP , event_type::BUTTON_UP },
+			{ SDL_JOYAXISMOTION , event_type::AXIS}
 		};
 
 		const std::map<SDL_GameControllerButton, button> sdl_button_map =
@@ -78,9 +80,9 @@ namespace eversim { namespace core { namespace input {
 		{
 			{ SDL_CONTROLLER_AXIS_LEFTX ,range::GAMEPAD_ANALOGUE_LEFT_STICK_X },
 			{ SDL_CONTROLLER_AXIS_LEFTY ,range::GAMEPAD_ANALOGUE_LEFT_STICK_Y },
-			{ SDL_CONTROLLER_AXIS_RIGHTX ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_X },
-			{ SDL_CONTROLLER_AXIS_RIGHTY ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_Y },
-			{ SDL_CONTROLLER_AXIS_TRIGGERLEFT ,range::GAMEPAD_ANALOGUE_LT },
+			{ SDL_CONTROLLER_AXIS_RIGHTX ,range::GAMEPAD_ANALOGUE_LT },
+			{ SDL_CONTROLLER_AXIS_RIGHTY ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_X },
+			{ SDL_CONTROLLER_AXIS_TRIGGERLEFT ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_Y },
 			{ SDL_CONTROLLER_AXIS_TRIGGERRIGHT ,range::GAMEPAD_ANALOGUE_RT }
 		};
 	}

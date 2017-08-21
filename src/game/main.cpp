@@ -235,6 +235,7 @@ int main(int argc, char* argv[])
 
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
+
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::JUMP,
 		[]() { LOG(INFO) << "pressed A for jumping"; }
@@ -252,7 +253,7 @@ int main(int argc, char* argv[])
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DUP,
-		[]() { LOG(INFO) << "pressed DPAD UP"; }
+		[]() { LOG(INFO) << "pressed DPAD UP";	}
 	);
 
 	inputhandler_ptr->get_context("game")->register_function(

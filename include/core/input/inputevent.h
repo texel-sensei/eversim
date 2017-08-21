@@ -26,6 +26,8 @@ namespace eversim {
 				RawInputConstants::button button = RawInputConstants::button::INVALID;
 				RawInputConstants::range range = RawInputConstants::range::INVALID;
 
+				double range_value = 0.0;
+
 			public:
 				
 				RawInputConstants::event_type get_event_type() const;
@@ -33,6 +35,8 @@ namespace eversim {
 
 				RawInputConstants::button get_button() const;
 				RawInputConstants::range get_range() const;
+
+				double get_range_value() const { return range_value; }
 
 				static std::vector<InputEvent> map_event(const SDL_Event&);
 
