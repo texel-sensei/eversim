@@ -34,6 +34,7 @@ namespace eversim {
 				const std::map<std::string, std::shared_ptr<InputContext>>& get_available_contexts() const;
 
 				void handle_event(SDL_Event& sdl_event);
+				void handle_event(InputEvent& event);
 
 				void execute();
 			};

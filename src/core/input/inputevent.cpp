@@ -33,6 +33,30 @@ namespace eversim {
 				{ static_cast<size_t>(SDL_HAT_DOWN),{3}}, //SDL_HAT_DOWN
 				{ static_cast<size_t>(SDL_HAT_RIGHTDOWN),{2,3}} //SDL_HAT_RIGHTDOWN
 			};
+
+			InputEvent InputEvent::create_button(
+				RawInputConstants::event_type type, 
+				RawInputConstants::button button)
+			{
+				InputEvent event;
+				event.type = type;
+				event.button_or_range = RawInputConstants::raw_type::BUTTON;
+				event.button = button;
+				return event;
+			}
+
+			InputEvent InputEvent::create_range(
+				RawInputConstants::event_type type,
+				RawInputConstants::range range, 
+				double value)
+			{
+				InputEvent event;
+				event.type = type;
+				event.button_or_range = RawInputConstants::raw_type::RANGE;
+				event.range = range;
+				event.range_value = value;
+				return event;
+			}
 				
 			std::vector<InputEvent> InputEvent::map_event(const SDL_Event& sdl_event)
 			{
@@ -146,6 +170,28 @@ namespace eversim {
 			RawInputConstants::range  InputEvent::get_range() const
 			{
 				return range;
+			}
+
+			std::ostream& operator<<(std::ostream& out, InputEvent& event)
+			{
+				switch (event.get_event_type()) {
+				case RawInputConstants::event_type::INVALID:
+					return out;
+				case RawInputConstants::event_type::BUTTON_DOWN:
+					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
+						std::string(event.get_button()._to_string());
+					return out;
+				case RawInputConstants::event_type::BUTTON_UP:
+					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
+						std::string(event.get_button()._to_string());
+					return out;
+				case RawInputConstants::event_type::AXIS:
+					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
+						std::string(event.get_range()._to_string()) << " " << std::to_string(event.get_range_value());
+					return out;
+				default: return out;
+				}
+
 			}
 		}
 	}

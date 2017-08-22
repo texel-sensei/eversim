@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <map>
+#include <iostream>
+#include <string>
 
 namespace eversim {
 	namespace core {
@@ -16,7 +18,7 @@ namespace eversim {
 			protected:
 
 				static std::vector<RawInputConstants::event_type> dpad_states;
-				static const std::map<size_t,std::vector<size_t>> dpad_combinations;
+				static const std::map<size_t, std::vector<size_t>> dpad_combinations;
 				static const std::map < size_t, RawInputConstants::button> dpad_mapping;
 
 				RawInputConstants::event_type type = RawInputConstants::event_type::INVALID;
@@ -29,7 +31,7 @@ namespace eversim {
 				double range_value = 0.0;
 
 			public:
-				
+
 				RawInputConstants::event_type get_event_type() const;
 				RawInputConstants::raw_type get_raw_type() const;
 
@@ -39,9 +41,17 @@ namespace eversim {
 				double get_range_value() const { return range_value; }
 
 				static std::vector<InputEvent> map_event(const SDL_Event&);
+				static InputEvent create_button(
+					RawInputConstants::event_type type
+					, RawInputConstants::button button);
+				static InputEvent create_range(
+					RawInputConstants::event_type type,
+					RawInputConstants::range range, double value);
 
-				
-			};
+		};
+
+		std::ostream& operator<<(std::ostream& out, InputEvent& event);
+
 		}
 	}
 }

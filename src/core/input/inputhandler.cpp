@@ -66,21 +66,30 @@ namespace eversim {
 
 				for (auto& event : events) {
 
-					if (event.get_event_type() == +RawInputConstants::event_type::INVALID) return;
+					handle_event(event);
+					
+				}
+			}
 
-					for (auto& context_ptr : context_stack)
+			void InputHandler::handle_event(InputEvent& event)
+			{
+
+				//cout << event << endl;
+
+				if (event.get_event_type() == +RawInputConstants::event_type::INVALID) return;
+
+				for (auto& context_ptr : context_stack)
+				{
+					if (context_ptr.expired())
 					{
-						if (context_ptr.expired())
-						{
-							LOG(ERROR) << "invalid context ptr";
-							continue;
-						}
-						auto& context = *context_ptr.lock();
-
-						if (context.handle_event(event))
-							break;
-
+						LOG(ERROR) << "invalid context ptr";
+						continue;
 					}
+					auto& context = *context_ptr.lock();
+
+					if (context.handle_event(event))
+						break;
+
 				}
 			}
 
