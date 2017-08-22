@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 namespace eversim {
 	namespace core {
@@ -25,6 +26,8 @@ namespace eversim {
 			{
 			public:
 				static std::vector<InputContext> generate_contexts_from_json(const std::string& filename);
+				static std::vector<InputContext> generate_contexts_from_json(
+					std::basic_istream<boost::property_tree::ptree::key_type::value_type>& file);
 			};
 
 			}

@@ -6,7 +6,7 @@ namespace eversim {	namespace core { namespace input {
 
 	InputContext::InputContext(const std::string& n) : name(n)
 	{
-		LOG(INFO) << "create InputContext \"" << name << "\""; 
+		//LOG(INFO) << "create InputContext \"" << name << "\""; 
 	}
 
 	InputContext& InputContext::operator=(const InputContext& other) noexcept
@@ -31,7 +31,7 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::button::_from_string(action.c_str());
 
-			buttons[+raw_enum] = +action_enum;
+			buttons[raw_enum] = action_enum;
 		}
 			break;
 		case InputConstants::input_type::STATE :
@@ -39,7 +39,7 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::state::_from_string(action.c_str());
 			
-			states[+raw_enum] = +action_enum;
+			states[raw_enum] = action_enum;
 		}
 			break;
 		case InputConstants::input_type::RANGE :
@@ -47,7 +47,7 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::range::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::range::_from_string(action.c_str());
 			
-			ranges[+raw_enum] = +action_enum;
+			ranges[raw_enum] = action_enum;
 		}
 			break;
 		default:
@@ -214,7 +214,7 @@ namespace eversim {	namespace core { namespace input {
 
 		for (auto& range : ranges)
 		{
-			const auto raw_enum = RawInputConstants::button::_from_integral(range.first);
+			const auto raw_enum = RawInputConstants::range::_from_integral(range.first);
 			auto it = RawInputConstants::sdl_range_map.end();
 
 			for (it = RawInputConstants::sdl_range_map.begin(); it != RawInputConstants::sdl_range_map.end(); ++it)

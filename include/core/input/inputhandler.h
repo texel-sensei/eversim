@@ -22,6 +22,8 @@ namespace eversim {
 
 			public:
 				explicit InputHandler(const std::string& filename);
+				explicit InputHandler(std::istringstream& file);
+				explicit InputHandler(std::ifstream& file);
 
 				void push_context(const std::string& context_name);
 				std::string pop();

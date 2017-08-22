@@ -132,7 +132,7 @@ namespace eversim {
 							if (bit != RawInputConstants::sdl_button_map.end()) {
 								event.button = bit->second;
 								res.push_back(event);
-								LOG(INFO) << RawInputConstants::button::_from_integral(event.button)._to_string();
+								//LOG(INFO) << RawInputConstants::button::_from_integral(event.button)._to_string();
 
 							}
 						}
@@ -172,26 +172,33 @@ namespace eversim {
 				return range;
 			}
 
-			std::ostream& operator<<(std::ostream& out, InputEvent& event)
+			void InputEvent::print(std::ostream& out) const
 			{
+				const InputEvent& event = *this;
 				switch (event.get_event_type()) {
 				case RawInputConstants::event_type::INVALID:
-					return out;
+					out << "Event: INVALID";
+					break;
 				case RawInputConstants::event_type::BUTTON_DOWN:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
 						std::string(event.get_button()._to_string());
-					return out;
+					break;
 				case RawInputConstants::event_type::BUTTON_UP:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
 						std::string(event.get_button()._to_string());
-					return out;
+					break;
 				case RawInputConstants::event_type::AXIS:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
 						std::string(event.get_range()._to_string()) << " " << std::to_string(event.get_range_value());
-					return out;
-				default: return out;
+					break;
+				default: break;
 				}
+			}
 
+			std::ostream& operator<<(std::ostream& out,const InputEvent& event)
+			{
+				event.print(out);
+				return out;
 			}
 		}
 	}

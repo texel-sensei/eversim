@@ -4,6 +4,7 @@
 #include "core/input/inputconstants.h"
 
 #include <SDL2/SDL.h>
+#include <easylogging++.h>
 
 #include <vector>
 #include <map>
@@ -48,9 +49,11 @@ namespace eversim {
 					RawInputConstants::event_type type,
 					RawInputConstants::range range, double value);
 
+				void print(std::ostream& out) const;
+
 		};
 
-		std::ostream& operator<<(std::ostream& out, InputEvent& event);
+		std::ostream& operator<<(std::ostream& out, const InputEvent& event);
 
 		}
 	}
