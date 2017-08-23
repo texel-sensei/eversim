@@ -8,6 +8,7 @@
 #include "core/physics/events.h"
 
 #include "core/utility/object_pool.h"
+#include "core/utility/spatial_hashmap.h"
 
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/poly_collection/base_collection.hpp>
@@ -112,13 +113,17 @@ namespace eversim { namespace core { namespace physics {
 
 		glm::vec2 gravity = {0.f,-1.f};
 		float damping = 0.99f;
-		float particle_radius = 0.02f;
+		float particle_radius = 0.05f;
 		int num_dead_bodies = 0;
 
 		world::level const* level = nullptr;
 
 		events::body_body body_body_collision_event;
 		events::body_level body_level_collision_event;
+
+		utility::spatial_hashmap<particle*, std::atomic<int>>
+			possible_collisions{ 2 * particle_radius }
+		;
 
 		utility::array_view<particle> allocate_particles(size_t num);
 

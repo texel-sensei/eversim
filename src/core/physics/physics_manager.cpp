@@ -15,8 +15,9 @@
 #include <glm/detail/type_mat.hpp>
 #include <glm/gtx/norm.hpp>
 
-#include <boost/range/adaptor/indirected.hpp>
 #include <boost/range/join.hpp>
+
+#include <ppl.h>
 
 #include <algorithm>
 #include <bitset>
@@ -145,18 +146,25 @@ namespace eversim { namespace core { namespace physics {
 		collision_constraints.clear();
 		static_collision_constraints.clear();
 
-		static thread_local utility::spatial_hashmap<particle*> possible_collisions{2*particle_radius};
+		possible_collisions.set_cell_size(2.f*particle_radius);
 		possible_collisions.reset(particles.size(), particles.size() * 2);
-		for(auto& p : particles)
+		
+		concurrency::parallel_for_each(begin(particles), end(particles), 
+			[this](particle& p)
 		{
-			if (!p.is_alive()) continue;
-			possible_collisions.insert(p.pos, &p);
+			if (p.is_alive())
+				possible_collisions.insert(p.pos, &p);
+		});
 
-			if(level)
+		if (level){
+			for(auto&p : particles)
 			{
+				if (!p.is_alive())
+					continue;
 				particle_tile_collision(p);
 			}
 		}
+
 		for (auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
