@@ -88,7 +88,7 @@ namespace {
 
 TEST_CASE("spatial hashmap resize", "[utility][spatial_hashmap]")
 {
-	spatial_hashmap<int> the_map(1.f, 5, 10);
+	spatial_hashmap<int, std::atomic<int>> the_map(1.f, 5, 10);
 	the_map.reset(200, 3);
 	std::set<int> numbers;
 	std::set<ivec2, mycmp> positions;

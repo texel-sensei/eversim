@@ -7,15 +7,84 @@
 #include <boost/functional/hash.hpp>
 #include <boost/optional.hpp>
 #include <unordered_map>
+#include <atomic>
 
 namespace eversim { namespace core { namespace utility {
 
-	template <typename T>
+	namespace detail {
+		inline void swap(int& a, int& b) noexcept
+		{
+			int tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		// does only guarantee atomicity on parameter b
+		inline void swap(int& a, std::atomic<int>& b) noexcept
+		{
+			a = b.exchange(a);
+		}
+
+		/*
+		 * Wrapper class to allow copying of atomics.
+		 * The copy itself is not atomic!
+		 */
+		template <typename T>
+		struct atomwrapper
+		{
+			std::atomic<T> _a;
+
+			atomwrapper()
+				:_a()
+			{}
+
+			atomwrapper(const std::atomic<T> &a)
+				:_a(a.load())
+			{}
+
+			atomwrapper(T a) : _a(a){}
+
+			atomwrapper(const atomwrapper &other)
+				:_a(other._a.load())
+			{}
+
+			atomwrapper &operator=(const atomwrapper &other)
+			{
+				_a.store(other._a.load());
+				return *this;
+			}
+
+			operator std::atomic<T>&() {
+				return _a;
+			}
+
+			operator T()
+			{
+				return _a;
+			}
+		};
+
+		template<typename T>
+		struct get_copy_wrapper {
+			using type = T;
+		};
+
+		template<typename T>
+		struct get_copy_wrapper<std::atomic<T>> {
+			using type = atomwrapper<T>;
+		};
+
+		template<typename T>
+		using get_copy_wrapper_t = typename get_copy_wrapper<T>::type;
+	}
+
+	template <typename T, typename SI = int>
 	class spatial_hashmap {
 	public:
 		using key_type = glm::vec2;
 		using index_type = glm::ivec2;
 		using value_type = T;
+		using slot_index_t = SI;
 	private:
 		struct hash {
 			size_t operator()(index_type const& idx) const
@@ -104,8 +173,7 @@ namespace eversim { namespace core { namespace utility {
 			
 			if(node_hint == -1)
 			{
-				node_hint = free_node;
-				free_node++;
+				node_hint = free_node++;
 			}
 
 			if(nodes[node_hint].value)
@@ -114,8 +182,8 @@ namespace eversim { namespace core { namespace utility {
 			}
 			auto& n = nodes[node_hint] = { std::forward<VT>(v) , int(node_hint)};
 			using namespace std;
-			swap(n.next, slots[slot]);
-			num_items++;
+			detail::swap(n.next, slots[slot]);
+			++num_items;
 		}
 
 		void clear()
@@ -136,6 +204,11 @@ namespace eversim { namespace core { namespace utility {
 		float get_cell_size() const
 		{
 			return cellsize;
+		}
+
+		void set_cell_size(float x)
+		{
+			cellsize = x;
 		}
 
 		template<typename IT>
@@ -180,9 +253,9 @@ namespace eversim { namespace core { namespace utility {
 	private:
 		float cellsize = 1.f;
 		std::vector<node> nodes;
-		std::vector<int> slots;
+		std::vector<detail::get_copy_wrapper_t<slot_index_t>> slots;
 		hash hasher;
-		int free_node = 0;
-		int num_items = 0;
+		slot_index_t free_node = 0;
+		slot_index_t num_items = 0;
 	};
 }}}
