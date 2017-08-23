@@ -145,7 +145,8 @@ namespace eversim { namespace core { namespace physics {
 		collision_constraints.clear();
 		static_collision_constraints.clear();
 
-		utility::spatial_hashmap<particle*> possible_collisions{2*particle_radius};
+		static thread_local utility::spatial_hashmap<particle*> possible_collisions{2*particle_radius};
+		possible_collisions.reset(particles.size(), particles.size() * 2);
 		for(auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
@@ -228,6 +229,9 @@ namespace eversim { namespace core { namespace physics {
 			auto* ptr = newvec.data();
 			for (auto& b : bodies)
 			{
+				if (!b.is_alive())
+					continue;
+
 				newvec.insert(newvec.end(), b.particles.begin(), b.particles.end());
 				const auto s = b.particles.size();
 				b.particles = utility::make_array_view(ptr, s);

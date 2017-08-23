@@ -1,8 +1,11 @@
 #pragma once
 
+#include "core/utility/array_view.h"
+
 #include <glm/glm.hpp>
-#include <boost/iterator/iterator_adaptor.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/optional.hpp>
 #include <unordered_map>
 
 namespace eversim { namespace core { namespace utility {
@@ -26,28 +29,66 @@ namespace eversim { namespace core { namespace utility {
 				return seed;
 			};
 		};
-		using map_type = std::unordered_multimap<index_type, value_type, hash>;
+		
+		struct node {
+			boost::optional<T> value;
+			int next = -1;
+		};
 
 	public:
 
-		template<typename IT>
-		class base_iterator : public boost::iterator_adaptor<base_iterator<IT>, IT, value_type>{
+		template<typename VT>
+		class base_iterator : public boost::iterator_facade<
+			base_iterator<VT>, VT, boost::forward_traversal_tag
+		>{
 			friend class boost::iterator_core_access;
 		public:
-			base_iterator() {}
-			base_iterator(IT const& x): base_iterator::iterator_adaptor(x){}
+			base_iterator(){}
+			base_iterator(int cur_node, array_view<node> nodes) : cur_node(cur_node), nodes(nodes)
+			{}
 		private:
-			typename iterator_adaptor::reference dereference() const
+			int cur_node = -1;
+			array_view<node> nodes;
+
+			void increment()
 			{
-				return this->base()->second;
+
+				if(cur_node == -1)
+				{
+					return;
+				}
+				const auto& node = nodes[cur_node];
+				cur_node = node.next;
+			}
+
+			VT& dereference() const
+			{
+				return *(nodes[cur_node].value);
+			}
+
+			bool equal(base_iterator const& other) const
+			{
+				return this->cur_node == other.cur_node;
 			}
 		};
 
-		using iterator = base_iterator<typename map_type::iterator>;
-		using const_iterator = base_iterator<typename map_type::const_iterator>;
+		using iterator = base_iterator<value_type>;
+		using const_iterator = base_iterator<const value_type>;
 
-		explicit spatial_hashmap(float cellsize = 1.f) : cellsize(cellsize)
+		explicit spatial_hashmap(float cellsize = 1.f, int num_nodes = 50, int num_slots = 100)
+			: cellsize(cellsize), nodes(num_nodes), slots(num_slots), hasher()
 		{
+			fill(begin(slots), end(slots), -1);
+		}
+
+		void reset(int num_nodes, int num_slots)
+		{
+			nodes.clear();
+			nodes.resize(num_nodes);
+			slots.resize(num_slots);
+			fill(begin(slots), end(slots), -1);
+			free_node = 0;
+			num_items = 0;
 		}
 
 		index_type get_index(key_type const& v) const
@@ -55,32 +96,41 @@ namespace eversim { namespace core { namespace utility {
 			return {v / cellsize};
 		}
 
-		void insert(key_type const& k, value_type const& v)
+		template<typename VT>
+		void insert(key_type const& k, VT&& v, int node_hint = -1)
 		{
 			const auto idx = get_index(k);
-			map.insert(std::make_pair(idx, v));
-		}
+			const auto slot = hasher(idx) % slots.size();
+			
+			if(node_hint == -1)
+			{
+				node_hint = free_node;
+				free_node++;
+			}
 
-		void insert(key_type const& k, value_type&& v)
-		{
-			const auto idx = get_index(k);
-			//map[idx] = std::move(v);
-			map.insert(std::make_pair(idx, std::move(v)));
+			if(nodes[node_hint].value)
+			{
+				EVERSIM_THROW(generic_error::InvalidArgument, "Using a node double!");
+			}
+			auto& n = nodes[node_hint] = { std::forward<VT>(v) , int(node_hint)};
+			using namespace std;
+			swap(n.next, slots[slot]);
+			num_items++;
 		}
 
 		void clear()
 		{
-			map.clear();
+			reset(nodes.size(), slots.size());
 		}
 		
 		size_t size() const
 		{
-			return map.size();
+			return num_items;
 		}
 
 		bool empty() const
 		{
-			return map.empty();
+			return size() == 0;
 		}
 
 		float get_cell_size() const
@@ -102,7 +152,7 @@ namespace eversim { namespace core { namespace utility {
 			friend class spatial_hashmap;
 			IT first;
 			IT last;
-			base_cell(IT f, IT l) : first(f), last(l){}
+			explicit base_cell(IT f, IT l) : first(f), last(l){}
 		};
 
 		using cell = base_cell<iterator>;
@@ -110,15 +160,13 @@ namespace eversim { namespace core { namespace utility {
 
 		cell get_cell(index_type const& idx)
 		{
-			iterator first, last;
-			std::tie(first, last) = map.equal_range(idx);
-			return cell{ first, last };
+			const auto slot = hasher(idx) % slots.size();
+			return cell(iterator(slots[slot], nodes), iterator());
 		}
 		const_cell get_cell(index_type const& idx) const
 		{
-			iterator first, last;
-			std::tie(first, last) = map.equal_range(idx);
-			return const_cell{ first, last };
+			const auto slot = hasher(idx) % slots.size();
+			return const_cell(const_iterator(slots[slot], nodes), const_iterator());
 		}
 
 		cell get_cell(key_type const& v)
@@ -131,7 +179,10 @@ namespace eversim { namespace core { namespace utility {
 		}
 	private:
 		float cellsize = 1.f;
-		map_type map;
-		
+		std::vector<node> nodes;
+		std::vector<int> slots;
+		hash hasher;
+		int free_node = 0;
+		int num_items = 0;
 	};
 }}}
