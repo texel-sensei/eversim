@@ -236,30 +236,39 @@ int main(int argc, char* argv[])
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::JUMP,
-		[]() { LOG(INFO) << "pressed A for jumping"; }
-	);
+
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DLEFT,
-		[]() { LOG(INFO) << "pressed DPAD LEFT"; }
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DRIGHT,
-		[]() { LOG(INFO) << "pressed DPAD RIGHT"; }
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DUP,
-		[]() { LOG(INFO) << "pressed DPAD UP";	}
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
 	);
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DDOWN,
-		[]() { LOG(INFO) << "pressed DPAD DOWN"; }
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
 	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::state::DUCK,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::state::GOLEM,
+		[](input::InputContext& context) { LOG(INFO) << "pressed GOLEM"; }
+	);
+
+
 
 	// create loaders
 	world::level_loader level_loader;
@@ -293,6 +302,9 @@ int main(int argc, char* argv[])
 	windows.add_window<editor::windows::log_window>();
 	windows.add_window<editor::windows::physics_inspector>(&physics);
 
+	// 0. time
+	const auto dt = 1.f / 60.f;
+
 	// prepare player
 	//	1. physics
 	const auto player_body_template = body_loader.load("cube.bdy");
@@ -303,6 +315,30 @@ int main(int argc, char* argv[])
 	auto kobold = renderer.add_texture("brick_gray0\\big_kobold.png");
 	player_entity->set_Texture(kobold);
 	player_entity->set_Position(player->position);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::range::STEER_X,
+		[&](input::InputContext& context, double value) {
+		//LOG(INFO) << "pressed STEER_X " << value;
+		player->velocity += 3.f*dt*glm::vec2(value, 0);
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::range::STEER_Y,
+		[&](input::InputContext& context, double value) {
+		//LOG(INFO) << "pressed STEER_Y " << -value;
+		player->velocity += 3.f*dt*glm::vec2(0,-value);
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::JUMP,
+		[&](input::InputContext& context) 
+	{
+		player->velocity += 500.f*dt*glm::vec2(0,1);
+	}
+	);
 
 	// setup camera
 	rendering::Camera cam("default_cam",
@@ -320,7 +356,6 @@ int main(int argc, char* argv[])
 	// game loop
 	while (handle_sdl_events())
 	{
-		const auto dt = 1.f / 60.f;
 
 		// initialize frame for editor
 		ImGui_ImplSdlGL3_NewFrame(renderer.get_window());

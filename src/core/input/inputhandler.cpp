@@ -38,10 +38,10 @@ namespace eversim {
 					available_contexts[context.get_name()] = make_shared<InputContext>(context);
 				}
 
-				/*for (const auto& context : available_contexts)
+				for (const auto& context : available_contexts)
 				{
 					context.second->list_actions();
-				}*/
+				}
 			}
 
 			void InputHandler::push_context(const std::string& context_name)

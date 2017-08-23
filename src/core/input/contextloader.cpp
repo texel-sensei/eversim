@@ -34,9 +34,26 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(
 
 		for (auto &action : context.second)
 		{
-			auto val = as_vector<string>(context.second, action.first);
+			auto action_name = action.first;
 
-			inputcontext.register_action(val.at(1), action.first, val.at(0));
+			string type = "";
+			vector<string> buttons;
+
+			for (auto &data : action.second)
+			{
+				if (data.first == "type")
+				{
+					type = data.second.get_value<string>();
+				}
+				else if (data.first == "keys")
+				{
+					auto tmp = as_vector<string>(action.second, data.first);
+					buttons.insert(buttons.end(), tmp.begin(), tmp.end());
+				}
+			}
+
+			for(auto& button : buttons)
+				inputcontext.register_action(type, action_name, button);
 		}
 	}
 

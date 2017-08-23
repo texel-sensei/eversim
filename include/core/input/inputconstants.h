@@ -26,6 +26,7 @@ namespace eversim {	namespace core { namespace input {
 
 		BETTER_ENUM(state, uint8_t,
 			DUCK = 0,
+			GOLEM,
 			INVALID
 		)
 

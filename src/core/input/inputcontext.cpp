@@ -28,26 +28,44 @@ namespace eversim {	namespace core { namespace input {
 		{
 		case InputConstants::input_type::BUTTON :
 		{
+			//LOG(INFO) << "\tbutton";
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::button::_from_string(action.c_str());
 
-			buttons[raw_enum] = action_enum;
+			auto it = buttons.find(raw_enum);
+
+			if (it == buttons.end())
+				buttons[raw_enum] = {};
+
+			buttons[raw_enum].emplace(action_enum);
 		}
 			break;
 		case InputConstants::input_type::STATE :
 		{
+			//LOG(INFO) << "\tstate";
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::state::_from_string(action.c_str());
 			
-			states[raw_enum] = action_enum;
+			auto it = states.find(raw_enum);
+
+			if (it == states.end())
+				states[raw_enum] = {};
+
+			states[raw_enum].emplace(action_enum);
 		}
 			break;
 		case InputConstants::input_type::RANGE :
 		{
+			//LOG(INFO) << "\trange";
 			const auto raw_enum = RawInputConstants::range::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::range::_from_string(action.c_str());
-			
-			ranges[raw_enum] = action_enum;
+	
+			auto it = ranges.find(raw_enum);
+
+			if (it == ranges.end())
+				ranges[raw_enum] = {};
+
+			ranges[raw_enum].emplace(action_enum);
 		}
 			break;
 		default:
@@ -71,60 +89,65 @@ namespace eversim {	namespace core { namespace input {
 
 	bool InputContext::handle_event(const InputEvent& event)
 	{
-		switch(event.get_raw_type())
-		{
-		case RawInputConstants::raw_type::BUTTON:
-		{
-			auto button = event.get_button();
-			auto input_type = get_input_type(button);
-			if (input_type == +InputConstants::input_type::INVALID) return false;
-			if (input_type == +InputConstants::input_type::BUTTON)
-			{
-				auto action_it = buttons.find(button);
-				auto& action = action_it->second;
-				//LOG(INFO) << "\tbutton action " << InputConstants::button::_from_integral(action)._to_string();
-				button_states[action] = true;
-				return true;
-			}
 
-			if (input_type == +InputConstants::input_type::STATE)
-			{
-				auto action_it = states.find(button);
-				auto& action = action_it->second;
-				//LOG(INFO) << "\tstate action " << InputConstants::button::_from_integral(action)._to_string();
-				state_states[action] = true;
-				return true;
-			}
-		}
-		case RawInputConstants::raw_type::RANGE:
+		bool handeled = false;
+
+		if (event.get_raw_type() == +RawInputConstants::raw_type::INVALID) return handeled;
+
 		{
-			auto range = event.get_range();
-			auto input_type = get_input_type(range);
-			if (input_type == +InputConstants::input_type::INVALID) return false;
-			if (input_type == +InputConstants::input_type::RANGE)
-			{
-				auto action_it = ranges.find(range);
-				auto& action = action_it->second;
-				range_states[action] = event.get_range_value();
-				//LOG(INFO) << "\trange action " << event.get_range_value() << " " << InputConstants::range::_from_integral(action)._to_string();
-				return true;
+			//find in buttons
+			auto button = event.get_button();
+			auto action_it = buttons.find(button);
+			if (action_it != buttons.end()) {
+				handeled = true;
+				for (auto& action : action_it->second)
+				{
+					button_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
+				}
 			}
 		}
-		default: return false;
+		{
+			//find in states
+			auto state = event.get_button();
+			auto action_it = states.find(state);
+			if (action_it != states.end()) {
+				handeled = true;
+				for (auto& action : action_it->second)
+				{
+					state_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
+				}
+			}
 		}
+		{
+			//find in ranges
+			auto range = event.get_range();
+			auto action_it = ranges.find(range);
+			if (action_it != ranges.end()) {
+				handeled = true;
+				for (auto& action : action_it->second)
+				{
+					range_states[action] = event.get_range_value();
+				}
+			}
+		}
+
+		return handeled;
 	}
 
-	void InputContext::register_function(const InputConstants::button button,std::function<void()> f)
+	void InputContext::register_function(const InputConstants::button button,
+		button_function f)
 	{
 		button_functions[button] = f;
 	}
 
-	void InputContext::register_function(const InputConstants::state state, std::function<void()> f)
+	void InputContext::register_function(const InputConstants::state state, 
+		button_function f)
 	{
 		state_functions[state] = f;
 	}
 
-	void InputContext::register_function(const InputConstants::range range, std::function<void()> f)
+	void InputContext::register_function(const InputConstants::range range,
+		range_function f)
 	{
 		range_functions[range] = f;
 	}
@@ -139,7 +162,7 @@ namespace eversim {	namespace core { namespace input {
 				auto it = button_functions.find(s.first);
 				if(it != button_functions.end())
 				{
-					it->second();
+					it->second(*this);
 				}
 			}
 		}
@@ -152,16 +175,19 @@ namespace eversim {	namespace core { namespace input {
 				auto it = state_functions.find(s.first);
 				if (it != state_functions.end())
 				{
-					it->second();
+					it->second(*this);
 				}
 			}
 		}
 
-		/*for(auto& p : button_functions)
+		for (auto& s : range_states)
 		{
-			p.second();
-		}*/
-		//button_functions.clear();
+			auto it = range_functions.find(s.first);
+			if (it != range_functions.end())
+			{
+				it->second(*this,s.second);
+			}
+		}
 	}
 
 	void InputContext::list_actions() const
@@ -169,71 +195,29 @@ namespace eversim {	namespace core { namespace input {
 		LOG(INFO) << "Context \"" << name << "\"";
 		for(auto& button : buttons)
 		{
-			const auto raw_enum = RawInputConstants::button::_from_integral(button.first);
-			auto it = RawInputConstants::sdl_button_map.end();
-
-			for(it = RawInputConstants::sdl_button_map.begin(); it != RawInputConstants::sdl_button_map.end(); ++it)
+			LOG(INFO) << "\tBUTTON " << RawInputConstants::button::_from_integral(button.first)._to_string();
+			for (auto& action : button.second)
 			{
-				if(it->second == raw_enum)
-				{
-					break;
-				}
+				LOG(INFO) << "\t\t" << InputConstants::button::_from_integral(action)._to_string();
 			}
-	
-			if(it == RawInputConstants::sdl_button_map.end())
-			{
-				LOG(ERROR) << "sdl to raw mapping not found";
-				continue;
-			}
-			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first << 
-				" -> " << InputConstants::button::_from_integral(button.second)._to_string();
 		}
 
 		for (auto& state : states)
 		{
-			const auto raw_enum = RawInputConstants::button::_from_integral(state.first);
-			auto it = RawInputConstants::sdl_button_map.end();
-
-			for (it = RawInputConstants::sdl_button_map.begin(); it != RawInputConstants::sdl_button_map.end(); ++it)
+			LOG(INFO) << "\tSTATE " << RawInputConstants::button::_from_integral(state.first)._to_string();
+			for (auto& action : state.second)
 			{
-				if (it->second == raw_enum)
-				{
-					break;
-				}
+				LOG(INFO) << "\t\t" << InputConstants::state::_from_integral(action)._to_string();
 			}
-
-			if (it == RawInputConstants::sdl_button_map.end())
-			{
-				LOG(ERROR) << "sdl to raw mapping not found";
-				continue;
-			}
-
-			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first <<
-				" -> " << InputConstants::state::_from_integral(state.second)._to_string();
 		}
 
 		for (auto& range : ranges)
 		{
-			const auto raw_enum = RawInputConstants::range::_from_integral(range.first);
-			auto it = RawInputConstants::sdl_range_map.end();
-
-			for (it = RawInputConstants::sdl_range_map.begin(); it != RawInputConstants::sdl_range_map.end(); ++it)
+			LOG(INFO) << "\tRANGE " << RawInputConstants::range::_from_integral(range.first)._to_string();
+			for (auto& action : range.second)
 			{
-				if (it->second == raw_enum)
-				{
-					break;
-				}
+				LOG(INFO) << "\t\t" << InputConstants::range::_from_integral(action)._to_string();
 			}
-
-			if (it == RawInputConstants::sdl_range_map.end())
-			{
-				LOG(ERROR) << "sdl to raw mapping not found";
-				continue;
-			}
-
-			LOG(INFO) << "\t\t" << raw_enum._to_string() << " / " << it->first <<
-				" -> " << InputConstants::range::_from_integral(range.second)._to_string();
 		}
-		LOG(INFO) << "END PRINT";
 	}
 }}}

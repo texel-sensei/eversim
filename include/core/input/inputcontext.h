@@ -9,32 +9,36 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <functional>
 
 
+
 namespace eversim { namespace core { namespace input {
+	class InputContext;
 	class InputEvent;
-
-
+	typedef std::function<void(InputContext&)> button_function;
+	typedef std::function<void(InputContext&, double)> range_function;
+	
 	class InputContext
 	{
 	private:
 		std::string name;
 
-		// map <RawInput,MappedInput>
-		std::map<uint8_t,uint8_t> buttons;
-		std::map<uint8_t,uint8_t> states;
-		std::map<uint8_t,uint8_t> ranges;
+		// map <MappedInput,actions>
+		std::map<uint8_t,std::set<uint8_t>> buttons;
+		std::map<uint8_t,std::set<uint8_t>> states;
+		std::map<uint8_t,std::set<uint8_t>> ranges;
 
 		//map <MappedInput,state>
 		std::map<uint8_t, bool> button_states;
 		std::map<uint8_t, bool> state_states;
 		std::map<uint8_t, double> range_states;
 
-		// map <MappedInput,function>
-		std::map<uint8_t, std::function<void()>> button_functions;
-		std::map<uint8_t, std::function<void()>> state_functions;
-		std::map<uint8_t, std::function<void()>> range_functions;
+		// map <action,function>
+		std::map<uint8_t, button_function> button_functions;
+		std::map<uint8_t, button_function> state_functions;
+		std::map<uint8_t, range_function> range_functions;
 
 		InputConstants::input_type get_input_type(const RawInputConstants::button& b) const;
 		InputConstants::input_type get_input_type(const RawInputConstants::range& r) const;
@@ -46,9 +50,12 @@ namespace eversim { namespace core { namespace input {
 
 		void register_action(const std::string& type,const std::string& action, const std::string& rawcode);
 		
-		void register_function(const InputConstants::button button, std::function<void()> f);
-		void register_function(const InputConstants::state state, std::function<void()> f);
-		void register_function(const InputConstants::range range, std::function<void()> f);
+		void register_function(const InputConstants::button button, 
+			button_function f);
+		void register_function(const InputConstants::state state, 
+			button_function f);
+		void register_function(const InputConstants::range range, 
+			range_function f);
 
 		void list_actions() const;
 
@@ -58,6 +65,4 @@ namespace eversim { namespace core { namespace input {
 
 		std::string get_name() const { return name; }
 	};
-
-
 }}}
