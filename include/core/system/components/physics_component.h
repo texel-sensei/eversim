@@ -1,9 +1,9 @@
 #pragma once
 #include "core/system/component.h"
-#include "core/physics/body.h"
 
 namespace eversim {namespace core {namespace physics {
 	class body_template;
+	class body;
 	class physics_manager;
 }}}
 
@@ -18,6 +18,9 @@ namespace eversim {namespace core { namespace system {
 
 		physics::body& get_body() { return *body; }
 		physics::body const& get_body() const { return *body; }
+
+		static physics_component* get_from_body(physics::body const*);
+		static gameobject& gameobject_from_body(physics::body const*);
 
 	protected:
 		std::unique_ptr<component> do_clone() const override

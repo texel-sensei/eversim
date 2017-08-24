@@ -18,6 +18,8 @@ namespace eversim { namespace core { namespace physics {
 
 		float gravity_scale = 1.f;
 
+		void* user_data = nullptr;
+
 		particle& get_particle(size_t idx) const
 		{
 			assert(idx < particles.size());

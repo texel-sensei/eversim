@@ -9,6 +9,17 @@ namespace eversim { namespace core { namespace system {
 	) : component(owner)
 	{
 		body = mng.add_body(templ, owner->get_position(), owner->get_scale());
+		body->user_data = this;
+	}
+
+	physics_component* physics_component::get_from_body(physics::body const* body)
+	{
+		return static_cast<physics_component*>(body->user_data);
+	}
+
+	gameobject& physics_component::gameobject_from_body(physics::body const* body)
+	{
+		return get_from_body(body)->get_owner();
 	}
 
 	void physics_component::update()
