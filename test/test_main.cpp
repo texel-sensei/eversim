@@ -5,5 +5,20 @@ INITIALIZE_EASYLOGGINGPP
 //Those clash with the catch.hpp macros.
 #undef CHECK
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
+
+int main(int argc, char* argv[])
+{
+	START_EASYLOGGINGPP(argc, argv);
+	el::Configurations default_config;
+	default_config.setToDefault();
+	default_config.setGlobally(el::ConfigurationType::Filename, "logs/test_log.txt");
+	el::Loggers::reconfigureAllLoggers(default_config);
+
+	int result = Catch::Session().run(argc, argv);
+
+	// global clean-up...
+
+	return (result < 0xff ? result : 0xff);
+}

@@ -103,7 +103,7 @@ include_directories(${EXTERNALS}/poly_collection/include)
 
 #easyloggingpp
 option(build_static_lib "Build easyloggingpp as a static library" ON)
-add_definitions(-DELPP_FEATURE_ALL)
+add_definitions(-DELPP_FEATURE_ALL -DELPP_NO_DEFAULT_LOG_FILE)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
 set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
 include_directories(${EXTERNALS}/easyloggingpp/src)

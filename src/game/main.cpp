@@ -10,7 +10,6 @@
 #include "core/world/level_loader.h"
 #include "core/world/tile_loader.h"
 #include "core/world/level.h"
-#include "core/world/tile_descriptor.h"
 
 #include "core/physics/constraints/angle_constraint.h"
 #include "core/physics/body_template.h"
@@ -21,7 +20,10 @@
 #include "core/system/components/rendering_component.h"
 #include "core/system/game.h"
 
+#include "core/utility/filesystem_wrapper.h"
+
 #include <easylogging++.h>
+
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
@@ -33,6 +35,9 @@ INITIALIZE_EASYLOGGINGPP
 using namespace std;
 using namespace eversim;
 using namespace eversim::core;
+
+// Keep only this much logfiles around. If there are more, then the oldest ones are deleted
+constexpr int NUM_LOGFILES = 10;
 
 bool direction_pressed[4];
 
@@ -191,9 +196,46 @@ void init_rendering(rendering::render_manager& renderer)
 	rendering::myrenderer = &renderer;
 }
 
+void init_logging(int argc, char* argv[])
+{
+	using namespace utility;
+
+	START_EASYLOGGINGPP(argc, argv);
+	el::Configurations default_config;
+	default_config.setToDefault();
+
+	el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+	default_config.setGlobally(el::ConfigurationType::Filename, "logs/%datetime{%Y-%M-%d %H-%m-%s}.log");
+
+	if (fs::exists("log.conf")) {
+		default_config.parseFromFile("log.conf");
+	}
+	el::Loggers::reconfigureAllLoggers(default_config);
+
+	// collect all files in logs/ directory
+	auto dir_begin = fs::directory_iterator("logs");
+	auto dir_end = fs::directory_iterator();
+	vector<fs::path> logfiles(dir_begin, dir_end);
+
+	// remove all files that do not end in '.log'
+	const auto is_no_logfile = [](fs::path const& p) { return p.extension() != ".log"; };
+	logfiles.erase(remove_if(logfiles.begin(), logfiles.end(), is_no_logfile), logfiles.end());
+	sort(logfiles.begin(), logfiles.end());
+
+	if (logfiles.size() > NUM_LOGFILES)
+	{
+		const auto end = logfiles.begin() + NUM_LOGFILES-1;
+		for (auto it = logfiles.begin(); it != end; ++it)
+		{
+			LOG(INFO) << "Deleting logfile " << it->string();
+			fs::remove(*it);
+		}
+	}
+}
+
 int main(int argc, char* argv[])
 {
-	START_EASYLOGGINGPP(argc, argv);
+	init_logging(argc, argv);
 
 	// init rendering
 	const auto resolution = glm::ivec2(1920, 1080);
