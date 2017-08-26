@@ -27,6 +27,8 @@ namespace eversim {
 
 				void push_context(const std::string& context_name);
 				std::string pop();
+				void pop(const std::string& context_name);
+				void pop(const std::vector<std::string>& context_names);
 
 				std::shared_ptr<InputContext> get_context(const std::string& context_name) const
 				{

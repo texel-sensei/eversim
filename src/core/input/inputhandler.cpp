@@ -56,6 +56,22 @@ namespace eversim {
 				return res;
 			}
 
+			void InputHandler::pop(const std::string& context_name)
+			{
+				auto it = std::remove_if(begin(context_stack), end(context_stack),
+					[&](std::weak_ptr<InputContext> ptr) {
+						return ptr.expired() || (ptr.lock()->get_name() == context_name);
+					}
+				);
+				context_stack = std::list<std::weak_ptr<InputContext>>(begin(context_stack), it);
+			}
+
+			void InputHandler::pop(const std::vector<std::string>& context_names)
+			{
+				for (const auto& context_name : context_names)
+					pop(context_name);
+			}
+
 			const std::map<std::string, std::shared_ptr<InputContext>>& InputHandler::get_available_contexts() const
 			{
 				return available_contexts;

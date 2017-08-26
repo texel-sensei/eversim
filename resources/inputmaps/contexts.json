@@ -36,5 +36,17 @@
       "type": "RANGE",
       "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y" ]
     }
+  },
+  "midjump": {
+    "DOUBLEJUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+  },
+  "midjumpjumped": {
+    "DROP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
   }
 }

@@ -32,6 +32,12 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::button::_from_string(action.c_str());
 
+			if (action_enum == +InputConstants::button::DROP)
+			{
+				buttons_to_drop.push_back(raw_enum);
+				break;
+			}
+
 			auto it = buttons.find(raw_enum);
 
 			if (it == buttons.end())
@@ -46,6 +52,12 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::state::_from_string(action.c_str());
 			
+			if (action_enum == +InputConstants::state::DROP)
+			{
+				buttons_to_drop.push_back(raw_enum);
+				break;
+			}
+
 			auto it = states.find(raw_enum);
 
 			if (it == states.end())
@@ -60,6 +72,12 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::range::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::range::_from_string(action.c_str());
 	
+			if (action_enum == +InputConstants::range::DROP)
+			{
+				ranges_to_drop.push_back(raw_enum);
+				break;
+			}
+
 			auto it = ranges.find(raw_enum);
 
 			if (it == ranges.end())
@@ -97,6 +115,9 @@ namespace eversim {	namespace core { namespace input {
 		{
 			//find in buttons
 			auto button = event.get_button();
+
+			if (find(begin(buttons_to_drop), end(buttons_to_drop), button) != buttons_to_drop.end()) return true;
+
 			auto action_it = buttons.find(button);
 			if (action_it != buttons.end()) {
 				handeled = true;
@@ -109,6 +130,9 @@ namespace eversim {	namespace core { namespace input {
 		{
 			//find in states
 			auto state = event.get_button();
+
+			if (find(begin(buttons_to_drop), end(buttons_to_drop), state) != buttons_to_drop.end()) return true;
+
 			auto action_it = states.find(state);
 			if (action_it != states.end()) {
 				handeled = true;
@@ -121,6 +145,9 @@ namespace eversim {	namespace core { namespace input {
 		{
 			//find in ranges
 			auto range = event.get_range();
+
+			if (find(begin(ranges_to_drop),end(ranges_to_drop),range) != ranges_to_drop.end()) return true;
+
 			auto action_it = ranges.find(range);
 			if (action_it != ranges.end()) {
 				handeled = true;

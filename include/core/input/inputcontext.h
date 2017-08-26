@@ -25,6 +25,9 @@ namespace eversim { namespace core { namespace input {
 	private:
 		std::string name;
 
+		std::vector<RawInputConstants::button> buttons_to_drop;
+		std::vector<RawInputConstants::range> ranges_to_drop;
+
 		// map <MappedInput,actions>
 		std::map<uint8_t,std::set<uint8_t>> buttons;
 		std::map<uint8_t,std::set<uint8_t>> states;

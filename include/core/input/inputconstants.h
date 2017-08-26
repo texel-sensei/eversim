@@ -14,6 +14,7 @@ namespace eversim {	namespace core { namespace input {
 			CONFIRM = 0,
 			BACK,
 			JUMP,
+			DOUBLEJUMP,
 			MENU,
 			FART_LEFT,
 			FART_RIGHT,
@@ -21,18 +22,21 @@ namespace eversim {	namespace core { namespace input {
 			DRIGHT,
 			DUP,
 			DDOWN,
+			DROP,
 			INVALID
 		)
 
 		BETTER_ENUM(state, uint8_t,
 			DUCK = 0,
 			GOLEM,
+			DROP,
 			INVALID
 		)
 
 		BETTER_ENUM(range, uint8_t,
 			STEER_X = 0,
 			STEER_Y,
+			DROP,
 			INVALID
 		)
 

@@ -236,8 +236,6 @@ int main(int argc, char* argv[])
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
 
-
-
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::button::DLEFT,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
@@ -267,7 +265,6 @@ int main(int argc, char* argv[])
 		input::InputConstants::state::GOLEM,
 		[](input::InputContext& context) { LOG(INFO) << "pressed GOLEM"; }
 	);
-
 
 
 	// create loaders
@@ -319,16 +316,8 @@ int main(int argc, char* argv[])
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::range::STEER_X,
 		[&](input::InputContext& context, double value) {
-		//LOG(INFO) << "pressed STEER_X " << value;
+		if (std::abs(value) - 0.2 < 0.) return;
 		player->velocity += 3.f*dt*glm::vec2(value, 0);
-	}
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::range::STEER_Y,
-		[&](input::InputContext& context, double value) {
-		//LOG(INFO) << "pressed STEER_Y " << -value;
-		player->velocity += 3.f*dt*glm::vec2(0,-value);
 	}
 	);
 
@@ -336,9 +325,34 @@ int main(int argc, char* argv[])
 		input::InputConstants::button::JUMP,
 		[&](input::InputContext& context) 
 	{
-		player->velocity += 500.f*dt*glm::vec2(0,1);
+		player->velocity += 2.f*glm::vec2(0,1);
+		inputhandler_ptr->push_context("midjump");
 	}
 	);
+
+	inputhandler_ptr->get_context("midjump")->register_function(
+		input::InputConstants::button::DOUBLEJUMP,
+		[&](input::InputContext& context)
+	{
+		player->velocity += 1.5f*glm::vec2(0, 1);
+		inputhandler_ptr->push_context("midjumpjumped");
+	}
+	);
+
+	utility::Delegate delg;
+	delg.connect([](physics::body* ptr, 
+		physics::events::static_col_list const& list) 
+	{
+		for (const auto& sc : list)
+		{
+			if (std::abs(sc.normal.y - 1.) < 0.001)
+			{
+				//LOG(INFO) << "ground";
+				inputhandler_ptr->pop({std::string("midjumpjumped") , "midjump"});
+				break;
+			}
+		}
+	}, physics.level_collision_events());
 
 	// setup camera
 	rendering::Camera cam("default_cam",
