@@ -11,37 +11,52 @@ using namespace eversim::core::input;
 
 const auto simple_file = 
 R"#delim#({
-"game": {
-		"JUMP": ["GAMEPAD_BUTTON_A", "BUTTON"],
-		"MENU" : ["GAMEPAD_BUTTON_START", "BUTTON"],
-		"DUCK" : ["GAMEPAD_BUTTON_X", "STATE"],
-		"STEER_X" : ["GAMEPAD_ANALOGUE_LEFT_STICK_X", "RANGE"],
-		"STEER_Y" : ["GAMEPAD_ANALOGUE_LEFT_STICK_Y", "RANGE"],
-		"FART_LEFT" : ["GAMEPAD_BUTTON_LB", "BUTTON"],
-		"FART_RIGHT" : ["GAMEPAD_BUTTON_RB", "BUTTON"],
-		"DLEFT" : ["GAMEPAD_BUTTON_DPAD_LEFT", "BUTTON"],
-		"DRIGHT" : ["GAMEPAD_BUTTON_DPAD_RIGHT", "BUTTON"],
-		"DUP" : ["GAMEPAD_BUTTON_DPAD_UP", "BUTTON"],
-		"DDOWN" : ["GAMEPAD_BUTTON_DPAD_DOWN", "BUTTON"]
-},
-"menu": {
-		"BACK": ["GAMEPAD_BUTTON_B", "BUTTON"],
-			"CONFIRM" : ["GAMEPAD_BUTTON_A", "BUTTON"]
-	}
+  "game": {
+    "JUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    },
+    "BACK": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_DPAD_LEFT" ]
+    }
+  },
+  "midjump": {
+    "DOUBLEJUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+  },
+  "midjumpjumped": {
+    "DROP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+  },
+ "menu":{
+  "MENU" : {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+ }
 })#delim#";
-const std::string sf(simple_file);
 
 const auto harder_file =
 R"#delim#({
 "game": {
-		"JUMP": ["GAMEPAD_BUTTON_A", "BUTTON"],
-		"MENU": ["GAMEPAD_BUTTON_A", "BUTTON"]
+    "JUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    },
+    "MENU": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
 }})#delim#";
-const std::string hf(harder_file);
 
 TEST_CASE("increment_simple", "[input][inputhandler]") {
 
-	std::istringstream iss(sf);
+	std::istringstream iss(simple_file);
 
 	InputHandler handler(iss);
 
@@ -51,7 +66,7 @@ TEST_CASE("increment_simple", "[input][inputhandler]") {
 
 	handler.get_context("game")->register_function(
 		InputConstants::button::JUMP,
-		[&]() { a++; }
+		[&](InputContext&) { a++; }
 	);
 
 	//press button 5 times
@@ -69,7 +84,7 @@ TEST_CASE("increment_simple", "[input][inputhandler]") {
 
 TEST_CASE("increment_two_contexts", "[input][inputhandler]") {
 
-	std::istringstream iss(sf);
+	std::istringstream iss(simple_file);
 
 	InputHandler handler(iss);
 
@@ -80,7 +95,7 @@ TEST_CASE("increment_two_contexts", "[input][inputhandler]") {
 
 	handler.get_context("game")->register_function(
 		InputConstants::button::JUMP,
-		[&]() { a++; }
+		[&](InputContext&) { a++; }
 	);
 
 	//press button 5 times
@@ -101,9 +116,9 @@ TEST_CASE("increment_two_contexts", "[input][inputhandler]") {
 	REQUIRE(a == 1);
 }
 
-TEST_CASE("increment_harder", "[input][inputhandler]") {
+TEST_CASE("two_buttons", "[input][inputhandler]") {
 
-	std::istringstream iss(hf);
+	std::istringstream iss(harder_file);
 
 	InputHandler handler(iss);
 
@@ -114,12 +129,12 @@ TEST_CASE("increment_harder", "[input][inputhandler]") {
 
 	handler.get_context("game")->register_function(
 		InputConstants::button::JUMP,
-		[&]() { a++; }
+		[&](InputContext&) { a++; }
 	);
 
 	handler.get_context("game")->register_function(
 		InputConstants::button::MENU,
-		[&]() { b++; }
+		[&](InputContext&) { b++; }
 	);
 
 	//press button 5 times
@@ -127,18 +142,17 @@ TEST_CASE("increment_harder", "[input][inputhandler]") {
 	event.type = SDL_JOYBUTTONDOWN;
 	event.cbutton.button = SDL_CONTROLLER_BUTTON_A;
 
+	for (size_t i = 0; i < 5; ++i) {
+		handler.handle_event(event);
+		handler.execute();
+	}
 
-	handler.handle_event(event);
-	handler.execute();
-
-
-	REQUIRE(b == 1);
-	REQUIRE(a == 1);
+	REQUIRE(a == 5);
 	REQUIRE(a == b);
 }
 
 TEST_CASE("increment_simple_mapped", "[input][inputhandler]") {
-	std::istringstream iss(sf);
+	std::istringstream iss(simple_file);
 
 	InputHandler handler(iss);
 
@@ -148,7 +162,7 @@ TEST_CASE("increment_simple_mapped", "[input][inputhandler]") {
 
 	handler.get_context("game")->register_function(
 		InputConstants::button::JUMP,
-		[&]() { a++; }
+		[&](InputContext&) { a++; }
 	);
 
 	//press button 5 times
