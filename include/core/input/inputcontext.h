@@ -25,15 +25,12 @@ namespace eversim { namespace core { namespace input {
 	private:
 		std::string name;
 
-		std::vector<RawInputConstants::button> buttons_to_drop;
-		std::vector<RawInputConstants::range> ranges_to_drop;
-
 		// map <MappedInput,actions>
 		std::map<uint8_t,std::set<uint8_t>> buttons;
 		std::map<uint8_t,std::set<uint8_t>> states;
 		std::map<uint8_t,std::set<uint8_t>> ranges;
 
-		//map <MappedInput,state>
+		//map <action,state>
 		std::map<uint8_t, bool> button_states;
 		std::map<uint8_t, bool> state_states;
 		std::map<uint8_t, double> range_states;
@@ -67,5 +64,15 @@ namespace eversim { namespace core { namespace input {
 		bool handle_event(const InputEvent& event);
 
 		std::string get_name() const { return name; }
+
+		std::vector<RawInputConstants::button> get_buttons() const;
+		std::vector<RawInputConstants::button> get_states() const;
+		std::vector<RawInputConstants::range> get_ranges() const;
+
+		void reset_states(const std::vector<RawInputConstants::button>&);
+		void reset_ranges(const std::vector<RawInputConstants::range>&);
+
+		void reset_states(const std::vector<std::vector<RawInputConstants::button>>&);
+		void reset_ranges(const std::vector<std::vector<RawInputConstants::range>>&);
 	};
 }}}

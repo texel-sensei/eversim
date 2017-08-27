@@ -46,6 +46,14 @@ namespace eversim {
 
 			void InputHandler::push_context(const std::string& context_name)
 			{
+
+				auto context = available_contexts.at(context_name);
+
+				if (context_stack.size() >= 1) {
+					auto front_context = context_stack.begin()->lock();
+					front_context->reset_states({ context->get_buttons(), context->get_states() });
+					front_context->reset_ranges(context->get_ranges());
+				}
 				context_stack.push_front(available_contexts.at(context_name));
 			}
 

@@ -263,7 +263,9 @@ int main(int argc, char* argv[])
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::state::GOLEM,
-		[](input::InputContext& context) { LOG(INFO) << "pressed GOLEM"; }
+		[](input::InputContext& context) { 
+		LOG(INFO) << "pressed GOLEM"; 
+	}
 	);
 
 
@@ -317,7 +319,8 @@ int main(int argc, char* argv[])
 		input::InputConstants::range::STEER_X,
 		[&](input::InputContext& context, double value) {
 		if (std::abs(value) - 0.2 < 0.) return;
-		player->velocity += 3.f*dt*glm::vec2(value, 0);
+		double a = (value < 0.) ? -1. : 1.;
+		player->velocity += 3.f*dt*glm::vec2(a*std::exp(std::abs(value)), 0);
 	}
 	);
 

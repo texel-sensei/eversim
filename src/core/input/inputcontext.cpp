@@ -32,12 +32,6 @@ namespace eversim {	namespace core { namespace input {
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::button::_from_string(action.c_str());
 
-			if (action_enum == +InputConstants::button::DROP)
-			{
-				buttons_to_drop.push_back(raw_enum);
-				break;
-			}
-
 			auto it = buttons.find(raw_enum);
 
 			if (it == buttons.end())
@@ -51,12 +45,6 @@ namespace eversim {	namespace core { namespace input {
 			//LOG(INFO) << "\tstate";
 			const auto raw_enum = RawInputConstants::button::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::state::_from_string(action.c_str());
-			
-			if (action_enum == +InputConstants::state::DROP)
-			{
-				buttons_to_drop.push_back(raw_enum);
-				break;
-			}
 
 			auto it = states.find(raw_enum);
 
@@ -71,12 +59,6 @@ namespace eversim {	namespace core { namespace input {
 			//LOG(INFO) << "\trange";
 			const auto raw_enum = RawInputConstants::range::_from_string(rawcode.c_str());
 			const auto action_enum = InputConstants::range::_from_string(action.c_str());
-	
-			if (action_enum == +InputConstants::range::DROP)
-			{
-				ranges_to_drop.push_back(raw_enum);
-				break;
-			}
 
 			auto it = ranges.find(raw_enum);
 
@@ -90,6 +72,82 @@ namespace eversim {	namespace core { namespace input {
 			//TODO
 			break;
 		}
+	}
+
+	std::vector<RawInputConstants::button> InputContext::get_buttons() const
+	{
+		std::vector<RawInputConstants::button> res;
+		for (auto& bpair : buttons)
+			res.push_back(RawInputConstants::button::_from_integral(bpair.first));
+		return res;
+	}
+
+	std::vector<RawInputConstants::button> InputContext::get_states() const
+	{
+		std::vector<RawInputConstants::button> res;
+		for (auto& spair : states)
+			res.push_back(RawInputConstants::button::_from_integral(spair.first));
+		return res;
+	}
+
+	std::vector<RawInputConstants::range> InputContext::get_ranges() const
+	{
+		std::vector<RawInputConstants::range> res;
+		for (auto& rpair : ranges)
+			res.push_back(RawInputConstants::range::_from_integral(rpair.first));
+		return res;
+	}
+
+	void InputContext::reset_states(const std::vector<RawInputConstants::button>& ss)
+	{
+		for (const auto& b : ss)
+		{
+			auto it = states.find(+b);
+			if (it == states.end()) continue;
+			auto& actions = *it;
+
+			for (const auto& action : actions.second)
+			{
+				std::for_each(begin(state_states), end(state_states),
+					[&](std::pair<const uint8_t, bool>& element)
+				{
+					if(element.first == action)
+						element.second = false;
+				});
+			}
+		}
+	}
+
+	void InputContext::reset_ranges(const std::vector<RawInputConstants::range>& rs)
+	{
+		for (const auto& b : rs)
+		{
+			auto it = buttons.find(+b);
+			if (it == buttons.end()) continue;
+			auto& actions = *it;
+
+			for (const auto& action : actions.second)
+			{
+				std::for_each(begin(range_states), end(range_states),
+					[&](std::pair<const uint8_t, double>& element)
+				{
+					if (element.first == action)
+						element.second = 0.f;
+				});
+			}
+		}
+	}
+
+	void InputContext::reset_states(const std::vector<std::vector<RawInputConstants::button>>& v)
+	{
+		for (const auto& s : v)
+			reset_states(s);
+	}
+
+	void InputContext::reset_ranges(const std::vector<std::vector<RawInputConstants::range>>& v)
+	{
+		for (const auto& s : v)
+			reset_ranges(s);
 	}
 
 	InputConstants::input_type InputContext::get_input_type(const RawInputConstants::button& button) const
@@ -116,7 +174,7 @@ namespace eversim {	namespace core { namespace input {
 			//find in buttons
 			auto button = event.get_button();
 
-			if (find(begin(buttons_to_drop), end(buttons_to_drop), button) != buttons_to_drop.end()) return true;
+			//if (find(begin(buttons_to_drop), end(buttons_to_drop), button) != buttons_to_drop.end()) return true;
 
 			auto action_it = buttons.find(button);
 			if (action_it != buttons.end()) {
@@ -131,7 +189,7 @@ namespace eversim {	namespace core { namespace input {
 			//find in states
 			auto state = event.get_button();
 
-			if (find(begin(buttons_to_drop), end(buttons_to_drop), state) != buttons_to_drop.end()) return true;
+			//if (find(begin(buttons_to_drop), end(buttons_to_drop), state) != buttons_to_drop.end()) return true;
 
 			auto action_it = states.find(state);
 			if (action_it != states.end()) {
@@ -146,7 +204,7 @@ namespace eversim {	namespace core { namespace input {
 			//find in ranges
 			auto range = event.get_range();
 
-			if (find(begin(ranges_to_drop),end(ranges_to_drop),range) != ranges_to_drop.end()) return true;
+			//if (find(begin(ranges_to_drop),end(ranges_to_drop),range) != ranges_to_drop.end()) return true;
 
 			auto action_it = ranges.find(range);
 			if (action_it != ranges.end()) {
