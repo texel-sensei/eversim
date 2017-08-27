@@ -26,19 +26,19 @@ namespace eversim { namespace core { namespace input {
 		std::string name;
 
 		// map <MappedInput,actions>
-		std::map<uint8_t,std::set<uint8_t>> buttons;
-		std::map<uint8_t,std::set<uint8_t>> states;
-		std::map<uint8_t,std::set<uint8_t>> ranges;
+		std::map<RawInputConstants::button,std::set<InputConstants::button>> buttons;
+		std::map<RawInputConstants::button,std::set<InputConstants::state>> states;
+		std::map<RawInputConstants::range,std::set<InputConstants::range>> ranges;
 
 		//map <action,state>
-		std::map<uint8_t, bool> button_states;
-		std::map<uint8_t, bool> state_states;
-		std::map<uint8_t, double> range_states;
+		std::map<InputConstants::button, bool> button_states;
+		std::map<InputConstants::state, bool> state_states;
+		std::map<InputConstants::range, double> range_states;
 
 		// map <action,function>
-		std::map<uint8_t, button_function> button_functions;
-		std::map<uint8_t, button_function> state_functions;
-		std::map<uint8_t, range_function> range_functions;
+		std::map<InputConstants::button, button_function> button_functions;
+		std::map<InputConstants::state, button_function> state_functions;
+		std::map<InputConstants::range, range_function> range_functions;
 
 		InputConstants::input_type get_input_type(const RawInputConstants::button& b) const;
 		InputConstants::input_type get_input_type(const RawInputConstants::range& r) const;
