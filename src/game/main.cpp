@@ -15,6 +15,7 @@
 #include "editor/windows/physics_inspector.h"
 
 #include "core/input/contextloader.h"
+#include "core/input/gamepadhandler.h"
 
 #include "editor/core/window_manager.h"
 
@@ -33,6 +34,7 @@ using namespace eversim::core;
 
 world::tile_descriptor dirt, grass, bricks;
 std::shared_ptr<input::InputHandler> inputhandler_ptr = nullptr;
+input::GamepadHandler ghandler;
 
 bool direction_pressed[4];
 
@@ -67,6 +69,8 @@ bool handle_sdl_events()
 
 	while (SDL_PollEvent(&event))
 	{
+		ghandler.handle_event(event);
+
 		ImGui_ImplSdlGL3_ProcessEvent(&event);
 
 		inputhandler_ptr->handle_event(event);
