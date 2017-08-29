@@ -77,6 +77,11 @@ namespace eversim {
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			}
 
+			void Framebuffer::unbind() const
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
 			std::shared_ptr<FramebufferAutoUnbind> Framebuffer::bind_auto_unbind() const
 			{
 				bind();
