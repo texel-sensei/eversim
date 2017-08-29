@@ -1,6 +1,7 @@
 #include "editor/windows/log_window.h"
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
+#include "editor/windows/game_window.h"
 
 #include "editor/core/window_manager.h"
 
@@ -44,6 +45,7 @@ input::GamepadHandler ghandler;
 constexpr int NUM_LOGFILES = 10;
 
 bool direction_pressed[4];
+function<void(glm::ivec2, int)> mouse_click;
 
 bool handle_keypress(SDL_Keysym sym, bool down)
 {
@@ -95,6 +97,14 @@ bool handle_sdl_events()
 			if (skip_key) break;
 			should_continue &= handle_keypress(event.key.keysym, false);
 			break;
+		case SDL_MOUSEBUTTONDOWN: {
+			if (io.WantCaptureMouse)
+				break;
+			auto pos = glm::ivec2{ event.button.x, event.button.y };
+			if (mouse_click)
+				mouse_click(pos, event.button.button);
+			break;
+		}
 		default:
 			break;
 		}
@@ -332,9 +342,10 @@ int main(int argc, char* argv[])
 
 	// Create editor windows
 	editor::core::window_manager windows;
-	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::log_window>();
 	windows.add_window<editor::windows::physics_inspector>(&physics);
+	auto* gamewindow = windows.add_window<editor::windows::game_window>();
+	auto* pd = windows.add_window<editor::windows::performance_display>();
 
 	// 0. time
 	const auto dt = 1.f / 60.f;
@@ -410,6 +421,25 @@ int main(int argc, char* argv[])
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	enable_gl_debug();
 
+	const auto boulder_templ = body_loader.load("boulder somewhat stable.bdy");
+	mouse_click = [&](glm::ivec2 pos, int button)
+	{
+		auto ss_pos = glm::vec2(pos) / glm::vec2(resolution);
+		ss_pos = ss_pos*2.f - 1.f;
+		ss_pos.y *= -1;
+
+		auto VP = cam.get_projection_matrix() * cam.get_view_matrix();
+
+		const auto ws_pos3 = inverse(VP) * glm::vec3(ss_pos, 1);
+		const auto ws_pos = glm::vec2(ws_pos3 / ws_pos3.z);
+
+		LOG(INFO) << "Pressed " << button;
+
+		if (button == 1) {
+			physics.add_body(*boulder_templ, ws_pos, glm::vec2(0.4f));
+		}
+	};
+
 	// game loop
 	while (handle_sdl_events())
 	{
@@ -453,9 +483,13 @@ int main(int argc, char* argv[])
 			rendering::draw_point(p.pos);
 		}
 
+		gamewindow->bind();
 		{
 			// draw game
 			utility::scoped_timer tim(pd->get_reporter("Render loop"));
+			
+			glClearColor(0.623, 0.76, 0.729, 1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			renderer.draw(cam);
 		}
 
@@ -464,6 +498,7 @@ int main(int argc, char* argv[])
 			utility::scoped_timer tim(pd->get_reporter("debug rendering"));
 			renderer.do_draw(cam);
 		}
+		gamewindow->unbind();
 
 		{
 			// draw gui
