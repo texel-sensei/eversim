@@ -14,6 +14,8 @@
 #include <tuple>
 #include <limits>
 
+#include <boost/align/aligned_allocator.hpp>
+
 
 using namespace std;
 using namespace glm;
@@ -144,7 +146,7 @@ namespace eversim { namespace core { namespace rendering {
 		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-		if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 			cerr << "SDL_Init Error: " << SDL_GetError();
 			throw sdl::sdl_error{ "Failed to init SDL!" };
 		}

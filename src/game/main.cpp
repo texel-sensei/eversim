@@ -19,7 +19,8 @@
 #include "core/system/components/physics_component.h"
 #include "core/system/components/rendering_component.h"
 #include "core/system/game.h"
-
+#include "core/input/contextloader.h"
+#include "core/input/gamepadhandler.h"
 #include "core/utility/filesystem_wrapper.h"
 
 #include <easylogging++.h>
@@ -27,7 +28,7 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
-
+#include "core/input/inputhandler.h"
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -35,6 +36,9 @@ INITIALIZE_EASYLOGGINGPP
 using namespace std;
 using namespace eversim;
 using namespace eversim::core;
+
+std::shared_ptr<input::InputHandler> inputhandler_ptr = nullptr;
+input::GamepadHandler ghandler;
 
 // Keep only this much logfiles around. If there are more, then the oldest ones are deleted
 constexpr int NUM_LOGFILES = 10;
@@ -69,9 +73,15 @@ bool handle_sdl_events()
 	SDL_Event event;
 	auto should_continue = true;
 	auto& io = ImGui::GetIO();
+
 	while (SDL_PollEvent(&event))
 	{
+		ghandler.handle_event(event);
+
 		ImGui_ImplSdlGL3_ProcessEvent(&event);
+
+		inputhandler_ptr->handle_event(event);
+
 		auto skip_key = io.WantCaptureKeyboard || io.WantTextInput;
 		switch (event.type)
 		{
@@ -89,6 +99,9 @@ bool handle_sdl_events()
 			break;
 		}
 	}
+
+	inputhandler_ptr->execute();
+
 	return should_continue;
 }
 
@@ -249,6 +262,44 @@ int main(int argc, char* argv[])
 	io.DisplaySize.x = float(resolution.x);
 	io.DisplaySize.y = float(resolution.y);
 
+	//init inputhandler
+
+	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
+	inputhandler_ptr->push_context("game"); 
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DLEFT,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DRIGHT,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DUP,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::DDOWN,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::state::DUCK,
+		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::state::GOLEM,
+		[](input::InputContext& context) { 
+		LOG(INFO) << "pressed GOLEM"; 
+	}
+	);
+
+
 	// create loaders
 	auto tile_loader = make_shared<world::tile_loader>();
 	world::level_loader level_loader{tile_loader};
@@ -274,6 +325,7 @@ int main(int argc, char* argv[])
 	>();
 
 	physics.set_level(level.get());
+	physics.set_gravity({0,-10});
 
 	// Create game
 	system::game the_game(&physics);
@@ -283,6 +335,9 @@ int main(int argc, char* argv[])
 	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::log_window>();
 	windows.add_window<editor::windows::physics_inspector>(&physics);
+
+	// 0. time
+	const auto dt = 1.f / 60.f;
 
 	// prepare player
 	const auto player_body_template = body_loader.load("cube.bdy");
@@ -294,6 +349,53 @@ int main(int argc, char* argv[])
 	player->add_component<system::physics_component>(physics, *player_body_template);
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
 
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::range::STEER_X,
+		[&](input::InputContext& context, double value) {
+		if (std::abs(value) - 0.2 < 0.) return;
+		double a = (value < 0.) ? -1. : 1.;
+		auto pc = player->get_component<system::physics_component>();
+		auto& velocity = pc->get_body().velocity;
+		velocity += 3.f*dt*glm::vec2(a*std::exp(std::abs(value)), 0);
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function(
+		input::InputConstants::button::JUMP,
+		[&](input::InputContext& context) 
+	{
+		auto pc = player->get_component<system::physics_component>();
+		auto& velocity = pc->get_body().velocity;
+		velocity += 5.f*glm::vec2(0, 1);
+		inputhandler_ptr->push_context("midjump");
+	}
+	);
+
+	inputhandler_ptr->get_context("midjump")->register_function(
+		input::InputConstants::button::DOUBLEJUMP,
+		[&](input::InputContext& context)
+	{
+		auto pc = player->get_component<system::physics_component>();
+		auto& velocity = pc->get_body().velocity;
+		velocity += 3.5f*glm::vec2(0, 1);
+		inputhandler_ptr->push_context("midjumpjumped");
+	}
+	);
+
+	utility::Delegate delg;
+	delg.connect([](physics::body* ptr, 
+		physics::events::static_col_list const& list) 
+	{
+		for (const auto& sc : list)
+		{
+			if (std::abs(sc.normal.y - 1.) < 0.001)
+			{
+				//LOG(INFO) << "ground";
+				inputhandler_ptr->pop({std::string("midjumpjumped") , "midjump"});
+				break;
+			}
+		}
+	}, physics.level_collision_events());
 
 	// setup camera
 	rendering::Camera cam("default_cam",
@@ -311,7 +413,6 @@ int main(int argc, char* argv[])
 	// game loop
 	while (handle_sdl_events())
 	{
-		const auto dt = 1.f / 60.f;
 
 		// initialize frame for editor
 		ImGui_ImplSdlGL3_NewFrame(renderer.get_window());

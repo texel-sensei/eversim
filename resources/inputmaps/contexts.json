@@ -1,0 +1,52 @@
+{
+  "game": {
+    "JUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_Y", "GAMEPAD_BUTTON_A" ]
+    },
+    "DLEFT": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_DPAD_LEFT" ]
+    },
+    "DRIGHT": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_DPAD_RIGHT" ]
+    },
+    "DUP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_DPAD_UP" ]
+    },
+    "DDOWN": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_DPAD_DOWN" ]
+    },
+    "DUCK": {
+      "type": "STATE",
+      "keys": [ "GAMEPAD_BUTTON_X" ]
+    },
+    "GOLEM": {
+      "type": "STATE",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    },
+    "STEER_X": {
+      "type": "RANGE",
+      "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK_X" ]
+    },
+    "STEER_Y": {
+      "type": "RANGE",
+      "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y" ]
+    }
+  },
+  "midjump": {
+    "DOUBLEJUMP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+  },
+  "midjumpjumped": {
+    "DROP": {
+      "type": "BUTTON",
+      "keys": [ "GAMEPAD_BUTTON_A" ]
+    }
+  }
+}

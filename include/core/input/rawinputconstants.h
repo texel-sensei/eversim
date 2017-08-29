@@ -1,0 +1,91 @@
+#pragma once
+
+#include "enum.h"
+
+#include <SDL2/SDL.h>
+#include <imgui_impl_sdl_gl3.h>
+
+#include <map>
+
+
+/*
+* Enums for every possible rawinput
+*/
+
+namespace eversim { namespace core { namespace input {
+
+	namespace RawInputConstants
+	{
+		BETTER_ENUM(button, uint8_t,
+			GAMEPAD_BUTTON_A = 0,
+			GAMEPAD_BUTTON_B,
+			GAMEPAD_BUTTON_X,
+			GAMEPAD_BUTTON_Y,
+			GAMEPAD_BUTTON_LB,
+			GAMEPAD_BUTTON_RB,
+			GAMEPAD_BUTTON_START,
+			GAMEPAD_BUTTON_SELECT,
+			GAMEPAD_BUTTON_DPAD_LEFT,
+			GAMEPAD_BUTTON_DPAD_RIGHT,
+			GAMEPAD_BUTTON_DPAD_UP, 
+			GAMEPAD_BUTTON_DPAD_DOWN,
+			INVALID
+		)
+
+		BETTER_ENUM(range, uint8_t,
+			GAMEPAD_ANALOGUE_LEFT_STICK_X = 0,
+			GAMEPAD_ANALOGUE_LEFT_STICK_Y,
+			GAMEPAD_ANALOGUE_RIGHT_STICK_X,
+			GAMEPAD_ANALOGUE_RIGHT_STICK_Y,
+			GAMEPAD_ANALOGUE_LT,
+			GAMEPAD_ANALOGUE_RT,
+			INVALID
+		)
+
+		BETTER_ENUM(raw_type, uint8_t,
+			BUTTON=0,
+			RANGE,
+			INVALID
+		)
+
+		BETTER_ENUM(event_type, uint8_t,
+			BUTTON_DOWN=0,
+			BUTTON_UP,
+			AXIS,
+			INVALID
+		)
+
+		const std::map<SDL_EventType,event_type> sdl_event_map =
+		{
+			{ SDL_JOYBUTTONDOWN , event_type::BUTTON_DOWN },
+			{ SDL_CONTROLLERBUTTONDOWN , event_type::BUTTON_DOWN },
+			{ SDL_JOYBUTTONUP , event_type::BUTTON_UP },
+			{ SDL_CONTROLLERBUTTONUP , event_type::BUTTON_UP },
+			{ SDL_JOYAXISMOTION , event_type::AXIS}
+		};
+
+		const std::map<SDL_GameControllerButton, button> sdl_button_map =
+		{
+			{SDL_CONTROLLER_BUTTON_A,button::GAMEPAD_BUTTON_A},
+			{SDL_CONTROLLER_BUTTON_B,button::GAMEPAD_BUTTON_B},
+			{SDL_CONTROLLER_BUTTON_X,button::GAMEPAD_BUTTON_X},
+			{SDL_CONTROLLER_BUTTON_Y,button::GAMEPAD_BUTTON_Y},
+			{SDL_CONTROLLER_BUTTON_BACK,button::GAMEPAD_BUTTON_LB},
+			{SDL_CONTROLLER_BUTTON_GUIDE,button::GAMEPAD_BUTTON_RB},
+			{SDL_CONTROLLER_BUTTON_LEFTSTICK,button::GAMEPAD_BUTTON_START},
+			{SDL_CONTROLLER_BUTTON_START,button::GAMEPAD_BUTTON_SELECT}
+		};
+
+		const std::map<SDL_GameControllerAxis, range> sdl_range_map =
+		{
+			{ SDL_CONTROLLER_AXIS_LEFTX ,range::GAMEPAD_ANALOGUE_LEFT_STICK_X },
+			{ SDL_CONTROLLER_AXIS_LEFTY ,range::GAMEPAD_ANALOGUE_LEFT_STICK_Y },
+			{ SDL_CONTROLLER_AXIS_RIGHTX ,range::GAMEPAD_ANALOGUE_LT },
+			{ SDL_CONTROLLER_AXIS_RIGHTY ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_X },
+			{ SDL_CONTROLLER_AXIS_TRIGGERLEFT ,range::GAMEPAD_ANALOGUE_RIGHT_STICK_Y },
+			{ SDL_CONTROLLER_AXIS_TRIGGERRIGHT ,range::GAMEPAD_ANALOGUE_RT }
+		};
+	}
+
+	
+}}}

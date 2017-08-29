@@ -492,7 +492,7 @@ namespace eversim { namespace core { namespace physics {
 			}
 
 			const auto dist = side.distance_to_point(mpos);
-			if(dist < 0.1f * tile.size())
+			if(dist < 0.3f * tile.size())
 			{
 				const auto entry = side.closest_point(mpos) + tile.position();
 
