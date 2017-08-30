@@ -1,14 +1,42 @@
 #include "core/system/game.h"
-#include <chrono>
 #include "core/physics/physics_manager.h"
 #include <easylogging++.h>
+#include <chrono>
+#include "core/rendering/render_manager.h"
+
+using namespace std;
 
 namespace eversim { namespace core { namespace system {
 
-	game::game(physics::physics_manager* physics, std::shared_ptr<utility::clock> game_clock)
-		: physics(physics), game_clock(game_clock)
+	game::game() : main_camera("main_camera", {1920,1080}, 20.f)
+	{
+		set_clock(make_shared<utility::realtime_clock>());
+	}
+
+	game::game(physics::physics_manager* physics, shared_ptr<utility::clock> game_clock)
+		: game()
 	{
 		EVERSIM_ASSERT(physics);
+		set_clock(game_clock);
+		set_physics(physics);
+	}
+
+	void game::set_physics(physics::physics_manager* phy)
+	{
+		EVERSIM_ASSERT(phy);
+		physics = phy;
+	}
+
+	void game::set_graphics(rendering::render_manager* ren)
+	{
+		EVERSIM_ASSERT(ren);
+		rendering = ren;
+	}
+
+	void game::set_clock(utility::clock::ptr clk)
+	{
+		EVERSIM_ASSERT(clk);
+		game_clock = clk;
 		frame_started = game_clock->now();
 	}
 
@@ -42,6 +70,17 @@ namespace eversim { namespace core { namespace system {
 		cleanup_dead();
 	}
 
+	void game::render()
+	{
+		if(!rendering)
+		{
+			LOG(WARNING) << "Call to render with no render_manager attached!";
+			return;
+		}
+		rendering->clear();
+		rendering->draw(main_camera);
+	}
+
 	void game::cleanup_dead()
 	{
 		for(auto& o : dead_objects)
@@ -55,16 +94,16 @@ namespace eversim { namespace core { namespace system {
 		if (!physics) return;
 
 		using namespace std::chrono;
-		physics_time_accumulator += time_passed;
+		time_accumulator += time_passed;
 		auto num_iterations = 0;
-		while(physics_time_accumulator > physics_timestep)
+		while(time_accumulator > timestep)
 		{
 			const auto dt =
-				float(duration_cast<milliseconds>(physics_timestep).count())
+				float(duration_cast<milliseconds>(timestep).count())
 				/ float(duration_cast<milliseconds>(1s).count());
 
 			physics->integrate(dt);
-			physics_time_accumulator -= physics_timestep;
+			time_accumulator -= timestep;
 
 			num_iterations++;
 
