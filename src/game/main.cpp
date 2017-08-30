@@ -267,35 +267,42 @@ int main(int argc, char* argv[])
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DLEFT,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::DLEFT,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DRIGHT,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::DRIGHT,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DUP,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::DUP,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DDOWN,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::DDOWN,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::state::DUCK,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::DUCK,
 		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::state::GOLEM,
-		[](input::InputContext& context) { 
-		LOG(INFO) << "pressed GOLEM"; 
+	inputhandler_ptr->get_context("game")->register_function_state(
+		input::InputConstants::action::GOLEM,
+		[](input::InputContext& context,input::state_func_type& t) { 
+		LOG(INFO) << "pressed GOLEM " << t._to_string(); 
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_range(
+		input::InputConstants::action::FART_LEFT,
+		[](input::InputContext& context, double val) {
+		//LOG(INFO) << "pressed fart_left = " << val;
 	}
 	);
 
@@ -349,8 +356,8 @@ int main(int argc, char* argv[])
 	player->add_component<system::physics_component>(physics, *player_body_template);
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::range::STEER_X,
+	inputhandler_ptr->get_context("game")->register_function_range(
+		input::InputConstants::action::STEER_X,
 		[&](input::InputContext& context, double value) {
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;
@@ -360,8 +367,8 @@ int main(int argc, char* argv[])
 	}
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::JUMP,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::JUMP,
 		[&](input::InputContext& context) 
 	{
 		auto pc = player->get_component<system::physics_component>();
@@ -371,8 +378,8 @@ int main(int argc, char* argv[])
 	}
 	);
 
-	inputhandler_ptr->get_context("midjump")->register_function(
-		input::InputConstants::button::DOUBLEJUMP,
+	inputhandler_ptr->get_context("midjump")->register_function_button(
+		input::InputConstants::action::DOUBLEJUMP,
 		[&](input::InputContext& context)
 	{
 		auto pc = player->get_component<system::physics_component>();

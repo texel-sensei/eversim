@@ -10,7 +10,8 @@ namespace eversim {	namespace core { namespace input {
 
 	namespace InputConstants
 	{
-		BETTER_ENUM(button, uint8_t,
+		//merge
+		BETTER_ENUM(action, uint8_t,
 			CONFIRM = 0,
 			BACK,
 			JUMP,
@@ -23,20 +24,10 @@ namespace eversim {	namespace core { namespace input {
 			DUP,
 			DDOWN,
 			DROP,
-			INVALID
-		)
-
-		BETTER_ENUM(state, uint8_t,
-			DUCK = 0,
+			DUCK,
 			GOLEM,
-			DROP,
-			INVALID
-		)
-
-		BETTER_ENUM(range, uint8_t,
-			STEER_X = 0,
+			STEER_X,
 			STEER_Y,
-			DROP,
 			INVALID
 		)
 
