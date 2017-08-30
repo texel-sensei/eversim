@@ -1,3 +1,5 @@
+#include "game/components/camera_follow_component.h"
+
 #include "editor/windows/log_window.h"
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
@@ -20,16 +22,17 @@
 #include "core/system/components/physics_component.h"
 #include "core/system/components/rendering_component.h"
 #include "core/system/game.h"
+
 #include "core/input/contextloader.h"
 #include "core/input/gamepadhandler.h"
+#include "core/input/inputhandler.h"
+
 #include "core/utility/filesystem_wrapper.h"
 
 #include <easylogging++.h>
-
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
-#include "core/input/inputhandler.h"
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -345,6 +348,7 @@ int main(int argc, char* argv[])
 
 	// Create game
 	system::game the_game(&physics);
+	the_game.set_graphics(&renderer);
 
 	// Create editor windows
 	editor::core::window_manager windows;
@@ -356,6 +360,11 @@ int main(int argc, char* argv[])
 	// 0. time
 	const auto dt = 1.f / 60.f;
 
+	// setup camera
+	rendering::Camera cam("default_cam",
+		resolution,
+		20.f);
+
 	// prepare player
 	const auto player_body_template = body_loader.load("cube.bdy");
 
@@ -365,6 +374,8 @@ int main(int argc, char* argv[])
 
 	player->add_component<system::physics_component>(physics, *player_body_template);
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
+	auto cam_follow_component = player->add_component<game::components::camera_follow_component>(&cam);
+	cam_follow_component->set_speed(0.05f);
 
 	inputhandler_ptr->get_context("game")->register_function(
 		input::InputConstants::range::STEER_X,
@@ -414,12 +425,6 @@ int main(int argc, char* argv[])
 		}
 	}, physics.level_collision_events());
 
-	// setup camera
-	rendering::Camera cam("default_cam",
-	                      resolution,
-	                      20.f);
-	cam.set_position(player->get_position());
-
 	// do neccessary gl setup
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
@@ -456,10 +461,6 @@ int main(int argc, char* argv[])
 
 		// read input speed
 		player->get_component<system::physics_component>()->get_body().velocity += get_input_speed(2.f, dt);
-
-		// pan camera to player
-		const auto old_cam_pos = cam.get_position();
-		cam.set_position(mix(player->get_position(), old_cam_pos, 0.9f));
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.623, 0.76, 0.729, 1);
