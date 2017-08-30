@@ -13,12 +13,12 @@ namespace eversim {
 			vector<RawInputConstants::event_type> InputEvent::dpad_states =
 				vector<RawInputConstants::event_type>(4, RawInputConstants::event_type::BUTTON_UP);
 
-			const map < size_t, RawInputConstants::button> InputEvent::dpad_mapping = 
+			const map < size_t, RawInputConstants::input> InputEvent::dpad_mapping = 
 			{
-				{0,RawInputConstants::button::GAMEPAD_BUTTON_DPAD_LEFT},
-				{1,RawInputConstants::button::GAMEPAD_BUTTON_DPAD_UP},
-				{2,RawInputConstants::button::GAMEPAD_BUTTON_DPAD_RIGHT},
-				{3,RawInputConstants::button::GAMEPAD_BUTTON_DPAD_DOWN}
+				{0,RawInputConstants::input::GAMEPAD_BUTTON_DPAD_LEFT},
+				{1,RawInputConstants::input::GAMEPAD_BUTTON_DPAD_UP},
+				{2,RawInputConstants::input::GAMEPAD_BUTTON_DPAD_RIGHT},
+				{3,RawInputConstants::input::GAMEPAD_BUTTON_DPAD_DOWN}
 			};
 
 			const map<size_t,vector<size_t>> InputEvent::dpad_combinations =
@@ -35,25 +35,22 @@ namespace eversim {
 			};
 
 			InputEvent InputEvent::create_button(
-				RawInputConstants::event_type type, 
-				RawInputConstants::button button)
+				RawInputConstants::input button,
+				bool down)
 			{
 				InputEvent event;
-				event.type = type;
-				event.button_or_range = RawInputConstants::raw_type::BUTTON;
-				event.button = button;
+				event.type = (down) ? RawInputConstants::event_type::BUTTON_DOWN : RawInputConstants::event_type::BUTTON_UP;
+				event.input_enum = button;
 				return event;
 			}
 
 			InputEvent InputEvent::create_range(
-				RawInputConstants::event_type type,
-				RawInputConstants::range range, 
+				RawInputConstants::input range,
 				double value)
 			{
 				InputEvent event;
-				event.type = type;
-				event.button_or_range = RawInputConstants::raw_type::RANGE;
-				event.range = range;
+				event.type = RawInputConstants::event_type::RANGE;
+				event.input_enum = range;
 				event.range_value = value;
 				return event;
 			}
@@ -87,11 +84,11 @@ namespace eversim {
 
 						if (state == +RawInputConstants::event_type::BUTTON_UP) {
 							state = RawInputConstants::event_type::BUTTON_DOWN;
-							InputEvent event;
-							event.type = state;
-							event.button_or_range = RawInputConstants::raw_type::BUTTON;
-							event.button = dpad_mapping.at(bidx);
-							res.push_back(event);
+
+							res.push_back
+							(
+								create_button(dpad_mapping.at(bidx),  true)
+							);
 						}
 					}
 
@@ -100,24 +97,21 @@ namespace eversim {
 
 						if (state == +RawInputConstants::event_type::BUTTON_DOWN) {
 							state = RawInputConstants::event_type::BUTTON_UP;
-							InputEvent event;
-							event.type = state;
-							event.button_or_range = RawInputConstants::raw_type::BUTTON;
-							event.button = dpad_mapping.at(bidx);
-							res.push_back(event);
+
+							res.push_back
+							(
+								create_button(dpad_mapping.at(bidx), false)
+							);
 						}
 					}
 
 				}
 				else {
-					InputEvent event;
 					const auto it = RawInputConstants::sdl_event_map.find(static_cast<SDL_EventType>(sdl_event.type));
-					if (it != RawInputConstants::sdl_event_map.end())
-					{
-						event.type = it->second;
-					}
 
-					if (event.type != +RawInputConstants::event_type::INVALID)
+					if (it != RawInputConstants::sdl_event_map.end()
+						&&
+						it->second != +RawInputConstants::event_type::INVALID)
 					{
 						if (sdl_event.type == SDL_JOYBUTTONDOWN ||
 							sdl_event.type == SDL_JOYBUTTONUP ||
@@ -125,26 +119,72 @@ namespace eversim {
 							sdl_event.type == SDL_CONTROLLERBUTTONUP)
 						{
 							//gamepadbuttoninput
-							event.button_or_range = RawInputConstants::raw_type::BUTTON;
 							auto sdl_button = static_cast<SDL_GameControllerButton>(sdl_event.cbutton.button);
 
 							auto bit = RawInputConstants::sdl_button_map.find(sdl_button);
-							if (bit != RawInputConstants::sdl_button_map.end()) {
-								event.button = bit->second;
-								res.push_back(event);
-								//LOG(INFO) << RawInputConstants::button::_from_integral(event.button)._to_string();
 
+							if (bit != RawInputConstants::sdl_button_map.end()) {
+								res.push_back(
+									create_button(
+										bit->second, 
+										(sdl_event.type == SDL_JOYBUTTONDOWN || sdl_event.type == SDL_CONTROLLERBUTTONDOWN)
+									)
+								);
 							}
 						}
 						else if (sdl_event.type == SDL_JOYAXISMOTION) {
-							event.button_or_range = RawInputConstants::raw_type::RANGE;
-							event.range = RawInputConstants::sdl_range_map.at(static_cast<SDL_GameControllerAxis>(sdl_event.jaxis.axis));
-							event.range_value = static_cast<double>(
+							auto sdl_range = static_cast<SDL_GameControllerAxis>(sdl_event.jaxis.axis);
+							auto rit = RawInputConstants::sdl_range_map.find(sdl_range);
+							
+
+							auto value = static_cast<double>(
 								(static_cast<signed int>(sdl_event.jaxis.value) + 32768)) 
 								/ (32768.+32767.);
-							event.range_value *= 2.;
-							event.range_value -= 1.;
-							res.push_back(event);
+							value = 2.*value - 1.;
+
+							if (rit != RawInputConstants::sdl_range_map.end()) {
+								res.push_back(
+									create_range(
+										rit->second,
+										value
+									)
+								);
+							}
+
+						} 
+						else if (sdl_event.type == SDL_MOUSEBUTTONDOWN ||
+							sdl_event.type == SDL_MOUSEBUTTONUP) {
+							auto mit = RawInputConstants::sdl_mouserange_map.find(sdl_event.button.button);
+							if ( mit != RawInputConstants::sdl_mouserange_map.end())
+							{
+								auto remap_it = RawInputConstants::mouse_remap.find(mit->second);
+								if (remap_it != RawInputConstants::mouse_remap.end())
+								{
+									res.push_back(create_range(
+										remap_it->second.first,
+										sdl_event.button.x
+									));
+									res.push_back(create_range(
+										remap_it->second.second,
+										sdl_event.button.y
+									));
+								}
+								res.push_back(create_button(
+									mit->second,
+									sdl_event.type == SDL_MOUSEBUTTONDOWN
+								));
+							}
+
+						}
+						else if (sdl_event.type == SDL_MOUSEMOTION) {
+							res.push_back(create_range(
+								RawInputConstants::input::MOUSE_X,
+								sdl_event.motion.x
+							));
+							res.push_back(create_range(
+								RawInputConstants::input::MOUSE_Y,
+								sdl_event.motion.y
+							));
 						}
 					}
 				}
@@ -157,19 +197,9 @@ namespace eversim {
 				return type;
 			}
 
-			RawInputConstants::raw_type  InputEvent::get_raw_type() const
+			RawInputConstants::input  InputEvent::get_input_enum() const
 			{
-				return button_or_range;
-			}
-
-			RawInputConstants::button  InputEvent::get_button() const
-			{
-				return button;
-			}
-
-			RawInputConstants::range  InputEvent::get_range() const
-			{
-				return range;
+				return input_enum;
 			}
 
 			void InputEvent::print(std::ostream& out) const
@@ -179,19 +209,14 @@ namespace eversim {
 				case RawInputConstants::event_type::INVALID:
 					out << "Event: INVALID";
 					break;
-				case RawInputConstants::event_type::BUTTON_DOWN:
+				case RawInputConstants::event_type::RANGE:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
-						std::string(event.get_button()._to_string());
+						std::string(event.get_input_enum()._to_string()) << " " << std::to_string(event.get_range_value());
 					break;
-				case RawInputConstants::event_type::BUTTON_UP:
+				default:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
-						std::string(event.get_button()._to_string());
+						std::string(event.get_input_enum()._to_string());
 					break;
-				case RawInputConstants::event_type::AXIS:
-					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
-						std::string(event.get_range()._to_string()) << " " << std::to_string(event.get_range_value());
-					break;
-				default: break;
 				}
 			}
 

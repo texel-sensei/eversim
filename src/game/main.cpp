@@ -286,6 +286,7 @@ int main(int argc, char* argv[])
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
 
+
 	// create loaders
 	auto tile_loader = make_shared<world::tile_loader>();
 	world::level_loader level_loader{tile_loader};
@@ -344,8 +345,8 @@ int main(int argc, char* argv[])
 	auto cam_follow_component = player->add_component<game::components::camera_follow_component>(&cam);
 	cam_follow_component->set_speed(0.05f);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::range::STEER_X,
+	inputhandler_ptr->get_context("game")->register_function_range(
+		input::InputConstants::action::STEER_X,
 		[&](input::InputContext& context, double value) {
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;
@@ -355,8 +356,8 @@ int main(int argc, char* argv[])
 	}
 	);
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::JUMP,
+	inputhandler_ptr->get_context("game")->register_function_button(
+		input::InputConstants::action::JUMP,
 		[&](input::InputContext& context) 
 	{
 		auto pc = player->get_component<system::physics_component>();
@@ -366,8 +367,8 @@ int main(int argc, char* argv[])
 	}
 	);
 
-	inputhandler_ptr->get_context("midjump")->register_function(
-		input::InputConstants::button::DOUBLEJUMP,
+	inputhandler_ptr->get_context("midjump")->register_function_button(
+		input::InputConstants::action::DOUBLEJUMP,
 		[&](input::InputContext& context)
 	{
 		auto pc = player->get_component<system::physics_component>();

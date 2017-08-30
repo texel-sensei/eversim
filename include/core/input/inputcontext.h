@@ -12,12 +12,21 @@
 #include <set>
 #include <functional>
 
-
+#include "enum.h"
 
 namespace eversim { namespace core { namespace input {
 	class InputContext;
 	class InputEvent;
+
+	BETTER_ENUM(state_func_type,uint8_t,
+		PRESS=0,
+		HOLD,
+		RELEASE,
+		INVALID
+	)
+
 	typedef std::function<void(InputContext&)> button_function;
+	typedef std::function<void(InputContext&, state_func_type)> state_function;
 	typedef std::function<void(InputContext&, double)> range_function;
 	
 	class InputContext
@@ -26,22 +35,21 @@ namespace eversim { namespace core { namespace input {
 		std::string name;
 
 		// map <MappedInput,actions>
-		std::map<RawInputConstants::button,std::set<InputConstants::button>> buttons;
-		std::map<RawInputConstants::button,std::set<InputConstants::state>> states;
-		std::map<RawInputConstants::range,std::set<InputConstants::range>> ranges;
+		std::map<RawInputConstants::input,std::set<InputConstants::action>> buttons;
+		std::map<RawInputConstants::input,std::set<InputConstants::action>> states;
+		std::map<RawInputConstants::input,std::set<InputConstants::action>> ranges;
 
 		//map <action,state>
-		std::map<InputConstants::button, bool> button_states;
-		std::map<InputConstants::state, bool> state_states;
-		std::map<InputConstants::range, double> range_states;
+		std::map<InputConstants::action, bool> button_states;
+		std::map<InputConstants::action, bool> state_states;
+		std::map<InputConstants::action, double> range_states;
 
 		// map <action,function>
-		std::map<InputConstants::button, button_function> button_functions;
-		std::map<InputConstants::state, button_function> state_functions;
-		std::map<InputConstants::range, range_function> range_functions;
+		std::map<InputConstants::action, button_function> button_functions;
+		std::map<InputConstants::action, state_function> state_functions;
+		std::map<InputConstants::action, range_function> range_functions;
 
-		InputConstants::input_type get_input_type(const RawInputConstants::button& b) const;
-		InputConstants::input_type get_input_type(const RawInputConstants::range& r) const;
+		InputConstants::input_type get_input_type(const RawInputConstants::input& b) const;
 	public:
 		
 		InputContext(){}
@@ -50,12 +58,9 @@ namespace eversim { namespace core { namespace input {
 
 		void register_action(const std::string& type,const std::string& action, const std::string& rawcode);
 		
-		void register_function(const InputConstants::button button, 
-			button_function f);
-		void register_function(const InputConstants::state state, 
-			button_function f);
-		void register_function(const InputConstants::range range, 
-			range_function f);
+		void register_function_button(const InputConstants::action a, button_function f);
+		void register_function_state(const InputConstants::action a, state_function f);
+		void register_function_range(const InputConstants::action a, range_function f);
 
 		void list_actions() const;
 
@@ -65,14 +70,14 @@ namespace eversim { namespace core { namespace input {
 
 		std::string get_name() const { return name; }
 
-		std::vector<RawInputConstants::button> get_buttons() const;
-		std::vector<RawInputConstants::button> get_states() const;
-		std::vector<RawInputConstants::range> get_ranges() const;
+		std::vector<RawInputConstants::input> get_buttons() const;
+		std::vector<RawInputConstants::input> get_states() const;
+		std::vector<RawInputConstants::input> get_ranges() const;
 
-		void reset_states(const std::vector<RawInputConstants::button>&);
-		void reset_ranges(const std::vector<RawInputConstants::range>&);
+		void reset_states(const std::vector<RawInputConstants::input>&);
+		void reset_ranges(const std::vector<RawInputConstants::input>&);
 
-		void reset_states(const std::vector<std::vector<RawInputConstants::button>>&);
-		void reset_ranges(const std::vector<std::vector<RawInputConstants::range>>&);
+		void reset_states(const std::vector<std::vector<RawInputConstants::input>>&);
+		void reset_ranges(const std::vector<std::vector<RawInputConstants::input>>&);
 	};
 }}}

@@ -26,7 +26,7 @@
     },
     "GOLEM": {
       "type": "STATE",
-      "keys": [ "GAMEPAD_BUTTON_A" ]
+      "keys": [ "GAMEPAD_BUTTON_A", "MOUSE_BUTTON_LEFT" ]
     },
     "STEER_X": {
       "type": "RANGE",
@@ -35,7 +35,12 @@
     "STEER_Y": {
       "type": "RANGE",
       "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y" ]
-    }
+    },
+    "FART_LEFT": {
+      "type": "RANGE",
+      "keys": [ "MOUSE_BUTTON_LEFT_X" ]
+    } 
+
   },
   "midjump": {
     "DOUBLEJUMP": {
