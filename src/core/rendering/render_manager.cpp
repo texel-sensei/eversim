@@ -384,4 +384,15 @@ namespace eversim { namespace core { namespace rendering {
 			drawcall->draw(cam);
 		}
 	}
+
+	void render_manager::clear(vec4 cc, bool clear_depth)
+	{
+		glClearColor(cc.r, cc.g, cc.b, cc.a);
+		auto clear_flag = GL_COLOR_BUFFER_BIT;
+		if(clear_depth)
+		{
+			clear_flag |= GL_DEPTH_BUFFER_BIT;
+		}
+		glClear(clear_flag);
+	}
 } /* rendering */ } /* core */ } /* eversim */

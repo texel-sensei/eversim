@@ -493,9 +493,7 @@ int main(int argc, char* argv[])
 		{
 			// draw game
 			utility::scoped_timer tim(pd->get_reporter("Render loop"));
-			
-			glClearColor(0.623, 0.76, 0.729, 1);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			renderer.clear({ 0.623f, 0.76f, 0.729f, 1.f });
 			renderer.draw(cam);
 		}
 

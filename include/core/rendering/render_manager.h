@@ -74,7 +74,12 @@ namespace eversim { namespace core { namespace rendering {
 		 */
 		void draw(Camera& cam);
 
-		
+		/*
+		 * Clears the screen with the passed color (RGBA).
+		 * If `clear_depth` is true it also clears the depth buffer
+		 */
+		void clear(glm::vec4 clear_color = {}, bool clear_depth = true);
+
 
 	private:
 		struct line
