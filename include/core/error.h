@@ -32,7 +32,8 @@ namespace eversim { namespace core {
 		AssertionFailure = 1,			\
 		FileNotFound,					\
 		InvalidArgument,				\
-		InvalidEnum						\
+		InvalidEnum,					\
+		NotYetImplemented 
 	)
 
 	// Because BETTER_ENUM uses an enum embedded into a type, a direct conversion doesn't work.
