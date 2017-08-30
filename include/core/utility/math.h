@@ -57,6 +57,14 @@ namespace eversim { namespace core { namespace utility {
 		glm::vec2 closest_point(glm::vec2 p) const;
 	};
 
+	/**
+	 * Calculate image size while conserving aspect ratio.
+	 */
+	inline glm::ivec2 calculateAspectRatioFit(glm::ivec2 src_size, glm::ivec2 target_size) {
+		using namespace glm;
+		const auto ratio = std::min(float(target_size.x) / src_size.x, float(target_size.y) / src_size.y);
 
+		return ivec2(vec2(src_size)*ratio);
+	}
 
 } } }
