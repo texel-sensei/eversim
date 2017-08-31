@@ -4,6 +4,7 @@
 #include "core/input/inputconstants.h"
 
 #include <SDL2/SDL.h>
+#include <glm/glm.hpp>
 #include <easylogging++.h>
 
 #include <vector>
@@ -26,7 +27,7 @@ namespace eversim {
 			
 				RawInputConstants::input input_enum = RawInputConstants::input::INVALID;
 
-				double range_value = 0.0;
+				glm::vec2 range_value = { 0.,0. };
 
 			public:
 
@@ -34,11 +35,11 @@ namespace eversim {
 
 				RawInputConstants::input get_input_enum() const;
 
-				double get_range_value() const { return range_value; }
+				glm::vec2 get_range_value() const { return range_value; }
 
 				static std::vector<InputEvent> map_event(const SDL_Event&);
 				static InputEvent create_button(RawInputConstants::input,bool);
-				static InputEvent create_range(RawInputConstants::input,double);
+				static InputEvent create_range(RawInputConstants::input, glm::vec2);
 
 				void print(std::ostream& out) const;
 

@@ -46,7 +46,7 @@ namespace eversim {
 
 			InputEvent InputEvent::create_range(
 				RawInputConstants::input range,
-				double value)
+				glm::vec2 value)
 			{
 				InputEvent event;
 				event.type = RawInputConstants::event_type::RANGE;
@@ -146,7 +146,7 @@ namespace eversim {
 								res.push_back(
 									create_range(
 										rit->second,
-										value
+										{ value, 0. }
 									)
 								);
 							}
@@ -157,33 +157,18 @@ namespace eversim {
 							auto mit = RawInputConstants::sdl_mouserange_map.find(sdl_event.button.button);
 							if ( mit != RawInputConstants::sdl_mouserange_map.end())
 							{
-								auto remap_it = RawInputConstants::mouse_remap.find(mit->second);
-								if (remap_it != RawInputConstants::mouse_remap.end())
-								{
-									res.push_back(create_range(
-										remap_it->second.first,
-										sdl_event.button.x
-									));
-									res.push_back(create_range(
-										remap_it->second.second,
-										sdl_event.button.y
-									));
-								}
-								res.push_back(create_button(
+								res.push_back(create_range(
 									mit->second,
-									sdl_event.type == SDL_MOUSEBUTTONDOWN
+									{ sdl_event.button.x,sdl_event.button.y }
 								));
 							}
 
 						}
 						else if (sdl_event.type == SDL_MOUSEMOTION) {
 							res.push_back(create_range(
-								RawInputConstants::input::MOUSE_X,
-								sdl_event.motion.x
-							));
-							res.push_back(create_range(
-								RawInputConstants::input::MOUSE_Y,
-								sdl_event.motion.y
+								RawInputConstants::input::MOUSE,
+								{ sdl_event.motion.x,
+								sdl_event.motion.y }
 							));
 						}
 					}
@@ -211,7 +196,8 @@ namespace eversim {
 					break;
 				case RawInputConstants::event_type::RANGE:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<
-						std::string(event.get_input_enum()._to_string()) << " " << std::to_string(event.get_range_value());
+						std::string(event.get_input_enum()._to_string()) << " " 
+						<< event.get_range_value().x << " " << event.get_range_value().y;
 					break;
 				default:
 					out << "Event: " << std::string(event.get_event_type()._to_string()) << " " <<

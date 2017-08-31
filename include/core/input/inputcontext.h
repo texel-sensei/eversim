@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <list>
 #include <functional>
 
 #include "enum.h"
@@ -27,7 +28,7 @@ namespace eversim { namespace core { namespace input {
 
 	typedef std::function<void(InputContext&)> button_function;
 	typedef std::function<void(InputContext&, state_func_type)> state_function;
-	typedef std::function<void(InputContext&, double)> range_function;
+	typedef std::function<void(InputContext&, glm::vec2)> range_function;
 
 	class InputContext
 	{
@@ -45,14 +46,17 @@ namespace eversim { namespace core { namespace input {
 		//map <action,state>
 		std::map<InputConstants::action, bool> button_states;
 		std::map<InputConstants::action, bool> state_states;
-		std::map<InputConstants::action, double> range_states;
+		std::map<InputConstants::action, glm::vec2> range_states;
 
 		// map <action,function>
 		std::map<InputConstants::action, button_function> button_functions;
 		std::map<InputConstants::action, state_function> state_functions;
 		std::map<InputConstants::action, range_function> range_functions;
 
+		std::vector<InputEvent> input_queue;
+
 		InputConstants::input_type get_input_type(const RawInputConstants::input& b) const;
+		void create_grouped_inputs();
 	public:
 		
 		InputContext(){}
@@ -65,11 +69,16 @@ namespace eversim { namespace core { namespace input {
 		void register_function_state(const std::string& a, state_function f);
 		void register_function_range(const std::string& a, range_function f);
 
+		void register_function_button(const InputConstants::action& a, button_function f);
+		void register_function_state(const InputConstants::action& a, state_function f);
+		void register_function_range(const InputConstants::action& a, range_function f);
+
 		void list_actions() const;
 
 		void execute();
 
 		bool handle_event(const InputEvent& event);
+		void enqueue_event(const InputEvent& event);
 
 		std::string get_name() const { return name; }
 

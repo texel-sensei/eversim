@@ -110,10 +110,10 @@ namespace eversim {	namespace core { namespace input {
 			for (const auto& action : actions.second)
 			{
 				std::for_each(begin(range_states), end(range_states),
-					[&](std::pair<const InputConstants::action, double>& element)
+					[&](std::pair<const InputConstants::action, glm::vec2>& element)
 				{
 					if (element.first == action)
-						element.second = 0.f;
+						element.second = {0.,0.};
 				});
 			}
 		}
@@ -139,84 +139,175 @@ namespace eversim {	namespace core { namespace input {
 		return InputConstants::input_type::INVALID;
 	}
 
+	void InputContext::enqueue_event(const InputEvent& event)
+	{
+		input_queue.push_back(event);
+	}
+
 	bool InputContext::handle_event(const InputEvent& event)
 	{
-
 		bool handeled = false;
 
 		if (event.get_event_type() == +RawInputConstants::event_type::INVALID) return handeled;
 
+		std::vector<std::map<RawInputConstants::input, std::set<InputConstants::action>>*> v =
+		{ &buttons,&states,&ranges };
+
 		const auto input_enum = event.get_input_enum();
-		{
-			//find in buttons
-			
-			auto action_it = buttons.find(input_enum);
-			if (action_it != buttons.end()) {
-				handeled = true;
-				for (auto& action : action_it->second)
-				{
-					button_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
-				}
-			}
+
+		for (auto* ptr : v) {
+			auto& m = *ptr;
+			auto action_it = m.find(input_enum);
+			handeled = handeled || (action_it != m.end());
 		}
-		{
-			//find in states
-			auto action_it = states.find(input_enum);
-			if (action_it != states.end()) {
-				handeled = true;
-				for (auto& action : action_it->second)
-				{
-					state_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
-				}
-			}
-		}
-		{
-			//find in ranges
-			auto action_it = ranges.find(input_enum);
-			if (action_it != ranges.end()) {
-				handeled = true;
-				for (auto& action : action_it->second)
-				{
-					range_states[action] = event.get_range_value();
-				}
-			}
-		}
+
+		if (handeled) enqueue_event(event);
 
 		return handeled;
 	}
 
 	void InputContext::register_function_button(const std::string& a, button_function f)
 	{
-		auto enumerator = action_enums.to_enum(a);
-		if (enumerator == 0) {
-			LOG(ERROR) << "unknown action " << a;
-			return;
-		}
-		button_functions[enumerator] = f;
+		const auto enumerator = action_enums.to_enum(a);
+		register_function_button(enumerator, f);
 	}
 
 	void InputContext::register_function_state(const std::string& a, state_function f)
 	{
-		auto enumerator = action_enums.to_enum(a);
-		if (enumerator == 0) {
-			LOG(ERROR) << "unknown action " << a;
-			return;
-		}
-		state_functions[enumerator] = f;
+		const auto enumerator = action_enums.to_enum(a);
+		register_function_state(enumerator, f);
 	}
 
 	void InputContext::register_function_range(const std::string& a, range_function f)
 	{
-		auto enumerator = action_enums.to_enum(a);
-		if (enumerator == 0) {
-			LOG(ERROR) << "unknown action " << a;
+		const auto enumerator = action_enums.to_enum(a);
+		register_function_range(enumerator, f);
+	}
+
+	void InputContext::register_function_button(const InputConstants::action& a, button_function f)
+	{
+		const auto name = action_enums.to_string(a);
+		if (name == "INVALID") {
+			LOG(ERROR) << "unknown action " << name;
 			return;
 		}
-		range_functions[enumerator] = f;
+		button_functions[a] = f;
+	}
+
+	void InputContext::register_function_state(const InputConstants::action& a, state_function f)
+	{
+		const auto name = action_enums.to_string(a);
+		if (name == "INVALID") {
+			LOG(ERROR) << "unknown action " << name;
+			return;
+		}
+		state_functions[a] = f;
+	}
+
+	void InputContext::register_function_range(const InputConstants::action& a, range_function f)
+	{
+		const auto name = action_enums.to_string(a);
+		if (name == "INVALID") {
+			LOG(ERROR) << "unknown action " << name;
+			return;
+		}
+		range_functions[a] = f;
+	}
+
+	void InputContext::create_grouped_inputs()
+	{
+		auto find_enum = [&](const RawInputConstants::input e)
+		{
+			return find_if(begin(input_queue), end(input_queue),
+				[&](const InputEvent& event)
+			{
+				return event.get_input_enum() == +e;
+			});
+		};
+
+		auto it_left_stick_x = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK_X);
+		auto it_left_stick_y = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK_Y);
+
+		if (it_left_stick_x != input_queue.end() || it_left_stick_y != input_queue.end())
+		{
+
+			glm::vec2 val(0);
+
+			if (it_left_stick_x != input_queue.end()) {
+				auto& event = *it_left_stick_x;
+				val.x = event.get_range_value().x;
+			}
+
+			if (it_left_stick_y != input_queue.end()) {
+				auto& event = *it_left_stick_y;
+				val.y = event.get_range_value().x;
+			}
+
+			input_queue.push_back(InputEvent::create_range(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK, val));
+		}
+
+		auto it_right_stick_x = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK_X);
+		auto it_right_stick_y = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK_Y);
+
+		if (it_right_stick_x != input_queue.end() || it_right_stick_y != input_queue.end())
+		{
+
+			glm::vec2 val(0);
+
+			if (it_right_stick_x != input_queue.end()) {
+				auto& event = *it_right_stick_x;
+				val.x = event.get_range_value().x;
+			}
+
+			if (it_right_stick_y != input_queue.end()) {
+				auto& event = *it_right_stick_y;
+				val.y = event.get_range_value().x;
+			}
+
+			input_queue.push_back(InputEvent::create_range(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK, val));
+		}
 	}
 
 	void InputContext::execute()
 	{
+		create_grouped_inputs();
+
+		for (const auto& event : input_queue) {
+			const auto input_enum = event.get_input_enum();
+			{
+				//find in buttons
+
+				auto action_it = buttons.find(input_enum);
+				if (action_it != buttons.end()) {
+					for (auto& action : action_it->second)
+					{
+						button_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
+					}
+				}
+			}
+			{
+				//find in states
+				auto action_it = states.find(input_enum);
+				if (action_it != states.end()) {
+					for (auto& action : action_it->second)
+					{
+						state_states[action] = (event.get_event_type() == +RawInputConstants::event_type::BUTTON_DOWN);
+					}
+				}
+			}
+			{
+				//find in ranges
+				auto action_it = ranges.find(input_enum);
+				if (action_it != ranges.end()) {
+					for (auto& action : action_it->second)
+					{
+						range_states[action] = event.get_range_value();
+					}
+				}
+			}
+		}
+
+		input_queue.clear();
 
 		for(auto& s : button_states)
 		{
