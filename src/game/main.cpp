@@ -268,41 +268,41 @@ int main(int argc, char* argv[])
 	inputhandler_ptr->push_context("game"); 
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::DLEFT,
+		"DLEFT",
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::DRIGHT,
+		"DRIGHT",
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::DUP,
+		"DUP",
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::DDOWN,
+		"DDOWN",
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::DUCK,
+		"DUCK",
 		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_state(
-		input::InputConstants::action::GOLEM,
+		"GOLEM",
 		[](input::InputContext& context,input::state_func_type& t) { 
-		LOG(INFO) << "pressed GOLEM " << t._to_string(); 
+		//LOG(INFO) << "pressed GOLEM " << t._to_string(); 
 	}
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_range(
-		input::InputConstants::action::FART_LEFT,
+		"FART_LEFT",
 		[](input::InputContext& context, double val) {
-		//LOG(INFO) << "pressed fart_left = " << val;
+		LOG(INFO) << "pressed fart_left = " << val;
 	}
 	);
 
@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
 
 	inputhandler_ptr->get_context("game")->register_function_range(
-		input::InputConstants::action::STEER_X,
+		"STEER_X",
 		[&](input::InputContext& context, double value) {
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;
@@ -368,7 +368,7 @@ int main(int argc, char* argv[])
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::JUMP,
+		"JUMP",
 		[&](input::InputContext& context) 
 	{
 		auto pc = player->get_component<system::physics_component>();
@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
 	);
 
 	inputhandler_ptr->get_context("midjump")->register_function_button(
-		input::InputConstants::action::DOUBLEJUMP,
+		"DOUBLEJUMP",
 		[&](input::InputContext& context)
 	{
 		auto pc = player->get_component<system::physics_component>();

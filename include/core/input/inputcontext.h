@@ -28,11 +28,14 @@ namespace eversim { namespace core { namespace input {
 	typedef std::function<void(InputContext&)> button_function;
 	typedef std::function<void(InputContext&, state_func_type)> state_function;
 	typedef std::function<void(InputContext&, double)> range_function;
-	
+
 	class InputContext
 	{
 	private:
 		std::string name;
+
+		//dynamic action enums
+		dynamic_enum<InputConstants::action> action_enums;
 
 		// map <MappedInput,actions>
 		std::map<RawInputConstants::input,std::set<InputConstants::action>> buttons;
@@ -58,9 +61,9 @@ namespace eversim { namespace core { namespace input {
 
 		void register_action(const std::string& type,const std::string& action, const std::string& rawcode);
 		
-		void register_function_button(const InputConstants::action a, button_function f);
-		void register_function_state(const InputConstants::action a, state_function f);
-		void register_function_range(const InputConstants::action a, range_function f);
+		void register_function_button(const std::string& a, button_function f);
+		void register_function_state(const std::string& a, state_function f);
+		void register_function_range(const std::string& a, range_function f);
 
 		void list_actions() const;
 
