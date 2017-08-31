@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
 	cam_follow_component->set_speed(0.05f);
 
 	inputhandler_ptr->get_context("game")->register_function_range(
-		input::InputConstants::action::STEER_X,
+		"STEER_X",
 		[&](input::InputContext& context, double value) {
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;
@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_button(
-		input::InputConstants::action::JUMP,
+		"JUMP",
 		[&](input::InputContext& context) 
 	{
 		auto pc = player->get_component<system::physics_component>();
@@ -368,7 +368,7 @@ int main(int argc, char* argv[])
 	);
 
 	inputhandler_ptr->get_context("midjump")->register_function_button(
-		input::InputConstants::action::DOUBLEJUMP,
+		"DOUBLEJUMP",
 		[&](input::InputContext& context)
 	{
 		auto pc = player->get_component<system::physics_component>();

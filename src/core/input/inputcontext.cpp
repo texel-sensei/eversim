@@ -22,12 +22,12 @@ namespace eversim {	namespace core { namespace input {
 	{
 		auto type_enum = InputConstants::input_type::_from_string(type.c_str());
 
-		LOG(INFO) << type << " " << action << " " << rawcode;
+		//LOG(INFO) << type << " " << action << " " << rawcode;
 
 		const auto raw_enum = RawInputConstants::input::_from_string(rawcode.c_str());
-		const auto action_enum = InputConstants::action::_from_string(action.c_str());
+		const auto action_enum = action_enums.add(action);
 
-		std::map<RawInputConstants::input, std::set<InputConstants::action>>* map_ptr = nullptr;
+		auto* map_ptr = &buttons; map_ptr = nullptr;
 
 		switch(type_enum)
 		{
@@ -185,19 +185,34 @@ namespace eversim {	namespace core { namespace input {
 		return handeled;
 	}
 
-	void InputContext::register_function_button(const InputConstants::action a, button_function f)
+	void InputContext::register_function_button(const std::string& a, button_function f)
 	{
-		button_functions[a] = f;
+		auto enumerator = action_enums.to_enum(a);
+		if (enumerator == 0) {
+			LOG(ERROR) << "unknown action " << a;
+			return;
+		}
+		button_functions[enumerator] = f;
 	}
 
-	void InputContext::register_function_state(const InputConstants::action a, state_function f)
+	void InputContext::register_function_state(const std::string& a, state_function f)
 	{
-		state_functions[a] = f;
+		auto enumerator = action_enums.to_enum(a);
+		if (enumerator == 0) {
+			LOG(ERROR) << "unknown action " << a;
+			return;
+		}
+		state_functions[enumerator] = f;
 	}
 
-	void InputContext::register_function_range(const InputConstants::action a, range_function f)
+	void InputContext::register_function_range(const std::string& a, range_function f)
 	{
-		range_functions[a] = f;
+		auto enumerator = action_enums.to_enum(a);
+		if (enumerator == 0) {
+			LOG(ERROR) << "unknown action " << a;
+			return;
+		}
+		range_functions[enumerator] = f;
 	}
 
 	void InputContext::execute()
@@ -246,7 +261,7 @@ namespace eversim {	namespace core { namespace input {
 			LOG(INFO) << "\tBUTTON " << RawInputConstants::input::_from_integral(button.first)._to_string();
 			for (auto& action : button.second)
 			{
-				LOG(INFO) << "\t\t" << InputConstants::action::_from_integral(action)._to_string();
+				LOG(INFO) << "\t\t" << action_enums.to_string(action);
 			}
 		}
 
@@ -255,7 +270,7 @@ namespace eversim {	namespace core { namespace input {
 			LOG(INFO) << "\tSTATE " << RawInputConstants::input::_from_integral(state.first)._to_string();
 			for (auto& action : state.second)
 			{
-				LOG(INFO) << "\t\t" << InputConstants::action::_from_integral(action)._to_string();
+				LOG(INFO) << "\t\t" << action_enums.to_string(action);
 			}
 		}
 
@@ -264,7 +279,7 @@ namespace eversim {	namespace core { namespace input {
 			LOG(INFO) << "\tRANGE " << RawInputConstants::input::_from_integral(range.first)._to_string();
 			for (auto& action : range.second)
 			{
-				LOG(INFO) << "\t\t" << InputConstants::action::_from_integral(action)._to_string();
+				LOG(INFO) << "\t\t" << action_enums.to_string(action);
 			}
 		}
 	}
