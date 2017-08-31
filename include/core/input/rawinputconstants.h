@@ -30,23 +30,18 @@ namespace eversim { namespace core { namespace input {
 			GAMEPAD_BUTTON_DPAD_RIGHT,
 			GAMEPAD_BUTTON_DPAD_UP,
 			GAMEPAD_BUTTON_DPAD_DOWN,
+			GAMEPAD_ANALOGUE_LEFT_STICK,
+			GAMEPAD_ANALOGUE_RIGHT_STICK,
 			GAMEPAD_ANALOGUE_LEFT_STICK_X,
 			GAMEPAD_ANALOGUE_LEFT_STICK_Y,
 			GAMEPAD_ANALOGUE_RIGHT_STICK_X,
 			GAMEPAD_ANALOGUE_RIGHT_STICK_Y,
 			GAMEPAD_ANALOGUE_LT,
 			GAMEPAD_ANALOGUE_RT,
-			MOUSE_X,
-			MOUSE_Y,
+			MOUSE,
 			MOUSE_BUTTON_LEFT,
 			MOUSE_BUTTON_MIDDLE,
 			MOUSE_BUTTON_RIGHT,
-			MOUSE_BUTTON_LEFT_X,
-			MOUSE_BUTTON_MIDDLE_X,
-			MOUSE_BUTTON_RIGHT_X,
-			MOUSE_BUTTON_LEFT_Y,
-			MOUSE_BUTTON_MIDDLE_Y,
-			MOUSE_BUTTON_RIGHT_Y,
 			INVALID
 		)
 
@@ -56,13 +51,6 @@ namespace eversim { namespace core { namespace input {
 			RANGE,
 			INVALID
 		)
-
-		const std::map<input, std::pair<input,input>> mouse_remap =
-		{
-			{ input::MOUSE_BUTTON_LEFT,{ input::MOUSE_BUTTON_LEFT_X ,input::MOUSE_BUTTON_LEFT_Y } },
-			{ input::MOUSE_BUTTON_MIDDLE,{ input::MOUSE_BUTTON_MIDDLE_X ,input::MOUSE_BUTTON_MIDDLE_Y } },
-			{ input::MOUSE_BUTTON_RIGHT,{ input::MOUSE_BUTTON_RIGHT_X ,input::MOUSE_BUTTON_RIGHT_Y } },
-		};
 
 		const std::map<SDL_EventType,event_type> sdl_event_map =
 		{

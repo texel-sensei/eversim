@@ -287,9 +287,11 @@ int main(int argc, char* argv[])
 		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
 	);
 
-	inputhandler_ptr->get_context("game")->register_function_button(
+	inputhandler_ptr->get_context("game")->register_function_state(
 		"DUCK",
-		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
+		[](input::InputContext& context, input::state_func_type& t) { 
+		//LOG(INFO) << "pressed DUCK"; 
+	}
 	);
 
 	inputhandler_ptr->get_context("game")->register_function_state(
@@ -301,8 +303,8 @@ int main(int argc, char* argv[])
 
 	inputhandler_ptr->get_context("game")->register_function_range(
 		"FART_LEFT",
-		[](input::InputContext& context, double val) {
-		LOG(INFO) << "pressed fart_left = " << val;
+		[](input::InputContext& context, glm::vec2 v) {
+		LOG(INFO) << "pressed left mouse at = " << v.x << "/" << v.y;
 	}
 	);
 
@@ -358,7 +360,8 @@ int main(int argc, char* argv[])
 
 	inputhandler_ptr->get_context("game")->register_function_range(
 		"STEER_X",
-		[&](input::InputContext& context, double value) {
+		[&](input::InputContext& context, glm::vec2 v) {
+		double value = v.x;
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;
 		auto pc = player->get_component<system::physics_component>();
