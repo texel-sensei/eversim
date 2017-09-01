@@ -286,39 +286,6 @@ int main(int argc, char* argv[])
 	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
 	inputhandler_ptr->push_context("game"); 
 
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DLEFT,
-		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DRIGHT,
-		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DUP,
-		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::button::DDOWN,
-		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::state::DUCK,
-		[](input::InputContext& context) { LOG(INFO) << "pressed DUCK"; }
-	);
-
-	inputhandler_ptr->get_context("game")->register_function(
-		input::InputConstants::state::GOLEM,
-		[](input::InputContext& context) { 
-		LOG(INFO) << "pressed GOLEM"; 
-	}
-	);
-
-
 	// create loaders
 	auto tile_loader = make_shared<world::tile_loader>();
 	world::level_loader level_loader{tile_loader};
