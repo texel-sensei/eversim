@@ -29,6 +29,10 @@ namespace eversim { namespace core { namespace input {
 	typedef std::function<void(InputContext&)> button_function;
 	typedef std::function<void(InputContext&, state_func_type)> state_function;
 	typedef std::function<void(InputContext&, glm::vec2)> range_function;
+	typedef std::map <
+		RawInputConstants::input,
+		std::pair<RawInputConstants::input, RawInputConstants::input>
+	> pairmap;
 
 	class InputContext
 	{
@@ -53,10 +57,22 @@ namespace eversim { namespace core { namespace input {
 		std::map<InputConstants::action, state_function> state_functions;
 		std::map<InputConstants::action, range_function> range_functions;
 
-		std::vector<InputEvent> input_queue;
+		std::map<RawInputConstants::input,InputEvent> input_map;
+		std::vector<std::map<RawInputConstants::input, InputEvent>::iterator> input_iterators;
+
+		pairmap input_range_pairs;
 
 		InputConstants::input_type get_input_type(const RawInputConstants::input& b) const;
+
+		void create_range_pair(RawInputConstants::input a, RawInputConstants::input b, RawInputConstants::input c);
 		void create_grouped_inputs();
+
+		void add_input_pair(
+			const std::string& a,
+			const std::string& b,
+			const std::string& c,
+			pairmap& m
+		);
 	public:
 		
 		InputContext(){}
@@ -91,5 +107,10 @@ namespace eversim { namespace core { namespace input {
 
 		void reset_states(const std::vector<std::vector<RawInputConstants::input>>&);
 		void reset_ranges(const std::vector<std::vector<RawInputConstants::input>>&);
+
+		void add_input_pair_range(
+			const std::string& a,
+			const std::string& b,
+			const std::string& c);
 	};
 }}}
