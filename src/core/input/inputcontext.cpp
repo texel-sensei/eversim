@@ -2,9 +2,11 @@
 
 #include <easylogging++.h>
 
+using namespace std;
+
 namespace eversim {	namespace core { namespace input {
 
-	InputContext::InputContext(const std::string& n) : name(n)
+	InputContext::InputContext(const string& n) : name(n)
 	{
 		//LOG(INFO) << "create InputContext \"" << name << "\""; 
 	}
@@ -18,7 +20,7 @@ namespace eversim {	namespace core { namespace input {
 		return *this;
 	}
 
-	void InputContext::register_action(const std::string& type, const std::string& action, const std::string& rawcode)
+	void InputContext::register_action(const string& type, const string& action, const string& rawcode)
 	{
 		auto type_enum = InputConstants::input_type::_from_string(type.c_str());
 
@@ -53,31 +55,31 @@ namespace eversim {	namespace core { namespace input {
 		}
 	}
 
-	std::vector<RawInputConstants::input> InputContext::get_buttons() const
+	vector<RawInputConstants::input> InputContext::get_buttons() const
 	{
-		std::vector<RawInputConstants::input> res;
+		vector<RawInputConstants::input> res;
 		for (auto& bpair : buttons)
 			res.push_back(bpair.first);
 		return res;
 	}
 
-	std::vector<RawInputConstants::input> InputContext::get_states() const
+	vector<RawInputConstants::input> InputContext::get_states() const
 	{
-		std::vector<RawInputConstants::input> res;
+		vector<RawInputConstants::input> res;
 		for (auto& spair : states)
 			res.push_back(spair.first);
 		return res;
 	}
 
-	std::vector<RawInputConstants::input> InputContext::get_ranges() const
+	vector<RawInputConstants::input> InputContext::get_ranges() const
 	{
-		std::vector<RawInputConstants::input> res;
+		vector<RawInputConstants::input> res;
 		for (auto& rpair : ranges)
 			res.push_back(rpair.first);
 		return res;
 	}
 
-	void InputContext::reset_states(const std::vector<RawInputConstants::input>& ss)
+	void InputContext::reset_states(const vector<RawInputConstants::input>& ss)
 	{
 		for (const auto& b : ss)
 		{
@@ -88,8 +90,8 @@ namespace eversim {	namespace core { namespace input {
 
 			for (const auto& action : actions.second)
 			{
-				std::for_each(begin(state_states), end(state_states),
-					[&](std::pair<const InputConstants::action, bool>& element)
+				for_each(begin(state_states), end(state_states),
+					[&](pair<const InputConstants::action, bool>& element)
 				{
 					if(element.first == action)
 						element.second = false;
@@ -98,7 +100,7 @@ namespace eversim {	namespace core { namespace input {
 		}
 	}
 
-	void InputContext::reset_ranges(const std::vector<RawInputConstants::input>& rs)
+	void InputContext::reset_ranges(const vector<RawInputConstants::input>& rs)
 	{
 		for (const auto& b : rs)
 		{
@@ -109,8 +111,8 @@ namespace eversim {	namespace core { namespace input {
 
 			for (const auto& action : actions.second)
 			{
-				std::for_each(begin(range_states), end(range_states),
-					[&](std::pair<const InputConstants::action, glm::vec2>& element)
+				for_each(begin(range_states), end(range_states),
+					[&](pair<const InputConstants::action, glm::vec2>& element)
 				{
 					if (element.first == action)
 						element.second = {0.,0.};
@@ -119,13 +121,13 @@ namespace eversim {	namespace core { namespace input {
 		}
 	}
 
-	void InputContext::reset_states(const std::vector<std::vector<RawInputConstants::input>>& v)
+	void InputContext::reset_states(const vector<vector<RawInputConstants::input>>& v)
 	{
 		for (const auto& s : v)
 			reset_states(s);
 	}
 
-	void InputContext::reset_ranges(const std::vector<std::vector<RawInputConstants::input>>& v)
+	void InputContext::reset_ranges(const vector<vector<RawInputConstants::input>>& v)
 	{
 		for (const auto& s : v)
 			reset_ranges(s);
@@ -141,7 +143,21 @@ namespace eversim {	namespace core { namespace input {
 
 	void InputContext::enqueue_event(const InputEvent& event)
 	{
-		input_queue.push_back(event);
+		auto& mpair = input_map.emplace(event.get_input_enum(),event);
+
+		auto& it = mpair.first;
+
+		if (!mpair.second) {
+			auto new_end = remove_if(begin(input_iterators), end(input_iterators), 
+				[&](const map<RawInputConstants::input, InputEvent>::iterator& eit)
+			{
+				return eit->first == event.get_input_enum();
+			});
+
+			input_iterators = vector<map<RawInputConstants::input, InputEvent>::iterator>
+				(begin(input_iterators), new_end);
+		}
+		input_iterators.push_back(it);
 	}
 
 	bool InputContext::handle_event(const InputEvent& event)
@@ -150,7 +166,7 @@ namespace eversim {	namespace core { namespace input {
 
 		if (event.get_event_type() == +RawInputConstants::event_type::INVALID) return handeled;
 
-		std::vector<std::map<RawInputConstants::input, std::set<InputConstants::action>>*> v =
+		vector<map<RawInputConstants::input, set<InputConstants::action>>*> v =
 		{ &buttons,&states,&ranges };
 
 		const auto input_enum = event.get_input_enum();
@@ -161,24 +177,25 @@ namespace eversim {	namespace core { namespace input {
 			handeled = handeled || (action_it != m.end());
 		}
 
-		if (handeled) enqueue_event(event);
+		if (handeled)
+			enqueue_event(event);
 
 		return handeled;
 	}
 
-	void InputContext::register_function_button(const std::string& a, button_function f)
+	void InputContext::register_function_button(const string& a, button_function f)
 	{
 		const auto enumerator = action_enums.to_enum(a);
 		register_function_button(enumerator, f);
 	}
 
-	void InputContext::register_function_state(const std::string& a, state_function f)
+	void InputContext::register_function_state(const string& a, state_function f)
 	{
 		const auto enumerator = action_enums.to_enum(a);
 		register_function_state(enumerator, f);
 	}
 
-	void InputContext::register_function_range(const std::string& a, range_function f)
+	void InputContext::register_function_range(const string& a, range_function f)
 	{
 		const auto enumerator = action_enums.to_enum(a);
 		register_function_range(enumerator, f);
@@ -214,65 +231,79 @@ namespace eversim {	namespace core { namespace input {
 		range_functions[a] = f;
 	}
 
+	void InputContext::create_range_pair(
+		RawInputConstants::input a, 
+		RawInputConstants::input b, 
+		RawInputConstants::input c)
+	{
+		auto& lsx = input_map.find(a);
+		auto& lsy = input_map.find(b);
+		const auto lsxb = lsx != input_map.end();
+		const auto lsyb = lsy != input_map.end();
+		if (lsxb || lsyb)
+		{
+			glm::vec2 val(0);
+			if (lsxb) {
+				auto& event = lsx->second;
+				val.x = event.get_range_value().x;
+			}
+			if (lsyb) {
+				auto& event = lsy->second;
+				val.y = event.get_range_value().x;
+			}
+			enqueue_event(InputEvent::create_range(c, val));
+		}
+	}
+
 	void InputContext::create_grouped_inputs()
 	{
-		auto find_enum = [&](const RawInputConstants::input e)
+		using namespace RawInputConstants;
+
+		for (auto& e : input_range_pairs) {
+			create_range_pair(e.second.first,e.second.second,e.first);
+		}	
+	}
+
+	void InputContext::add_input_pair(
+		const string& a,
+		const string& b,
+		const string& c,
+		pairmap& m
+	) 
+	{
+		using namespace RawInputConstants;
+
+		auto is_valid = [](const string& s)
 		{
-			return find_if(begin(input_queue), end(input_queue),
-				[&](const InputEvent& event)
-			{
-				return event.get_input_enum() == +e;
-			});
+			return input::_is_valid(s.c_str());
 		};
 
-		auto it_left_stick_x = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK_X);
-		auto it_left_stick_y = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK_Y);
+		if (is_valid(a) && is_valid(b) && is_valid(c)) {
 
-		if (it_left_stick_x != input_queue.end() || it_left_stick_y != input_queue.end())
-		{
+			auto ae = input::_from_string(a.c_str());
+			auto be = input::_from_string(b.c_str());
+			auto ce = input::_from_string(c.c_str());
 
-			glm::vec2 val(0);
-
-			if (it_left_stick_x != input_queue.end()) {
-				auto& event = *it_left_stick_x;
-				val.x = event.get_range_value().x;
-			}
-
-			if (it_left_stick_y != input_queue.end()) {
-				auto& event = *it_left_stick_y;
-				val.y = event.get_range_value().x;
-			}
-
-			input_queue.push_back(InputEvent::create_range(RawInputConstants::input::GAMEPAD_ANALOGUE_LEFT_STICK, val));
+			m.emplace(ce, pair<input, input>(ae,be));
 		}
+	}
 
-		auto it_right_stick_x = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK_X);
-		auto it_right_stick_y = find_enum(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK_Y);
-
-		if (it_right_stick_x != input_queue.end() || it_right_stick_y != input_queue.end())
-		{
-
-			glm::vec2 val(0);
-
-			if (it_right_stick_x != input_queue.end()) {
-				auto& event = *it_right_stick_x;
-				val.x = event.get_range_value().x;
-			}
-
-			if (it_right_stick_y != input_queue.end()) {
-				auto& event = *it_right_stick_y;
-				val.y = event.get_range_value().x;
-			}
-
-			input_queue.push_back(InputEvent::create_range(RawInputConstants::input::GAMEPAD_ANALOGUE_RIGHT_STICK, val));
-		}
+	void InputContext::add_input_pair_range
+	(
+		const string& a,
+		const string& b,
+		const string& c
+	)
+	{
+		add_input_pair(a, b, c, input_range_pairs);
 	}
 
 	void InputContext::execute()
 	{
 		create_grouped_inputs();
 
-		for (const auto& event : input_queue) {
+		for (const auto& event_it : input_iterators) {
+			const auto& event = event_it->second;
 			const auto input_enum = event.get_input_enum();
 			{
 				//find in buttons
@@ -307,7 +338,8 @@ namespace eversim {	namespace core { namespace input {
 			}
 		}
 
-		input_queue.clear();
+		input_iterators.clear();
+		input_map.clear();
 
 		for(auto& s : button_states)
 		{

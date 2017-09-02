@@ -1,4 +1,5 @@
 {
+  "pairfile" :  "../resources/inputmaps/inputpairs.json",
   "game": {
     "JUMP": {
       "type": "BUTTON",
@@ -39,7 +40,7 @@
     "FART_LEFT": {
       "type": "RANGE",
       "keys": [ "MOUSE_BUTTON_LEFT", "GAMEPAD_ANALOGUE_LEFT_STICK" ]
-    } 
+    }
 
   },
   "midjump": {

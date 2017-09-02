@@ -31,6 +31,9 @@ namespace eversim {
 
 			public:
 
+				bool operator==(const InputEvent& event) const 
+					{ return get_input_enum() == event.get_input_enum(); }
+
 				RawInputConstants::event_type get_event_type() const;
 
 				RawInputConstants::input get_input_enum() const;
