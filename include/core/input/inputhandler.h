@@ -21,9 +21,7 @@ namespace eversim {
 				std::list<std::weak_ptr<InputContext>> context_stack;
 
 			public:
-				explicit InputHandler(const std::string& filename);
-				explicit InputHandler(std::istringstream& file);
-				explicit InputHandler(std::ifstream& file);
+				explicit InputHandler(const std::string&);
 
 				void push_context(const std::string& context_name);
 				std::string pop();

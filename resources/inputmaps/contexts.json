@@ -1,5 +1,5 @@
 {
-  "pairfile" :  "../resources/inputmaps/inputpairs.json",
+  "pairfile" :  "inputpairs.json",
   "game": {
     "JUMP": {
       "type": "BUTTON",

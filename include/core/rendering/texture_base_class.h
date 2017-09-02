@@ -14,6 +14,7 @@ namespace eversim
 				size_t unique_id;
 
 			public:
+				virtual ~TextureBase() {}
 				virtual void bind() const = 0;
 				virtual glm::ivec2 get_resolution() const = 0;
 

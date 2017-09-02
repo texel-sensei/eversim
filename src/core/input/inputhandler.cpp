@@ -16,20 +16,7 @@ namespace eversim {
 	namespace core {
 		namespace input {
 
-			InputHandler::InputHandler(const string& filename) : InputHandler(std::ifstream(filename))
-			{}
-
-			InputHandler::InputHandler(std::ifstream& file)
-			{
-				string content((std::istreambuf_iterator<char>(file)),
-					(std::istreambuf_iterator<char>()));
-
-				istringstream iss(content);
-
-				*this = InputHandler(iss);
-			}
-
-			InputHandler::InputHandler(std::istringstream& file)
+			InputHandler::InputHandler(const string& file)
 			{
 				auto contexts = InputContextLoader::generate_contexts_from_json(file);
 

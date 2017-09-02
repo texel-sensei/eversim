@@ -3,6 +3,8 @@
 
 #include <easylogging++.h>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/optional/optional.hpp>
 
 namespace eversim {	namespace core { namespace input {
@@ -10,25 +12,15 @@ namespace eversim {	namespace core { namespace input {
 using namespace std;
 namespace pt = boost::property_tree;
 
-vector<InputContext> InputContextLoader::generate_contexts_from_json(const string& filename) 
+json_loader InputContextLoader::loader;
+
+vector<InputContext> InputContextLoader::generate_contexts_from_json(const string& file)
 {
-	ifstream ifs(filename);
-	string content((std::istreambuf_iterator<char>(ifs)),
-		(std::istreambuf_iterator<char>()));
 
-	istringstream iss(content);
-
-	return generate_contexts_from_json(iss);
-}
-
-vector<InputContext> InputContextLoader::generate_contexts_from_json(
-	std::basic_istream<pt::ptree::key_type::value_type>& file)
-{
 	vector<InputContext> result;
 
 	pt::ptree root;
-
-	pt::read_json(file, root);
+	pt::read_json(*loader.load(file).get(),root);
 
 	const string pairfile("pairfile");
 	
@@ -37,32 +29,32 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(
 		if (context.first == pairfile)
 			continue;
 
-			result.emplace_back(context.first);
-			auto& inputcontext = result.back();
+		result.emplace_back(context.first);
+		auto& inputcontext = result.back();
 
-			for (auto &action : context.second)
+		for (auto &action : context.second)
+		{
+			auto action_name = action.first;
+
+			string type = "";
+			vector<string> buttons;
+
+			for (auto &data : action.second)
 			{
-				auto action_name = action.first;
-
-				string type = "";
-				vector<string> buttons;
-
-				for (auto &data : action.second)
+				if (data.first == "type")
 				{
-					if (data.first == "type")
-					{
-						type = data.second.get_value<string>();
-					}
-					else if (data.first == "keys")
-					{
-						auto tmp = as_vector<string>(action.second, data.first);
-						buttons.insert(buttons.end(), tmp.begin(), tmp.end());
-					}
+					type = data.second.get_value<string>();
 				}
-
-				for (auto& button : buttons)
-					inputcontext.register_action(type, action_name, button);
+				else if (data.first == "keys")
+				{
+					auto tmp = as_vector<string>(action.second, data.first);
+					buttons.insert(buttons.end(), tmp.begin(), tmp.end());
+				}
 			}
+
+			for (auto& button : buttons)
+				inputcontext.register_action(type, action_name, button);
+		}
 	}
 	
 	boost::optional<string> c = root.get_optional<string>(pairfile);
@@ -71,8 +63,7 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(
 		auto filename =	c.get();
 		
 		pt::ptree pairtree;
-
-		pt::read_json(filename, pairtree);
+		pt::read_json(*loader.load(filename).get(), pairtree);
 
 		for (auto& context_d : pairtree) {
 
@@ -98,7 +89,6 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(
 									);
 							}
 						}
-
 					}
 				}
 			}
