@@ -206,6 +206,7 @@ struct loaders {
 	world::level_loader* lev;
 	world::tile_loader* til;
 	physics::body_template_loader* bdy;
+	input::json_loader* inp;
 
 	void add_directory(string const& path) const
 	{
@@ -213,6 +214,7 @@ struct loaders {
 		lev->add_search_directory(path + "/levels");
 		til->add_search_directory(path + "/tiles");
 		bdy->add_search_directory(path + "/physics");
+		inp->add_search_directory(path + "/inputmaps");
 	}
 };
 
@@ -281,12 +283,6 @@ int main(int argc, char* argv[])
 	io.DisplaySize.x = float(resolution.x);
 	io.DisplaySize.y = float(resolution.y);
 
-	//init inputhandler
-
-	inputhandler_ptr = std::make_shared<input::InputHandler>("../resources/inputmaps/contexts.json");
-	inputhandler_ptr->push_context("game"); 
-
-
 	// create loaders
 	auto tile_loader = make_shared<world::tile_loader>();
 	world::level_loader level_loader{tile_loader};
@@ -296,9 +292,56 @@ int main(int argc, char* argv[])
 	body_loader.register_factory("angle", make_unique<physics::angle_constraint_factory>());
 
 	// add search directories	
-	auto ldrs = loaders{&rendering::Texture::loader, &level_loader, tile_loader.get(), &body_loader};
+	auto ldrs = loaders{&rendering::Texture::loader, &level_loader, 
+		tile_loader.get(), &body_loader, input::InputContextLoader::get_loader()};
 	ldrs.add_directory("../resources");
 	ldrs.add_directory("./resources");
+
+	//init inputhandler
+
+	inputhandler_ptr = std::make_shared<input::InputHandler>("contexts.json");
+	inputhandler_ptr->push_context("game");
+
+	inputhandler_ptr->get_context("game")->register_function_button(
+		"DLEFT",
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD LEFT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_button(
+		"DRIGHT",
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD RIGHT"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_button(
+		"DUP",
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD UP";	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_button(
+		"DDOWN",
+		[](input::InputContext& context) { LOG(INFO) << "pressed DPAD DOWN"; }
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_state(
+		"DUCK",
+		[](input::InputContext& context, input::state_func_type& t) {
+		//LOG(INFO) << "pressed DUCK"; 
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_state(
+		"GOLEM",
+		[](input::InputContext& context, input::state_func_type& t) {
+		//LOG(INFO) << "pressed GOLEM " << t._to_string(); 
+	}
+	);
+
+	inputhandler_ptr->get_context("game")->register_function_range(
+		"FART_LEFT",
+		[](input::InputContext& context, glm::vec2 v) {
+		LOG(INFO) << "pressed left mouse at = " << v.x << "/" << v.y;
+	}
+	);
 
 	// load level
 	const auto level = level_loader.load("example_level");
