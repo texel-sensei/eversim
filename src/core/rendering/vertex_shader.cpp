@@ -11,6 +11,7 @@ namespace eversim {
 		namespace rendering {
 			VertexShader::VertexShader(const std::string& name) : AttachableShader(name)
 			{
+				id = glCreateShader(GL_VERTEX_SHADER);
 			}
 
 
@@ -21,9 +22,14 @@ namespace eversim {
 
 			void VertexShader::create(const std::string& filename)
 			{
-				id = glCreateShader(GL_VERTEX_SHADER);
-
 				compile(filename);
+
+				created = true;
+			}
+
+			void VertexShader::create(std::istream& file)
+			{
+				compile(file);
 
 				created = true;
 			}

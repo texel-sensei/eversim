@@ -97,7 +97,6 @@ namespace eversim { namespace core { namespace rendering {
 		std::shared_ptr<Multibuffer> default_buffer_ptr;
 		std::shared_ptr<Texture> default_texture_ptr;
 		std::shared_ptr<ShaderProgram> default_shader_ptr;
-		std::shared_ptr<ShaderProgram> spritemap_shader_ptr;
 
 		std::vector<line> lines;
 		std::vector<glm::vec2> points;

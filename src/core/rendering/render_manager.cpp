@@ -38,8 +38,7 @@ namespace eversim { namespace core { namespace rendering {
 		resolution(resolution),
 		default_buffer_ptr	(make_shared<Multibuffer>("default quad mesh")),
 		default_texture_ptr	(make_shared<Texture>(ivec2(4, 4))),
-		default_shader_ptr	(make_shared<ShaderProgram>("default uv shader")),
-		spritemap_shader_ptr(make_shared<ShaderProgram>("simple quad shader"))
+		default_shader_ptr	(make_shared<ShaderProgram>("default uv shader"))
 	{
 		setup(fullscreen);
 	
@@ -65,7 +64,7 @@ namespace eversim { namespace core { namespace rendering {
 
 		auto& default_shader = *default_shader_ptr;
 		default_shader.create();
-		default_shader.attach
+		default_shader.attach<std::string>
 		({
 			{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
 			{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
@@ -74,17 +73,7 @@ namespace eversim { namespace core { namespace rendering {
 
 		default_shader.logUnfiformslogAttributes();
 
-		auto& spritemap_shader = *spritemap_shader_ptr;
-		spritemap_shader.create();
-		spritemap_shader.attach
-		({
-			{ "..\\resources\\shader\\screen_sized_quad_vertex.glsl",GL_VERTEX_SHADER },
-			{ "..\\resources\\shader\\screen_sized_quad_geometry.glsl" , GL_GEOMETRY_SHADER },
-			{ "..\\resources\\shader\\screen_sized_quad_fragment.glsl",GL_FRAGMENT_SHADER }
-		});
-		spritemap_shader.link();
-
-		Spritemap::set_shader(spritemap_shader_ptr);
+		Spritemap::init_shader();
 	}
 
 	void render_manager::draw_line(glm::vec2 a, glm::vec2 b, int dur)

@@ -108,43 +108,6 @@ namespace eversim {
 				LOG(INFO) << "attached " << shader.name << " to " << name;
 			}
 
-			void ShaderProgram::attach(const std::string& filename, const GLenum TYPE) const
-			{
-				switch (TYPE) {
-				case GL_FRAGMENT_SHADER:
-				{
-					FragmentShader shader("default_named_FragmentShader");
-					shader.create(filename);
-					attach(shader); 
-				}
-				break;
-				case GL_VERTEX_SHADER:
-				{
-					VertexShader shader("default_named_VertexShader");
-					shader.create(filename);
-					attach(shader); 
-				}
-				break;
-				case GL_GEOMETRY_SHADER:
-				{
-					GeometryShader shader("default_named_GeometryShader");
-					shader.create(filename);
-					attach(shader); 
-				}
-				break;
-				default:
-					throw exception("Unknown GLenum when attaching a shader");
-					break;
-				}
-			}
-			void ShaderProgram::attach(const std::vector<
-				std::pair<std::string, GLenum>
-			>& shaders) const
-			{
-				for (const auto& shader : shaders)
-					attach(shader.first, shader.second);
-			}
-
 			void ShaderProgram::create()
 			{
 				id = glCreateProgram();

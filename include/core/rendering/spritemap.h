@@ -43,7 +43,8 @@ namespace eversim {
 
 				void init();
 
-				static std::weak_ptr<ShaderProgram> program;
+				//static std::weak_ptr<ShaderProgram> program;
+				static ShaderProgram program;
 
 			public:
 				/*
@@ -74,10 +75,7 @@ namespace eversim {
 
 				bool contains_texture(const GLuint& uid) const;
 
-				static void set_shader(std::weak_ptr<ShaderProgram> prog)
-				{
-					program = prog;
-				}
+				static void init_shader();
 			};
 		}
 	}

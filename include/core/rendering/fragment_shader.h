@@ -12,6 +12,7 @@ namespace eversim {
 				~FragmentShader();
 
 				void create(const std::string& filename) override;
+				void create(std::istream& file) override;
 			};
 		}
 	}
