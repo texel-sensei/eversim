@@ -95,10 +95,9 @@ include_directories(${EXTERNALS}/better-enums)
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.64.0 COMPONENTS regex)
+find_package(Boost 1.64.0 COMPONENTS regex serialization REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIR_DEBUG})
-link_directories(${Boost_LIBRARY_DIR_RELEASE})
+set(LIBS ${LIBS} ${Boost_LIBRARIES})
 
 #boost poly collection
 include_directories(${EXTERNALS}/poly_collection/include)
@@ -163,7 +162,7 @@ source_group("windows" REGULAR_EXPRESSION /editor/windows/)
 
 target_link_libraries(eversim ${LIBS})
 target_link_libraries(editor eversim)
-target_link_libraries(game editor eversim)
+target_link_libraries(game editor eversim ${LIBS})
 
 #######################################################################
 #                             testing                                 #
