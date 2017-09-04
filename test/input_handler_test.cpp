@@ -64,8 +64,8 @@ TEST_CASE("increment_simple", "[input][inputhandler]") {
 
 	int a = 0;
 
-	handler.get_context("game")->register_function(
-		InputConstants::button::JUMP,
+	handler.get_context("game")->register_function_button(
+		"JUMP",
 		[&](InputContext&) { a++; }
 	);
 
@@ -93,8 +93,8 @@ TEST_CASE("increment_two_contexts", "[input][inputhandler]") {
 
 	int a = 0;
 
-	handler.get_context("game")->register_function(
-		InputConstants::button::JUMP,
+	handler.get_context("game")->register_function_button(
+		"JUMP",
 		[&](InputContext&) { a++; }
 	);
 
@@ -127,13 +127,13 @@ TEST_CASE("two_buttons", "[input][inputhandler]") {
 	int a = 0;
 	int b = 0;
 
-	handler.get_context("game")->register_function(
-		InputConstants::button::JUMP,
+	handler.get_context("game")->register_function_button(
+		"JUMP",
 		[&](InputContext&) { a++; }
 	);
 
-	handler.get_context("game")->register_function(
-		InputConstants::button::MENU,
+	handler.get_context("game")->register_function_button(
+		"MENU",
 		[&](InputContext&) { b++; }
 	);
 
@@ -160,15 +160,15 @@ TEST_CASE("increment_simple_mapped", "[input][inputhandler]") {
 
 	int a = 0;
 
-	handler.get_context("game")->register_function(
-		InputConstants::button::JUMP,
+	handler.get_context("game")->register_function_button(
+		"JUMP",
 		[&](InputContext&) { a++; }
 	);
 
 	//press button 5 times
 	InputEvent event = InputEvent::create_button(
-		RawInputConstants::event_type::BUTTON_DOWN,
-		RawInputConstants::button::GAMEPAD_BUTTON_A
+		RawInputConstants::input::GAMEPAD_BUTTON_A,
+		true
 	);
 
 	for (size_t i = 0; i < 5; ++i) {

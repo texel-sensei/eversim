@@ -3,9 +3,7 @@
 
 #include <easylogging++.h>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/optional/optional.hpp>
+
 
 namespace eversim {	namespace core { namespace input {
 
@@ -14,16 +12,12 @@ namespace pt = boost::property_tree;
 
 json_loader InputContextLoader::loader;
 
-vector<InputContext> InputContextLoader::generate_contexts_from_json(const string& file)
+vector<InputContext> InputContextLoader::generate_contexts_from_property_tree(boost::property_tree::ptree& root)
 {
-
 	vector<InputContext> result;
 
-	pt::ptree root;
-	pt::read_json(*loader.load(file).get(),root);
-
 	const string pairfile("pairfile");
-	
+
 	for (auto &context : root)
 	{
 		if (context.first == pairfile)
@@ -56,12 +50,12 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(const strin
 				inputcontext.register_action(type, action_name, button);
 		}
 	}
-	
+
 	boost::optional<string> c = root.get_optional<string>(pairfile);
 
 	if (c.is_initialized()) {
-		auto filename =	c.get();
-		
+		auto filename = c.get();
+
 		pt::ptree pairtree;
 		pt::read_json(*loader.load(filename).get(), pairtree);
 
@@ -81,12 +75,12 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(const strin
 				{
 					if (type.first == "RANGE") {
 						for (auto &rangepair : type.second) {
-							
+
 							auto tmp = as_vector<string>(type.second, rangepair.first);
 							if (tmp.size() >= 2) {
 								context.add_input_pair_range(
 									tmp.at(0), tmp.at(1), rangepair.first
-									);
+								);
 							}
 						}
 					}
@@ -94,8 +88,22 @@ vector<InputContext> InputContextLoader::generate_contexts_from_json(const strin
 			}
 		}
 	}
-	
+
 	return result;
+}
+
+std::vector<InputContext> InputContextLoader::generate_contexts_from_json(std::istream& stream)
+{
+	pt::ptree root;
+	pt::read_json(stream, root);
+	return generate_contexts_from_property_tree(root);
+}
+
+vector<InputContext> InputContextLoader::generate_contexts_from_json(const string& file)
+{
+	pt::ptree root;
+	pt::read_json(*loader.load(file).get(),root);
+	return generate_contexts_from_property_tree(root);
 }
 
 }}}

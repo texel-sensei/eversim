@@ -5,10 +5,13 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/optional/optional.hpp>
 
 #include <vector>
 #include <string>
 #include <fstream>
+#include <istream>
+#include <sstream>
 
 namespace eversim {
 	namespace core {
@@ -30,8 +33,11 @@ namespace eversim {
 			private:
 				static json_loader loader;
 
+				static std::vector<InputContext> generate_contexts_from_property_tree(boost::property_tree::ptree& root);
+
 			public:
 				static std::vector<InputContext> generate_contexts_from_json(const std::string&);
+				static std::vector<InputContext> generate_contexts_from_json(std::istream&);
 
 				static json_loader* get_loader()
 				{

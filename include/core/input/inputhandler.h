@@ -20,8 +20,10 @@ namespace eversim {
 				std::map<std::string,std::shared_ptr<InputContext>> available_contexts;
 				std::list<std::weak_ptr<InputContext>> context_stack;
 
+				void input_contexts(std::vector<InputContext>&);
 			public:
 				explicit InputHandler(const std::string&);
+				explicit InputHandler(std::istream&);
 
 				void push_context(const std::string& context_name);
 				std::string pop();
