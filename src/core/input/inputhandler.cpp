@@ -16,10 +16,8 @@ namespace eversim {
 	namespace core {
 		namespace input {
 
-			InputHandler::InputHandler(const string& file)
+			void InputHandler::input_contexts(std::vector<InputContext>& contexts)
 			{
-				auto contexts = InputContextLoader::generate_contexts_from_json(file);
-
 				for (const auto& context : contexts)
 				{
 					available_contexts[context.get_name()] = make_shared<InputContext>(context);
@@ -29,6 +27,18 @@ namespace eversim {
 				{
 					context.second->list_actions();
 				}
+			}
+
+			InputHandler::InputHandler(const string& file)
+			{
+				auto contexts = InputContextLoader::generate_contexts_from_json(file);
+				input_contexts(contexts);
+			}
+
+			InputHandler::InputHandler(std::istream& file)
+			{
+				auto contexts = InputContextLoader::generate_contexts_from_json(file);
+				input_contexts(contexts);
 			}
 
 			void InputHandler::push_context(const std::string& context_name)
