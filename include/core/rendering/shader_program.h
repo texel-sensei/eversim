@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include <tuple>
+#include <istream>
 
 namespace eversim {
 	namespace core {
@@ -31,10 +32,44 @@ namespace eversim {
 				~ShaderProgram();
 
 				void attach(const AttachableShader& shader) const;
-				void attach(const std::string& filename,const GLenum TYPE) const;
-				void attach(const std::vector<
-					std::pair<std::string,GLenum>
-							>& shaders) const;
+
+				template<typename T>
+				void attach(T file, const GLenum Type) const
+				{
+					switch (Type) {
+					case GL_FRAGMENT_SHADER:
+					{
+						FragmentShader shader("default_named_FragmentShader");
+						shader.create(file);
+						attach(shader);
+					}
+					break;
+					case GL_VERTEX_SHADER:
+					{
+						VertexShader shader("default_named_VertexShader");
+						shader.create(file);
+						attach(shader);
+					}
+					break;
+					case GL_GEOMETRY_SHADER:
+					{
+						GeometryShader shader("default_named_GeometryShader");
+						shader.create(file);
+						attach(shader);
+					}
+					break;
+					default:
+						throw std::exception("Unknown GLenum when attaching a shader");
+						break;
+					}
+				}
+				template<typename T>
+				void attach(const std::vector<std::pair<T, GLenum>>& shaders) const
+				{
+					for (const auto& shader : shaders)
+						attach<T>(shader.first, shader.second);
+				}
+
 				void create();
 				void link();
 				void use() const;

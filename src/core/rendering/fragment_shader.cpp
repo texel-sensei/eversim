@@ -7,6 +7,7 @@ namespace eversim {
 		namespace rendering {
 			FragmentShader::FragmentShader(const std::string& name) : AttachableShader(name)
 			{
+				id = glCreateShader(GL_FRAGMENT_SHADER);
 			}
 
 
@@ -16,9 +17,14 @@ namespace eversim {
 
 			void FragmentShader::create(const std::string& filename)
 			{
-				id = glCreateShader(GL_FRAGMENT_SHADER);
-
 				compile(filename);
+
+				created = true;
+			}
+
+			void FragmentShader::create(std::istream& file)
+			{
+				compile(file);
 
 				created = true;
 			}

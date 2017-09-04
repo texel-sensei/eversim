@@ -9,6 +9,7 @@ namespace eversim {
 		namespace rendering {
 			GeometryShader::GeometryShader(const std::string& name) : AttachableShader(name)
 			{
+				id = glCreateShader(GL_GEOMETRY_SHADER);
 			}
 
 
@@ -19,9 +20,14 @@ namespace eversim {
 
 			void GeometryShader::create(const std::string& filename)
 			{
-				id = glCreateShader(GL_GEOMETRY_SHADER);
-
 				compile(filename);
+
+				created = true;
+			}
+
+			void GeometryShader::create(std::istream& file)
+			{
+				compile(file);
 
 				created = true;
 			}

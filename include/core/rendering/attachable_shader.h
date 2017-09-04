@@ -8,6 +8,7 @@
 #include <vector>
 #include <exception>
 #include <iostream>
+#include <istream>
 
 namespace eversim {
 	namespace core {
@@ -27,14 +28,19 @@ namespace eversim {
 				}
 
 				virtual void create(const std::string& filename) = 0;
+				virtual void create(std::istream& file) = 0;
 
 				GLuint getID() const { return id; }
 
 				void compile(const std::string& filename)
 				{
-					LOG(INFO) << "create " << filename << std::endl;
 					std::ifstream file(filename);
 					if (!file) throw std::exception("Could not open source file for compilation");
+					compile(file);
+				}
+
+				void compile(std::istream& file)
+				{
 					std::string sourcecode("");
 					std::string line;
 
@@ -44,11 +50,7 @@ namespace eversim {
 					const GLchar* tmp_gl_source = sourcecode.c_str();
 
 					glShaderSource(id, 1, &tmp_gl_source, NULL);
-					//TODO error
 					glCompileShader(id);
-					//TODO error
-					LOG(INFO) << "\tcreate successfull";
-
 				}
 
 				std::string GetShaderInfoLog() const
