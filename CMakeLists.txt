@@ -65,19 +65,22 @@ add_definitions(-DGLM_FORCE_RADIANS=1)
 #dear imgui
 file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
 add_library(imgui ${IMGUI_SOURCES})
+set_target_properties (imgui PROPERTIES FOLDER externals)
 target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
 SET(LIBS ${LIBS} imgui)
 
-#dear imgui
+#loadpng
 file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
 add_library(lodepng ${LODEPNG_SOURCES})
+set_target_properties (lodepng PROPERTIES FOLDER externals)
 target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
 include_directories(${EXTERNALS}/lodepng/include/)
 SET(LIBS ${LIBS} lodepng)
 
 #soil
 add_subdirectory(${EXTERNALS}/soil)
+set_target_properties (SOIL PROPERTIES FOLDER externals)
 include_directories(${EXTERNALS}/soil/include/)
 SET(LIBS ${LIBS} SOIL)
 
@@ -105,6 +108,7 @@ include_directories(${EXTERNALS}/poly_collection/include)
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_definitions(-DELPP_FEATURE_ALL -DELPP_NO_DEFAULT_LOG_FILE)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
+set_target_properties (easyloggingpp PROPERTIES FOLDER externals)
 set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
 include_directories(${EXTERNALS}/easyloggingpp/src)
 SET(LIBS ${LIBS} easyloggingpp)
