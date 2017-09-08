@@ -31,7 +31,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 14)
 
 ######### Show all warnings
 if(MSVC)
@@ -109,7 +108,6 @@ option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_definitions(-DELPP_FEATURE_ALL -DELPP_NO_DEFAULT_LOG_FILE)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
 set_target_properties (easyloggingpp PROPERTIES FOLDER externals)
-set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
 include_directories(${EXTERNALS}/easyloggingpp/src)
 SET(LIBS ${LIBS} easyloggingpp)
 
@@ -122,6 +120,12 @@ endif(WIN32)
 add_definitions(-DNOMINMAX)
 
 ############# SOURCE ###############
+
+set(CMAKE_CXX_STANDARD 17)
+if(MSVC)
+add_definitions(-D_HAS_AUTO_PTR_ETC) # required to use boost with c++17
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+endif(MSVC)
 
 file(GLOB_RECURSE CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/core/*.h)
 file(GLOB_RECURSE GAME_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/game/*.h)
