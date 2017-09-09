@@ -1,6 +1,7 @@
 #include "core/rendering/spritemap.h"
 
 #include <algorithm>
+#include <vector>
 
 using namespace eversim::core::utility;
 
@@ -94,12 +95,14 @@ namespace eversim {
 			void Spritemap::init_shader()
 			{
 				program.create();
-				program.attach<std::istream&>
-				({
+				program.attach
+				(
+				{
 					{ std::istringstream(vertex_shader),GL_VERTEX_SHADER },
 					{ std::istringstream(geometry_shader),GL_GEOMETRY_SHADER },
 					{ std::istringstream(fragment_shader),GL_FRAGMENT_SHADER }
-				});
+				}
+				);
 				program.link();
 			}
 

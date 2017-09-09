@@ -8,6 +8,7 @@
 #include "core/rendering/camera.h"
 #include "core/rendering/shader_storage_buffer.h"
 #include "core/rendering/drawcall_entity.h"
+#include "core/rendering/shader_loader.h"
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -73,9 +74,6 @@ namespace eversim { namespace core { namespace rendering {
 		 * draw everything
 		 */
 		void draw(Camera& cam);
-
-		
-
 	private:
 		struct line
 		{

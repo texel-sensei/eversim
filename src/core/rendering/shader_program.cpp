@@ -13,6 +13,9 @@ using namespace std;
 namespace eversim {
 	namespace core {
 		namespace rendering {
+
+			shader_loader ShaderProgram::loader({ "../resources/shader" , "./resources/shader" });
+
 			ShaderProgram::ShaderProgram(const std::string& name) :
 				name(name)
 			{
@@ -130,6 +133,53 @@ namespace eversim {
 			GLint ShaderProgram::getUniformLocation(const std::string& uname) const
 			{
 				return glGetUniformLocation(getID(), uname.c_str());
+			}
+
+			void ShaderProgram::attach(std::string file, const GLenum type) const
+			{
+				attach(*loader.load(file, type));
+			}
+
+			void ShaderProgram::attach(const std::vector<std::pair<std::string, GLenum>>& shaders) const
+			{
+				for (const auto& shader : shaders)
+					attach(shader.first, shader.second);
+			}
+
+			void ShaderProgram::attach(std::istream& file, const GLenum type) const
+			{
+				switch (type) {
+				case GL_FRAGMENT_SHADER:
+				{
+					FragmentShader shader("default_named_FragmentShader");
+					shader.create(file);
+					attach(shader);
+				}
+				break;
+				case GL_VERTEX_SHADER:
+				{
+					VertexShader shader("default_named_VertexShader");
+					shader.create(file);
+					attach(shader);
+				}
+				break;
+				case GL_GEOMETRY_SHADER:
+				{
+					GeometryShader shader("default_named_GeometryShader");
+					shader.create(file);
+					attach(shader);
+				}
+				break;
+				default:
+					throw std::exception("Unknown GLenum when attaching a shader");
+					break;
+				}
+			}
+
+			void ShaderProgram::attach(const std::vector<std::pair<std::istream&, GLenum>>& shaders) const
+			{
+				for (auto& shader : shaders)
+					attach(shader.first, shader.second);
 			}
 		}
 	}

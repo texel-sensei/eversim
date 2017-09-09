@@ -64,11 +64,10 @@ namespace eversim { namespace core { namespace rendering {
 
 		auto& default_shader = *default_shader_ptr;
 		default_shader.create();
-		default_shader.attach<std::string>
-		({
-			{ "..\\resources\\shader\\textured_quad_vertex.glsl",GL_VERTEX_SHADER },
-			{ "..\\resources\\shader\\textured_quad_fragment.glsl",GL_FRAGMENT_SHADER }
-		});
+
+		default_shader.attach("textured_quad_vertex.glsl", GL_VERTEX_SHADER);
+		default_shader.attach("textured_quad_fragment.glsl", GL_FRAGMENT_SHADER);
+
 		default_shader.link();
 
 		default_shader.logUnfiformslogAttributes();
