@@ -222,7 +222,6 @@ void init_rendering(rendering::render_manager& renderer)
 void init_logging(int argc, char* argv[])
 {
 	using namespace utility;
-
 	START_EASYLOGGINGPP(argc, argv);
 	el::Configurations default_config;
 	default_config.setToDefault();
@@ -233,11 +232,16 @@ void init_logging(int argc, char* argv[])
 	if (fs::exists("log.conf")) {
 		default_config.parseFromFile("log.conf");
 	}
+
+	// create directory if it's missing
+	if (!fs::exists("logs"))
+		fs::create_directory("logs");
+
 	el::Loggers::reconfigureAllLoggers(default_config);
 
 	// collect all files in logs/ directory
-	auto dir_begin = fs::directory_iterator("logs");
-	auto dir_end = fs::directory_iterator();
+	const auto dir_begin = fs::directory_iterator("logs");
+	const auto dir_end = fs::directory_iterator();
 	vector<fs::path> logfiles(dir_begin, dir_end);
 
 	// remove all files that do not end in '.log'
@@ -245,9 +249,11 @@ void init_logging(int argc, char* argv[])
 	logfiles.erase(remove_if(logfiles.begin(), logfiles.end(), is_no_logfile), logfiles.end());
 	sort(logfiles.begin(), logfiles.end());
 
-	if (logfiles.size() > NUM_LOGFILES)
+	const auto extra = int(logfiles.size()) - NUM_LOGFILES;
+
+	if (extra > 0)
 	{
-		const auto end = logfiles.begin() + NUM_LOGFILES-1;
+		const auto end = logfiles.begin() + extra;
 		for (auto it = logfiles.begin(); it != end; ++it)
 		{
 			LOG(INFO) << "Deleting logfile " << it->string();
