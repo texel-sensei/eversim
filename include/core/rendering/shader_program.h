@@ -1,9 +1,11 @@
 #pragma once
 
-#include "core\rendering\attachable_shader.h"
-#include "core\rendering\vertex_shader.h"
-#include "core\rendering\fragment_shader.h"
-#include "core\rendering\geometry_shader.h"
+#include "core/rendering/attachable_shader.h"
+#include "core/rendering/vertex_shader.h"
+#include "core/rendering/fragment_shader.h"
+#include "core/rendering/geometry_shader.h"
+
+#include "core/rendering/shader_loader.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +20,8 @@ namespace eversim {
 			{
 			private:
 				GLuint id;
+
+				static shader_loader loader;
 				
 				std::vector<std::tuple<GLenum,std::string,GLint>> attributes;
 				std::vector<std::pair<GLenum,std::string>> uniforms;
@@ -32,43 +36,10 @@ namespace eversim {
 				~ShaderProgram();
 
 				void attach(const AttachableShader& shader) const;
-
-				template<typename T>
-				void attach(T file, const GLenum Type) const
-				{
-					switch (Type) {
-					case GL_FRAGMENT_SHADER:
-					{
-						FragmentShader shader("default_named_FragmentShader");
-						shader.create(file);
-						attach(shader);
-					}
-					break;
-					case GL_VERTEX_SHADER:
-					{
-						VertexShader shader("default_named_VertexShader");
-						shader.create(file);
-						attach(shader);
-					}
-					break;
-					case GL_GEOMETRY_SHADER:
-					{
-						GeometryShader shader("default_named_GeometryShader");
-						shader.create(file);
-						attach(shader);
-					}
-					break;
-					default:
-						throw std::exception("Unknown GLenum when attaching a shader");
-						break;
-					}
-				}
-				template<typename T>
-				void attach(const std::vector<std::pair<T, GLenum>>& shaders) const
-				{
-					for (const auto& shader : shaders)
-						attach<T>(shader.first, shader.second);
-				}
+				void attach(std::string file, const GLenum type) const;
+				void attach(const std::vector<std::pair<std::string, GLenum>>& shaders) const;
+				void attach(std::istream& file, const GLenum type) const;
+				void attach(const std::vector<std::pair<std::istream&, GLenum>>& shaders) const;
 
 				void create();
 				void link();
