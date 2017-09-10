@@ -74,6 +74,7 @@ namespace eversim { namespace core { namespace rendering {
 		 * draw everything
 		 */
 		void draw(Camera& cam);
+		void enable_gl_debug() const;
 	private:
 		struct line
 		{

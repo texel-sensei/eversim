@@ -171,6 +171,21 @@ namespace eversim {
 								sdl_event.motion.y }
 							));
 						}
+						else if (sdl_event.type == SDL_KEYDOWN ||
+							sdl_event.type == SDL_KEYUP) {
+							auto sdl_button = static_cast<SDL_Keycode>(sdl_event.key.keysym.sym);
+
+							auto bit = RawInputConstants::sdl_keycode_map.find(sdl_button);
+
+							if (bit != RawInputConstants::sdl_keycode_map.end()) {
+								res.push_back(
+									create_button(
+										bit->second,
+										sdl_event.type == SDL_KEYDOWN
+									)
+								);
+							}
+						}
 					}
 				}
 

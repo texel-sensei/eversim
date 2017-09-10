@@ -167,6 +167,79 @@ namespace eversim { namespace core { namespace rendering {
 			throw sdl::sdl_error{ "Failed to init GLEW!" };
 		}
 
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	namespace {
+		const char* glTypeToString(GLenum type)
+		{
+			switch (type)
+			{
+			case GL_DEBUG_TYPE_ERROR:
+				return "ERROR";
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+				return "DEPRECATED_BEHAVIOR";
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+				return "UNDEFINED_BEHAVIOR";
+			case GL_DEBUG_TYPE_PORTABILITY:
+				return "PORTABILITY";
+			case GL_DEBUG_TYPE_PERFORMANCE:
+				return "PERFORMANCE";
+			case GL_DEBUG_TYPE_OTHER:
+				return "OTHER";
+			}
+			return "UNKNOWN";
+		}
+
+		const char* glSeverityToString(GLenum severity)
+		{
+			switch (severity)
+			{
+			case GL_DEBUG_SEVERITY_LOW:
+				return "LOW";
+			case GL_DEBUG_SEVERITY_MEDIUM:
+				return "MEDIUM";
+			case GL_DEBUG_SEVERITY_HIGH:
+				return "HIGH";
+			}
+			return "UNKNOWN";
+		}
+	}
+
+	void render_manager::enable_gl_debug() const
+	{
+		//Enable Debugging
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+		glDebugMessageCallback(
+			[](
+				GLenum source, GLenum type, GLuint /*id*/, GLenum severity,
+				GLsizei /*length*/, const GLchar* message, const void* /*userParam*/)
+		{
+			LOG(WARNING) << "GL Debug Message" << endl;
+			LOG(WARNING) << "GL Debug Message" << endl;
+			LOG(WARNING) << string(80, '=') << endl;
+			LOG(WARNING) << "src: " << source << endl;
+			LOG(WARNING) << "type: " << glTypeToString(type) << endl;
+			LOG(WARNING) << "severity: " << glSeverityToString(severity) << endl;
+			LOG(WARNING) << message << endl;
+			LOG(WARNING) << string(80, '=');
+
+			if (
+				severity == GL_DEBUG_SEVERITY_HIGH
+				&& type == GL_DEBUG_TYPE_ERROR
+				)
+			{
+				throw 42;
+			}
+		},
+			nullptr
+			);
 	}
 
 	entity_shptr render_manager::add_entity(const entity_type type)

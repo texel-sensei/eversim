@@ -1,5 +1,11 @@
 {
-  "pairfile" :  "inputpairs.json",
+  "pairfile": "inputpairs.json",
+  "general": {
+    "ESCAPE": {
+      "type": "BUTTON",
+      "keys": ["KEY_ESC"]
+    }
+  },
   "game": {
     "JUMP": {
       "type": "BUTTON",
