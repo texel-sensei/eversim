@@ -88,6 +88,7 @@ target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 
 #better enums
 include_directories(${EXTERNALS}/better-enums)
+add_definitions(-DBETTER_ENUMS_MACRO_FILE="${EXTERNALS}/better-enums/enum_macros.h")
 
 #boost
 set(Boost_USE_STATIC_LIBS ON) 
