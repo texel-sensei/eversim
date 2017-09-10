@@ -19,16 +19,19 @@
 #include "core/system/components/physics_component.h"
 #include "core/system/components/rendering_component.h"
 #include "core/system/game.h"
-#include "core/input/contextloader.h"
-#include "core/input/gamepadhandler.h"
+
 #include "core/utility/filesystem_wrapper.h"
 
-#include <easylogging++.h>
+#include "core/input/contextloader.h"
+#include "core/input/gamepadhandler.h"
+#include "core/input/inputhandler.h"
 
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
-#include "core/input/inputhandler.h"
+#include <easylogging++.h>
+
+
 #undef main
 
 INITIALIZE_EASYLOGGINGPP

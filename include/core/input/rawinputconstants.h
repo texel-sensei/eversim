@@ -61,8 +61,21 @@ namespace eversim { namespace core { namespace input {
 			KEY_RIGHT_CTRL,
 			KEY_CAPSLOCK,
 			KEY_TAB,
-			KEY_ALT,
-			KEY_ALTGR,
+			KEY_LEFT_ALT,
+			KEY_RIGHT_ALT,
+			KEY_0,
+			KEY_1,
+			KEY_2,
+			KEY_3,
+			KEY_4,
+			KEY_5,
+			KEY_6,
+			KEY_7,
+			KEY_8,
+			KEY_9,
+			KEY_BACKSPACE,
+			KEY_SPACE,
+			KEY_ENTER,
 			INVALID
 		)
 
@@ -89,19 +102,29 @@ namespace eversim { namespace core { namespace input {
 
 		const std::map<SDL_GameControllerButton, input> sdl_button_map =
 		{
-			{SDL_CONTROLLER_BUTTON_A,input::GAMEPAD_BUTTON_A},
-			{SDL_CONTROLLER_BUTTON_B,input::GAMEPAD_BUTTON_B},
-			{SDL_CONTROLLER_BUTTON_X,input::GAMEPAD_BUTTON_X},
-			{SDL_CONTROLLER_BUTTON_Y,input::GAMEPAD_BUTTON_Y},
-			{SDL_CONTROLLER_BUTTON_BACK,input::GAMEPAD_BUTTON_LB},
-			{SDL_CONTROLLER_BUTTON_GUIDE,input::GAMEPAD_BUTTON_RB},
-			{SDL_CONTROLLER_BUTTON_LEFTSTICK,input::GAMEPAD_BUTTON_START},
-			{SDL_CONTROLLER_BUTTON_START,input::GAMEPAD_BUTTON_SELECT}
+			{ SDL_CONTROLLER_BUTTON_A,input::GAMEPAD_BUTTON_A},
+			{ SDL_CONTROLLER_BUTTON_B,input::GAMEPAD_BUTTON_B},
+			{ SDL_CONTROLLER_BUTTON_X,input::GAMEPAD_BUTTON_X},
+			{ SDL_CONTROLLER_BUTTON_Y,input::GAMEPAD_BUTTON_Y},
+			{ SDL_CONTROLLER_BUTTON_BACK,input::GAMEPAD_BUTTON_LB},
+			{ SDL_CONTROLLER_BUTTON_GUIDE,input::GAMEPAD_BUTTON_RB},
+			{ SDL_CONTROLLER_BUTTON_LEFTSTICK,input::GAMEPAD_BUTTON_START},
+			{ SDL_CONTROLLER_BUTTON_START,input::GAMEPAD_BUTTON_SELECT}
 		};
 
 		const std::map<SDL_Keycode, input> sdl_keycode_map =
 		{
-			{SDLK_ESCAPE, input::KEY_ESC},
+			{ SDLK_ESCAPE, input::KEY_ESC},
+			{ SDLK_LSHIFT, input::KEY_LEFT_SHIFT },
+			{ SDLK_RSHIFT, input::KEY_RIGHT_SHIFT },
+			{ SDLK_LCTRL, input::KEY_LEFT_CTRL },
+			{ SDLK_RCTRL, input::KEY_RIGHT_CTRL },
+			{ SDLK_CAPSLOCK, input::KEY_CAPSLOCK },
+			{ SDLK_TAB , input::KEY_TAB },
+			{ SDLK_LALT, input::KEY_LEFT_ALT },
+			{ SDLK_RALT , input::KEY_RIGHT_ALT },
+			{ SDLK_BACKSPACE, input::KEY_BACKSPACE },
+			{ SDLK_SPACE, input::KEY_SPACE},
 			{ SDLK_F1, input::KEY_F1 },
 			{ SDLK_F1, input::KEY_F2 },
 			{ SDLK_F2, input::KEY_F3 },
@@ -113,7 +136,17 @@ namespace eversim { namespace core { namespace input {
 			{ SDLK_F9, input::KEY_F9 },
 			{ SDLK_F10, input::KEY_F10 },
 			{ SDLK_F11, input::KEY_F11 },
-			{ SDLK_F12, input::KEY_F12 }
+			{ SDLK_F12, input::KEY_F12 }, 
+			{ SDLK_0 , input::KEY_0},
+			{ SDLK_1 , input::KEY_1 },
+			{ SDLK_2 , input::KEY_2 },
+			{ SDLK_3 , input::KEY_3 },
+			{ SDLK_4 , input::KEY_4 },
+			{ SDLK_5 , input::KEY_5 },
+			{ SDLK_6 , input::KEY_6 },
+			{ SDLK_7 , input::KEY_7 },
+			{ SDLK_8 , input::KEY_8 },
+			{ SDLK_9 , input::KEY_9 }
 		};
 
 		const std::map<uint8_t, input> sdl_mouserange_map =
