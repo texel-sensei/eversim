@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor/core/base_window.h"
+#include "editor/core/errors.h"
 
 #include <easylogging++.h>
 
@@ -45,7 +46,7 @@ namespace eversim { namespace editor { namespace core {
 		if (it != windows.end())
 		{
 			LOG(ERROR) << "Added duplicate window to window manager! \"" << name << "\"";
-			throw std::runtime_error{"Duplicate window added!"};
+			EVERSIM_THROW(editor_error::DuplicateWindow, "Duplicated window '" + name + "'");
 		}
 		windows.insert(it, std::make_pair(name, move(w)));
 
