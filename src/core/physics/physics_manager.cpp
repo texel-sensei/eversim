@@ -295,6 +295,7 @@ namespace eversim { namespace core { namespace physics {
 		{
 			b.position = {};
 			b.velocity = {};
+			b.on_ground = false;
 		}
 	}
 
@@ -488,6 +489,7 @@ namespace eversim { namespace core { namespace physics {
 			{
 				const auto entry = ray.lerp(*intersection) + tile.position();
 
+				particle.owner->on_ground = true;
 				static_collision_constraints.emplace_back(tile, particle, normal, entry);
 			}
 
@@ -496,6 +498,7 @@ namespace eversim { namespace core { namespace physics {
 			{
 				const auto entry = side.closest_point(mpos) + tile.position();
 
+				particle.owner->on_ground = true;
 				static_collision_constraints.emplace_back(tile, particle, normal, entry);
 			}
 		}

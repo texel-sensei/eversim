@@ -32,12 +32,15 @@ namespace eversim { namespace core { namespace physics {
 			return alive;
 		}
 
+		bool is_on_ground() const { return on_ground; }
+
 		void kill() { alive = false; }
 
 	private:
 		glm::vec2 old_position;
 		glm::vec2 old_velocity;
 		bool alive = true;
+		bool on_ground = false;
 
 		utility::array_view<particle> particles;
 	};
