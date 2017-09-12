@@ -115,6 +115,7 @@ SET(LIBS ${LIBS} easyloggingpp)
 
 if(WIN32)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") #multiprocessor compilation for visual studio
+	SET(LIBS ${LIBS} DbgHelp)
 endif(WIN32)
 
 add_definitions(-DNOMINMAX)

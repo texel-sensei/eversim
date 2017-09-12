@@ -30,6 +30,7 @@
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
 #include "core/input/inputhandler.h"
+#include "core/utility/stacktrace.h"
 #undef main
 
 INITIALIZE_EASYLOGGINGPP
@@ -99,6 +100,31 @@ void init_logging(int argc, char* argv[])
 
 	el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 	default_config.setGlobally(el::ConfigurationType::Filename, "logs/%datetime{%Y-%M-%d %H-%m-%s}.log");
+
+	el::Helpers::setCrashHandler([](int sig)
+	{
+		const auto marker = std::string(80, '=');
+		LOG(ERROR) << "\n" << marker <<"\nApplication crash!\n" << marker;
+		stacktrace trace;
+		fill_stacktrace(&trace);
+		for(auto const& frame : trace)
+		{
+			LOG(ERROR) 
+				<< frame.get_simple_filename()
+				<< ":" << frame.get_line()
+				<< " " << frame.get_name()
+			;
+		}
+		if(trace.is_partial())
+		{
+			LOG(ERROR) << "...";
+		}
+		el::Helpers::logCrashReason(sig, true);
+		el::Loggers::flushAll();
+		el::Helpers::crashAbort(sig);
+		el::Loggers::flushAll();
+	});
+	el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
 
 	if (fs::exists("log.conf")) {
 		default_config.parseFromFile("log.conf");
