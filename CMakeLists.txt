@@ -133,6 +133,25 @@ add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 add_library(editor STATIC ${EDITOR_HEADERS} ${EDITOR_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
 
+# copy dlls
+if (WIN32)
+	if (CMAKE_CL_64)
+      set(SDL_DLL "${SDL2_INCLUDE_DIR}/../lib/x64/SDL2.dll")
+	else()
+      set(SDL_DLL "${SDL2_INCLUDE_DIR}/../lib/x86/SDL2.dll")
+	endif()
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
+	copy_if_different "${SDL_DLL}" $<TARGET_FILE_DIR:game>)  
+
+	set(GLEW_DLL_DEBUG "${GLEW_INCLUDE_DIR}/../bin/bin/Debug/glew32d.dll")
+	set(GLEW_DLL_RELEASE "${GLEW_INCLUDE_DIR}/../bin/bin/Release/glew32.dll")
+
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
+	copy_if_different "${GLEW_DLL_DEBUG}" $<TARGET_FILE_DIR:game>)  
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
+	copy_if_different "${GLEW_DLL_RELEASE}" $<TARGET_FILE_DIR:game>)  
+endif()
+
 # core source groups
 foreach(_file IN ITEMS ${CORE_HEADERS} ${CORE_SOURCES})
 	get_filename_component(_file_path "${_file}" PATH)
@@ -170,3 +189,4 @@ target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
 enable_testing()
 include(ParseAndAddCatchTests)
 ParseAndAddCatchTests(${TEST_BIN})
+

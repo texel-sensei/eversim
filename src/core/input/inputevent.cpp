@@ -192,6 +192,7 @@ namespace eversim {
 				return res;
 			}
 
+
 			RawInputConstants::event_type InputEvent::get_event_type() const
 			{
 				return type;

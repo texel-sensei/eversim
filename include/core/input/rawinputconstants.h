@@ -14,6 +14,7 @@
 
 namespace eversim { namespace core { namespace input {
 
+
 	namespace RawInputConstants
 	{
 		//merge button and range
