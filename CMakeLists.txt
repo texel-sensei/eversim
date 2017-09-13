@@ -31,7 +31,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 14)
 
 ######### Show all warnings
 if(MSVC)
@@ -65,19 +64,22 @@ add_definitions(-DGLM_FORCE_RADIANS=1)
 #dear imgui
 file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
 add_library(imgui ${IMGUI_SOURCES})
+set_target_properties (imgui PROPERTIES FOLDER externals)
 target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
 SET(LIBS ${LIBS} imgui)
 
-#dear imgui
+#loadpng
 file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
 add_library(lodepng ${LODEPNG_SOURCES})
+set_target_properties (lodepng PROPERTIES FOLDER externals)
 target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
 include_directories(${EXTERNALS}/lodepng/include/)
 SET(LIBS ${LIBS} lodepng)
 
 #soil
 add_subdirectory(${EXTERNALS}/soil)
+set_target_properties (SOIL PROPERTIES FOLDER externals)
 include_directories(${EXTERNALS}/soil/include/)
 SET(LIBS ${LIBS} SOIL)
 
@@ -105,7 +107,7 @@ include_directories(${EXTERNALS}/poly_collection/include)
 option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_definitions(-DELPP_FEATURE_ALL -DELPP_NO_DEFAULT_LOG_FILE)
 add_subdirectory(${EXTERNALS}/easyloggingpp)
-set(CMAKE_CXX_STANDARD 14) # required because easyloggingpp sets standard to 11
+set_target_properties (easyloggingpp PROPERTIES FOLDER externals)
 include_directories(${EXTERNALS}/easyloggingpp/src)
 SET(LIBS ${LIBS} easyloggingpp)
 
@@ -118,6 +120,12 @@ endif(WIN32)
 add_definitions(-DNOMINMAX)
 
 ############# SOURCE ###############
+
+set(CMAKE_CXX_STANDARD 17)
+if(MSVC)
+add_definitions(-D_HAS_AUTO_PTR_ETC) # required to use boost with c++17
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+endif(MSVC)
 
 file(GLOB_RECURSE CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/core/*.h)
 file(GLOB_RECURSE GAME_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/game/*.h)

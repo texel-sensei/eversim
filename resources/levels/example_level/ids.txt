@@ -1,4 +1,5 @@
 0 blank
 0x744b35ff nature/dirt
 0x28a21aff nature/grass
+0xd64040ff nature/red-flower
 0x8a8a8aff structure/bricks
