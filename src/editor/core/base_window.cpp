@@ -10,12 +10,12 @@ namespace eversim { namespace editor { namespace core {
 
 	void base_window::draw(display_type type)
 	{
-		auto vis = header(type);
+		const auto vis = header(type);
 		if (vis)
 		{
 			draw_content();
-			footer(type);
 		}
+		footer(type);
 	}
 
 	bool base_window::header(display_type type)
