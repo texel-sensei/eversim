@@ -5,5 +5,8 @@
 
 ##Tutorials
 
+###General Design
+- http://robert.zubek.net/docs/games-studio-2017/8-software-patterns.pdf
+
 ###Sound
-http://ruoyusun.com/2017/08/29/make-some-music.html
+- http://ruoyusun.com/2017/08/29/make-some-music.html
