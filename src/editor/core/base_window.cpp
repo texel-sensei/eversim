@@ -24,7 +24,7 @@ namespace eversim { namespace editor { namespace core {
 		{
 		case display_type::window:
 			this->begin_window();
-			return ImGui::Begin(name.c_str(), nullptr, ImVec2(0, 0), alpha, flags);
+			return ImGui::Begin(name.c_str(), &visible, ImVec2(0, 0), alpha, flags);
 		case display_type::child_window:
 			return ImGui::BeginChild(name.c_str());
 		case display_type::inplace:
