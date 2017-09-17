@@ -23,7 +23,7 @@ namespace eversim {
 			std::unique_ptr<constraint> angle_constraint_factory::build(
 				constraint_descriptor const& desc, body const* bdy
 			) const {
-				assert(desc.arity == 3);
+				EVERSIM_ASSERT(desc.arity == 3);
 				auto target = boost::any_cast<float>(desc.extra_data);
 				auto c = make_unique<angle_constraint>(target);
 				c->stiffness = desc.stiffness;

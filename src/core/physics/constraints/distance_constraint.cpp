@@ -21,7 +21,7 @@ namespace eversim { namespace core { namespace physics {
 	std::unique_ptr<constraint> distance_constraint_factory::build(
 		constraint_descriptor const& desc, body const* bdy
 	) const {
-		assert(desc.arity == 2);
+		EVERSIM_ASSERT(desc.arity == 2);
 		auto target = boost::any_cast<float>(desc.extra_data);
 		auto c = make_unique<distance_constraint>(target);
 		c->stiffness = desc.stiffness;

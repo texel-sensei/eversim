@@ -7,7 +7,7 @@ namespace eversim { namespace core { namespace physics {
 
 	body_offset_ptr::body_offset_ptr(particle const* p)
 	{
-		assert(p);
+		EVERSIM_ASSERT(p);
 		base = p->owner;
 		offset = p - base->get_particles().data();
 	}

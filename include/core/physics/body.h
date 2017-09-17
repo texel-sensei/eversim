@@ -22,7 +22,7 @@ namespace eversim { namespace core { namespace physics {
 
 		particle& get_particle(size_t idx) const
 		{
-			assert(idx < particles.size());
+			EVERSIM_ASSERT(idx < particles.size());
 			return particles[idx];
 		}
 		utility::array_view<particle> get_particles() const { return particles; }

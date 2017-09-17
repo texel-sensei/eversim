@@ -40,11 +40,14 @@ shared_ptr<level> level_loader::load_file(string const& filename)
 
 	if (!exists(layout_path))
 	{
-		throw runtime_error{"Layout file missing in " + filename};
+		EVERSIM_THROW(level_error::MissingLayout,
+			"Layout file missing in " + filename);
 	}
 	if (!exists(table_path))
 	{
-		throw runtime_error{"ID table file missing in " + filename};
+		EVERSIM_THROW(level_error::MissingIDTable,
+			"ID table file missing in " + filename
+		);
 	}
 
 	auto idtablestream = ifstream(table_path);

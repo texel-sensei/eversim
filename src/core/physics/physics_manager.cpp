@@ -137,7 +137,7 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::external;
 			break;
 		default:;
-			assert(!"unknown state!");
+			EVERSIM_THROW(generic_error::InvalidEnum, "physics step");
 		}
 	}
 
@@ -327,9 +327,7 @@ namespace eversim { namespace core { namespace physics {
 					break;
 				}
 			default:
-				{
-					assert(!"Unhandled constraint type!");
-				}
+				EVERSIM_THROW(generic_error::InvalidEnum, "physics constraint_type");
 			}
 
 			static thread_local glm::vec2 cache[physics_manager::max_constraint_arity];
@@ -406,7 +404,7 @@ namespace eversim { namespace core { namespace physics {
 			auto p1 = c.particles[0];
 			auto p2 = c.particles[1];
 
-			assert(p1.base != p2.base && "Collision between particles of the same body is not allowed!");
+			EVERSIM_ASSERT(p1.base != p2.base && "Collision between particles of the same body is not allowed!");
 
 			if(p1.base > p2.base)
 			{
@@ -446,7 +444,7 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::particle_tile_collision(particle& p)
 	{
-		assert(level);
+		EVERSIM_ASSERT(level);
 		
 		const auto pos = p.projected_position;
 

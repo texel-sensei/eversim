@@ -45,7 +45,9 @@ namespace eversim { namespace core { namespace world {
 		case collision_type::solid: 
 			return lvl->get_collision_shape(collision_shape.to_ulong());
 		case collision_type::extra: 
-			throw std::runtime_error{"Complex collisions shapes are not yet implemented!"};
+			EVERSIM_THROW(generic_error::NotYetImplemented,
+				"Complex collision shapes are not yet implemented!"
+			);
 		default:
 			using namespace std;
 			LOG(ERROR) << "Invalid enumeration value in " __FUNCTION__
