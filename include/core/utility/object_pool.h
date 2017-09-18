@@ -222,6 +222,11 @@ namespace eversim { namespace core { namespace utility {
 			return last;
 		}
 
+		void clear()
+		{
+			erase(begin(), end());
+		}
+
 	private:
 		struct node {
 			static_assert(sizeof(T) >= sizeof(node*), "Objects in a pool must at leas have the size of a pointer!");
