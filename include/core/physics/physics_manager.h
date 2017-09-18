@@ -106,8 +106,8 @@ namespace eversim { namespace core { namespace physics {
 		std::vector<particle> particles;
 
 		boost::base_collection<constraint> constraints;
-		std::vector<distance_constraint> collision_constraints;
-		std::vector<static_collision_constraint> static_collision_constraints;
+		utility::object_pool<distance_constraint, 200> collision_constraints;
+		utility::object_pool<static_collision_constraint, 200> static_collision_constraints;
 
 		body_container bodies;
 

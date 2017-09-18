@@ -182,7 +182,7 @@ namespace eversim { namespace core { namespace physics {
 							auto c = distance_constraint{2*particle_radius};
 							c.set_type(constraint_type::inequality);
 							c.particles = {&p, other};
-							collision_constraints.emplace_back(c);
+							collision_constraints.insert(c);
 						}
 					}
 				}
@@ -488,7 +488,7 @@ namespace eversim { namespace core { namespace physics {
 				const auto entry = ray.lerp(*intersection) + tile.position();
 
 				particle.owner->on_ground = true;
-				static_collision_constraints.emplace_back(tile, particle, normal, entry);
+				static_collision_constraints.emplace(tile, particle, normal, entry);
 			}
 
 			const auto dist = side.distance_to_point(mpos);
@@ -497,7 +497,7 @@ namespace eversim { namespace core { namespace physics {
 				const auto entry = side.closest_point(mpos) + tile.position();
 
 				particle.owner->on_ground = true;
-				static_collision_constraints.emplace_back(tile, particle, normal, entry);
+				static_collision_constraints.emplace(tile, particle, normal, entry);
 			}
 		}
 		
