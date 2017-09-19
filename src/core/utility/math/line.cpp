@@ -1,6 +1,6 @@
-#include "core/utility/math.h"
+#include "core/utility/math/line.h"
 
-namespace eversim { namespace core { namespace utility {
+namespace eversim::core::utility::math {
 
 	boost::optional<float> line::intersect(line const& other) const
 	{
@@ -44,4 +44,4 @@ namespace eversim { namespace core { namespace utility {
 		return start + direction() * dot(e, direction());
 		
 	}
-}}}
+}

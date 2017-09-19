@@ -1,10 +1,11 @@
 #include "core/physics/constraints/static_collision_constraint.h"
+#include "core/physics/constraints/angle_constraint.h"
+
 #include "core/world/tile.h"
-#include "core/utility/math.h"
+
 #include "core/rendering/render_manager.h"
 
 #include <vector>
-#include "core/physics/constraints/angle_constraint.h"
 
 using namespace std;
 

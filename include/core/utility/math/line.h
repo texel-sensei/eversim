@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <boost/optional.hpp>
 
-namespace eversim { namespace core { namespace utility {
+namespace eversim::core::utility::math {
 	
 	struct line {
 		glm::vec2 start, end;
@@ -57,6 +57,4 @@ namespace eversim { namespace core { namespace utility {
 		glm::vec2 closest_point(glm::vec2 p) const;
 	};
 
-
-
-} } }
+}

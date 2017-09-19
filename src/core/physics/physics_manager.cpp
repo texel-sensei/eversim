@@ -474,7 +474,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		const auto mpos = particle.pos - tile.position();
 		const auto mprojpos = particle.projected_position - tile.position();
-		const auto ray = utility::line{ mpos, mprojpos };
+		const auto ray = utility::math::line{ mpos, mprojpos };
 
 		for(auto const& side : tile.get_collision_shape())
 		{

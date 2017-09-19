@@ -1,10 +1,10 @@
-#include "core/utility/math.h"
+#include "core/utility/math/line.h"
 #include "test_helper.h"
 #include <catch.hpp>
 
-using namespace eversim::core::utility;
+using namespace eversim::core::utility::math;
 
-TEST_CASE("line", "[utility][math]")
+TEST_CASE("line", "[utility][math][line]")
 {
 	const auto l = line{ {},{ 1.f,1.f } };
 	SECTION("length")
@@ -69,7 +69,7 @@ TEST_CASE("line", "[utility][math]")
 	}
 }
 
-TEST_CASE("line intersections", "[utility][math]")
+TEST_CASE("line intersections", "[utility][math][line]")
 {
 	const auto X = line{ { -1.f,0.f }, { 1.f, 0.f } };
 	const auto Y = line{ { 0.f,-1.f },{ 0.f, 1.f } };

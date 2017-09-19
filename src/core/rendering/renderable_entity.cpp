@@ -2,7 +2,7 @@
 #include "core/rendering/drawcall_entity.h"
 
 #include "core/utility/plattform.h"
-#include "core/utility/matrix_helper.h"
+#include "core/utility/math/matrix_helper.h"
 
 #include <easylogging++.h>
 

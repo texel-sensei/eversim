@@ -4,7 +4,7 @@
 #include "core/rendering/render_manager.h"
 #include "core/rendering/renderable_entity.h"
 
-#include "core/utility/matrix_helper.h"
+#include "core/utility/math/matrix_helper.h"
 
 #include <glm/gtc/matrix_transform.inl>
 

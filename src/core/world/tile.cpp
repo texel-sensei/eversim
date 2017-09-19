@@ -36,7 +36,7 @@ namespace eversim { namespace core { namespace world {
 		return descriptor->collision != collision_type::none;
 	}
 
-	utility::array_view<const utility::line> tile::get_collision_shape() const
+	utility::array_view<const utility::math::line> tile::get_collision_shape() const
 	{
 		switch(descriptor->collision)
 		{
