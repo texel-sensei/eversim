@@ -171,9 +171,15 @@ target_link_libraries(game editor eversim)
 #######################################################################
 
 set(TEST_BIN eversim_tests)
-file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
-add_executable(${TEST_BIN} ${TEST_SOURCES})
+set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test)
+file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cpp)
+file(GLOB_RECURSE TEST_HEADERS ${TEST_DIR}/include/*.h)
+
+add_executable(${TEST_BIN} ${TEST_SOURCES} ${TEST_HEADERS})
 target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
+target_include_directories(${TEST_BIN} PRIVATE ${TEST_DIR}/include)
+
+source_group("include" ${TEST_HEADERS})
 
 enable_testing()
 include(ParseAndAddCatchTests)
