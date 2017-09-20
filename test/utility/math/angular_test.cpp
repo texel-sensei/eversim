@@ -13,10 +13,6 @@ TEST_CASE("angular: construction", "[utility][math][angular]")
 	SECTION("from float")
 	{
 		const auto o = orientation{ 0 };
-		const auto r = o.repr();
-
-		REQUIRE(r.real() == Approx(1));
-		REQUIRE(r.imag() == Approx(0));
 
 		REQUIRE_THAT(o.to_direction(), is_approx(1, 0));
 
@@ -31,14 +27,13 @@ TEST_CASE("angular: construction", "[utility][math][angular]")
 		REQUIRE_THAT(o.to_direction(), is_approx(0, 1));
 		REQUIRE(o.as_radians() == Approx(PI / 2));
 
-		// should be the same as (1,1)/||(1,1)||
 		const auto o2 = orientation{ 1. + 1i };
 		REQUIRE(o2.as_degrees() == Approx(45));
 		REQUIRE_THAT(o2.to_direction(), is_approx(normalize(vec2(1, 1))));
 	}
 }
 
-TEST_CASE("angular: addition/subtraction")
+TEST_CASE("angular: addition/subtraction", "[utility][math][angular]")
 {
 	SECTION("rotation + orientation")
 	{
@@ -51,4 +46,34 @@ TEST_CASE("angular: addition/subtraction")
 
 		REQUIRE(cw_rotated.as_degrees() == Approx(-25));
 	}
+
+	SECTION("orientation - orientation")
+	{
+		const auto o1 = orientation::from_degrees(45);
+		const auto o2 = orientation::from_degrees(-45);
+
+		const auto r1 = o1 - o2;
+
+		REQUIRE(r1.as_degrees() == Approx(-90));
+		REQUIRE(o1 + r1 == o2);
+
+		const auto o3 = orientation::from_degrees(0);
+		const auto o4 = orientation::from_degrees(180);
+
+		const auto r2 = o3 - o4;
+		REQUIRE(r2.as_degrees() == Approx(-180));
+		REQUIRE(o3 + r2 == o4);
+	}
+}
+
+TEST_CASE("angular: point functions", "[utility][math][angular]")
+{
+	const auto a = vec2(2, 1);
+	const auto b = vec2(3, 2);
+
+	const auto angle = angle_between_points(a, b);
+	REQUIRE(angle.as_degrees() == Approx(45));
+
+	const auto r_angle = angle_between_points(b, a);
+	REQUIRE(r_angle.as_degrees() == Approx(-135));
 }

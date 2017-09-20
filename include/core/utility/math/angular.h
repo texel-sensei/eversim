@@ -13,9 +13,9 @@ namespace eversim::core::utility::math
 	
 	struct rotation;
 
-	struct orientation
-		: boost::addable2<orientation, rotation>,
-		boost::subtractable2<orientation, rotation>
+	struct orientation :
+			boost::addable2<orientation, rotation>,
+			boost::subtractable2<orientation, rotation>
 	{
 		using representation = std::complex<float>;
 
@@ -30,9 +30,9 @@ namespace eversim::core::utility::math
 			return orientation{ deg * PI / 180.f };
 		}
 
-		representation repr() const
+		static orientation from_direction(glm::vec2 const& v)
 		{
-			return { value.real(), value.imag() };
+			return orientation{ {v.x,v.y} };
 		}
 
 		glm::vec2 to_direction() const
@@ -73,9 +73,24 @@ namespace eversim::core::utility::math
 		explicit rotation(float theta) : value(cosf(theta), sinf(theta)){}
 		explicit rotation(representation rep) : value(rep){}
 
+		float as_radians() const
+		{
+			return std::atan2(value.imag(), value.real());
+		}
+
+		float as_degrees() const
+		{
+			return as_radians() * 180.f / PI;
+		}
+
 		rotation operator-() const
 		{
 			return rotation{ conj(value) };
+		}
+
+		friend bool operator==(rotation const& a, rotation const& b) noexcept
+		{
+			return a.value == b.value;
 		}
 
 	private:
@@ -92,6 +107,16 @@ namespace eversim::core::utility::math
 		}
 	}
 
+	/*
+	 * Returns the rotation, that maps the positive X-axis onto the vector
+	 * from a to b
+	 */
+	inline rotation angle_between_points(glm::vec2 const& a, glm::vec2 const& b) noexcept
+	{
+		const auto dif = b - a;
+		return rotation{ {dif.x, dif.y} };
+	}
+
 	inline orientation& orientation::operator+=(rotation const& rot)
 	{
 		value *= rot.value;
@@ -106,7 +131,6 @@ namespace eversim::core::utility::math
 
 	inline rotation operator-(orientation const& a, orientation const& b)
 	{
-		using namespace literals;
-		return 0_deg;
+		return rotation{ b.value / a.value };
 	}
 }
