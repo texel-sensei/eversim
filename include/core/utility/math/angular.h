@@ -20,7 +20,7 @@ namespace eversim::core::utility::math
 		using representation = std::complex<float>;
 
 		explicit orientation(float rad) : value(cosf(rad), sinf(rad)){}
-		explicit orientation(representation repr) : value(repr)
+		explicit orientation(representation repr = {1,0}) : value(repr)
 		{
 			normalize();
 		}
@@ -71,7 +71,7 @@ namespace eversim::core::utility::math
 		using representation = orientation::representation;
 
 		explicit rotation(float theta) : value(cosf(theta), sinf(theta)){}
-		explicit rotation(representation rep) : value(rep){}
+		explicit rotation(representation rep = {1,0}) : value(rep){}
 
 		float as_radians() const
 		{

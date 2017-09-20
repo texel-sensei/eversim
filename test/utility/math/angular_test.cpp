@@ -45,6 +45,9 @@ TEST_CASE("angular: addition/subtraction", "[utility][math][angular]")
 		const auto cw_rotated = o - 70_deg;
 
 		REQUIRE(cw_rotated.as_degrees() == Approx(-25));
+
+		REQUIRE(o + 0_deg == o);
+		REQUIRE((o + 360_deg).as_degrees() == Approx(o.as_degrees()));
 	}
 
 	SECTION("orientation - orientation")
