@@ -13,21 +13,33 @@ namespace eversim::core::utility::math
 	
 	struct rotation;
 
-	struct orientation :
-			boost::addable2<orientation, rotation>,
-			boost::subtractable2<orientation, rotation>
+	struct orientation
+			: boost::additive<orientation, rotation
+			, boost::equality_comparable<orientation>
+		>
 	{
 		using representation = std::complex<float>;
 
-		explicit orientation(float rad) : value(cosf(rad), sinf(rad)){}
 		explicit orientation(representation repr = {1,0}) : value(repr)
 		{
 			normalize();
 		}
 
+		/*
+		 * Without this deleted c'tor something like 
+		 * orientation(0) would use the complex number c'tor but deliver
+		 * unexpected results
+		 */
+		explicit orientation(float) = delete;
+
+
+		static orientation from_radians(float rad) {
+			return orientation{{cosf(rad) , sinf(rad)}};
+		}
+
 		static orientation from_degrees(float deg)
 		{
-			return orientation{ deg * PI / 180.f };
+			return from_radians( deg * PI / 180.f );
 		}
 
 		static orientation from_direction(glm::vec2 const& v)
@@ -61,11 +73,28 @@ namespace eversim::core::utility::math
 		}
 
 		void normalize() { value /= abs(value); }
+
+		friend orientation lerp(orientation const& a, orientation const& b, float t);
+		
 	private:
 		representation value;
 	};
 
-	struct rotation
+	inline orientation normalize(orientation const& o)
+	{
+		auto c = o;
+		c.normalize();
+		return c;
+	}
+	inline orientation lerp(orientation const& a, orientation const& b, float t)
+	{
+		return normalize(orientation{ (1 - t) * a.value + t*b.value });
+	}
+
+	struct rotation 
+			: boost::additive1<rotation
+			, boost::equality_comparable<rotation>
+		>
 	{
 		friend struct orientation;
 		using representation = orientation::representation;
@@ -86,6 +115,18 @@ namespace eversim::core::utility::math
 		rotation operator-() const
 		{
 			return rotation{ conj(value) };
+		}
+
+		rotation& operator+=(rotation const& other)
+		{
+			value *= other.value;
+			return *this;
+		}
+
+		rotation& operator-=(rotation const& other)
+		{
+			*this += -other;
+			return *this;
 		}
 
 		friend bool operator==(rotation const& a, rotation const& b) noexcept

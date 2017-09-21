@@ -8,11 +8,21 @@ using namespace glm;
 using namespace eversim::core::utility::math;
 using namespace eversim::core::utility::math::literals;
 
+namespace Catch {
+	template<>
+	struct StringMaker<orientation> {
+		static std::string convert(orientation const& v)
+		{
+			return to_string(v.as_degrees()) + "°";
+		}
+	};
+}
+
 TEST_CASE("angular: construction", "[utility][math][angular]")
 {
 	SECTION("from float")
 	{
-		const auto o = orientation{ 0 };
+		const auto o = orientation::from_radians(0);
 
 		REQUIRE_THAT(o.to_direction(), is_approx(1, 0));
 
@@ -79,4 +89,14 @@ TEST_CASE("angular: point functions", "[utility][math][angular]")
 
 	const auto r_angle = angle_between_points(b, a);
 	REQUIRE(r_angle.as_degrees() == Approx(-135));
+}
+
+TEST_CASE("angular: lerp", "[utility][math][angular]")
+{
+	const auto a = orientation::from_degrees(45);
+	const auto b = orientation::from_degrees(315);
+
+	REQUIRE(lerp(a, b, 0) == a);
+	REQUIRE(lerp(a, b, 1) == b);
+	REQUIRE(lerp(a, b, 0.5).as_degrees() == Approx(0));
 }
