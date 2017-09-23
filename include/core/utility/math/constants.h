@@ -2,5 +2,5 @@
 
 namespace eversim::core::utility::math
 {
-	constexpr float PI = 3.14159265359;
+	constexpr float PI = 3.14159265359f;
 }
