@@ -8,16 +8,6 @@ using namespace glm;
 using namespace eversim::core::utility::math;
 using namespace eversim::core::utility::math::literals;
 
-namespace Catch {
-	template<>
-	struct StringMaker<orientation> {
-		static std::string convert(orientation const& v)
-		{
-			return to_string(v.as_degrees()) + "°";
-		}
-	};
-}
-
 TEST_CASE("angular: construction", "[utility][math][angular]")
 {
 	SECTION("from float")
@@ -30,14 +20,14 @@ TEST_CASE("angular: construction", "[utility][math][angular]")
 		REQUIRE_THAT(o2.to_direction(), is_approx(0, -1));
 	}
 
-	SECTION("from complex")
+	SECTION("from direction")
 	{
-		const auto o = orientation{ 0. + 1i }; // up on the unit circle == 90 deg
+		const auto o = orientation::from_direction({ 0., 1. });
 
 		REQUIRE_THAT(o.to_direction(), is_approx(0, 1));
 		REQUIRE(o.as_radians() == Approx(PI / 2));
 
-		const auto o2 = orientation{ 1. + 1i };
+		const auto o2 = orientation::from_direction({ 1., 1. });
 		REQUIRE(o2.as_degrees() == Approx(45));
 		REQUIRE_THAT(o2.to_direction(), is_approx(normalize(vec2(1, 1))));
 	}
@@ -76,6 +66,25 @@ TEST_CASE("angular: addition/subtraction", "[utility][math][angular]")
 		const auto r2 = o3 - o4;
 		REQUIRE(r2.as_degrees() == Approx(-180));
 		REQUIRE(o3 + r2 == o4);
+	}
+}
+
+TEST_CASE("angular: multiplication/division", "[utility][math][angular]")
+{
+	SECTION("mult")
+	{
+		const auto r = 30_deg;
+		REQUIRE_THAT(r * 2, is_approx(r + r));
+		REQUIRE_THAT(r * 2, is_approx(60_deg));
+		REQUIRE_THAT(r * 3, is_approx(90_deg));
+		REQUIRE_THAT(r * 6, is_approx(180_deg));
+		REQUIRE_THAT(r * 13, is_approx(r));
+	}
+	SECTION("div")
+	{
+		const auto r = 90_deg;
+		REQUIRE_THAT(r / 2, is_approx(45_deg));
+		REQUIRE_THAT(r / 3, is_approx(30_deg));
 	}
 }
 
