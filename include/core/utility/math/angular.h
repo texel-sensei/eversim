@@ -11,106 +11,89 @@
 namespace eversim::core::utility::math
 {
 	
-	struct rotation;
-
-	struct orientation
-			: boost::additive<orientation, rotation
-			, boost::equality_comparable<orientation>
-		>
+	namespace detail
 	{
-		using representation = std::complex<float>;
-
-		explicit orientation(representation repr = {1,0}) : value(repr)
+		template<typename Derived>
+		struct angular_base 
+			: boost::equality_comparable<angular_base<Derived>>
 		{
-			normalize();
-		}
+			using representation = std::complex<float>;
 
-		/*
-		 * Without this deleted c'tor something like 
-		 * orientation(0) would use the complex number c'tor but deliver
-		 * unexpected results
-		 */
-		explicit orientation(float) = delete;
+			/*
+			* Without this deleted c'tor something like
+			* orientation(0) would use the complex number c'tor but deliver
+			* unexpected results
+			*/
+			explicit angular_base(float) = delete;
 
 
-		static orientation from_radians(float rad) {
-			return orientation{{cosf(rad) , sinf(rad)}};
-		}
+			static Derived from_radians(float rad) {
+				return from_direction( { cosf(rad) , sinf(rad) } );
+			}
 
-		static orientation from_degrees(float deg)
-		{
-			return from_radians( deg * PI / 180.f );
-		}
+			static Derived from_degrees(float deg)
+			{
+				return from_radians(deg * PI / 180.f);
+			}
 
-		static orientation from_direction(glm::vec2 const& v)
-		{
-			return orientation{ {v.x,v.y} };
-		}
+			static Derived from_direction(glm::vec2 const& v)
+			{
+				return Derived{ { v.x,v.y } };
+			}
 
-		glm::vec2 to_direction() const
-		{
-			return { value.real(), value.imag() };
-		}
+			glm::vec2 to_direction() const
+			{
+				return { value.real(), value.imag() };
+			}
 
-		float as_radians() const
-		{
-			return std::atan2(value.imag(), value.real());
-		}
+			float as_radians() const
+			{
+				return std::atan2(value.imag(), value.real());
+			}
 
-		float as_degrees() const
-		{
-			return as_radians() * 180.f / PI;
-		}
+			float as_degrees() const
+			{
+				return as_radians() * 180.f / PI;
+			}
 
-		orientation& operator+=(rotation const& rot);
-		orientation& operator-=(rotation const& rot);
+			friend bool operator==(angular_base const& a, angular_base const& b) noexcept
+			{
+				return a.value == b.value;
+			}
 
-		friend rotation operator-(orientation const& a, orientation const& b);
+			void normalize() { value /= abs(value); }
 
-		friend bool operator==(orientation const& a, orientation const& b) noexcept
-		{
-			return a.value == b.value;
-		}
+			friend Derived lerp(angular_base const& a, angular_base const& b, float t)
+			{
+				const auto d = (1 - t)*a.to_direction() + t*b.to_direction();
+				return from_direction(d);
+			}
 
-		void normalize() { value /= abs(value); }
+		protected:
+			representation value;
 
-		friend orientation lerp(orientation const& a, orientation const& b, float t);
-		
-	private:
-		representation value;
-	};
-
-	inline orientation normalize(orientation const& o)
-	{
-		auto c = o;
-		c.normalize();
-		return c;
-	}
-	inline orientation lerp(orientation const& a, orientation const& b, float t)
-	{
-		return normalize(orientation{ (1 - t) * a.value + t*b.value });
+			angular_base() : angular_base({ 1,0 }) {}
+			explicit angular_base(representation repr) : value(repr)
+			{
+				normalize();
+			}
+		};
 	}
 
-	struct rotation 
-			: boost::additive1<rotation
-			, boost::equality_comparable<rotation>
-		>
+	class rotation : public detail::angular_base<rotation>
+		, boost::additive1<rotation
+		, boost::multipliable<rotation, float
+		, boost::dividable<rotation, float
+		, boost::equality_comparable<rotation>
+		>>>
 	{
-		friend struct orientation;
-		using representation = orientation::representation;
+		using base = detail::angular_base<rotation>;
+		friend class base;
+		friend class orientation;
+	public:
+		rotation() = default;
 
-		explicit rotation(float theta) : value(cosf(theta), sinf(theta)){}
-		explicit rotation(representation rep = {1,0}) : value(rep){}
-
-		float as_radians() const
-		{
-			return std::atan2(value.imag(), value.real());
-		}
-
-		float as_degrees() const
-		{
-			return as_radians() * 180.f / PI;
-		}
+		friend rotation angle_between_points(glm::vec2 const& a, glm::vec2 const& b) noexcept;
 
 		rotation operator-() const
 		{
@@ -129,22 +112,51 @@ namespace eversim::core::utility::math
 			return *this;
 		}
 
-		friend bool operator==(rotation const& a, rotation const& b) noexcept
+		rotation& operator*=(float f)
 		{
-			return a.value == b.value;
+			value = pow(value, f);
+			return *this;
+		}
+
+		rotation& operator/=(float f)
+		{
+			value = pow(value, 1/f);
+			return *this;
 		}
 
 	private:
-		representation value;
+		explicit rotation(representation re):base(re){}
+	};
+
+	class orientation : public detail::angular_base<orientation>
+			, boost::additive<orientation, rotation
+			, boost::equality_comparable<orientation>
+		>
+	{
+		using base = detail::angular_base<orientation>;
+		friend class base;
+	public:
+		orientation() = default;
+
+		orientation& operator+=(rotation const& rot);
+		orientation& operator-=(rotation const& rot);
+
+		rotation operator-(orientation const& b) const
+		{
+			return rotation{ b.value / this->value };
+		}
+
+	private:
+		explicit orientation(representation re) : base(re) {}
 	};
 
 	namespace literals
 	{
 		inline rotation operator"" _deg(long double d) {
-			return rotation{ float(d * PI/180) };
+			return rotation::from_degrees(d);
 		}
 		inline rotation operator"" _deg(unsigned long long int l) {
-			return rotation{ float(l * PI/180) };
+			return rotation::from_degrees(l);
 		}
 	}
 
@@ -168,10 +180,5 @@ namespace eversim::core::utility::math
 	{
 		*this += -rot;
 		return *this;
-	}
-
-	inline rotation operator-(orientation const& a, orientation const& b)
-	{
-		return rotation{ b.value / a.value };
 	}
 }
