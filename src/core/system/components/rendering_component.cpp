@@ -37,8 +37,8 @@ namespace eversim { namespace core { namespace system {
 		
 		display->set_Position(obj.get_position() + offset);
 		display->set_Scale(obj.get_scale());
-		display->set_Center(offset);
-		display->set_Rotation(obj.get_angle());
+		display->set_Center(-offset);
+		display->set_Rotation(-obj.get_angle().as_radians());
 	}
 
 }}}

@@ -30,5 +30,6 @@ namespace eversim { namespace core { namespace system {
 	void physics_component::post_physics_update()
 	{
 		get_owner().set_position(body->position);
+		get_owner().set_angle(body->angle);
 	}
 }}}

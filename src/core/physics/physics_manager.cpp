@@ -36,7 +36,8 @@ namespace eversim { namespace core { namespace physics {
 
 		auto const& p_tmpl = templ.particles;
 		bdy->particles = allocate_particles(p_tmpl.size());
-		bdy->position = bdy->old_position = pos;
+		auto midpoint = glm::vec2();
+		
 
 		transform(
 			p_tmpl.begin(), p_tmpl.end(),
@@ -47,8 +48,15 @@ namespace eversim { namespace core { namespace physics {
 			p.pos = desc.pos * scale + pos;
 			p.owner = bdy;
 			p.inv_mass = 1.f / desc.mass;
+			midpoint += p.pos;
 			return p;
 		});
+
+		midpoint /= float(bdy->particles.size());
+
+		bdy->position = bdy->old_position = midpoint;
+
+		bdy->init(bdy->particles);
 
 		// create constraints
 		for (auto const& cd : templ.constraints)
@@ -296,6 +304,7 @@ namespace eversim { namespace core { namespace physics {
 			b.position = {};
 			b.velocity = {};
 			b.on_ground = false;
+			b.angle_sum = 0;
 		}
 	}
 
@@ -387,11 +396,23 @@ namespace eversim { namespace core { namespace physics {
 			auto* const b = p.owner;
 			b->velocity += p.vel;
 			b->position += p.pos;
+			
+			const auto angle_dist = utility::math::angle_between_points(
+				b->old_position, p.pos
+			);
+
+			const auto east = utility::math::orientation::from_radians(0);
+			const auto deriv = p.get_base_orientation() - (east + angle_dist);
+
+			b->angle_sum += deriv.as_radians();
 		}
 		for(auto& b : get_bodies())
 		{
 			b.old_position = b.position = b.position/float(b.particles.size());
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
+
+			b.angle_sum /= b.particles.size();
+			b.angle = utility::math::orientation::from_radians(b.angle_sum);
 		}
 	}
 

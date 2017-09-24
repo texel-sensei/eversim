@@ -1,6 +1,7 @@
 #pragma once
 #include "core/physics/particle.h"
 #include "core/utility/array_view.h"
+#include "core/utility/math/angular.h"
 #include <glm/glm.hpp>
 
 namespace eversim { namespace core { namespace physics {
@@ -11,10 +12,16 @@ namespace eversim { namespace core { namespace physics {
 		friend class physics_manager;
 
 		body() = default;
-		explicit body(utility::array_view<particle> ps) : particles(ps){}
+		explicit body(utility::array_view<particle> ps);
+
+		void init(
+			utility::array_view<particle>
+		);
 
 		glm::vec2 position;
 		glm::vec2 velocity;
+		utility::math::orientation angle;
+
 
 		float gravity_scale = 1.f;
 
@@ -25,6 +32,7 @@ namespace eversim { namespace core { namespace physics {
 			EVERSIM_ASSERT(idx < particles.size());
 			return particles[idx];
 		}
+
 		utility::array_view<particle> get_particles() const { return particles; }
 
 		bool is_alive() const
@@ -39,6 +47,7 @@ namespace eversim { namespace core { namespace physics {
 	private:
 		glm::vec2 old_position;
 		glm::vec2 old_velocity;
+		float angle_sum = 0.f;
 		bool alive = true;
 		bool on_ground = false;
 
