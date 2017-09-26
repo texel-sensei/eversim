@@ -8,5 +8,8 @@
 ###General Design
 - http://robert.zubek.net/docs/games-studio-2017/8-software-patterns.pdf
 
+###Rendering
+- https://godotengine.org/article/godot-3-renderer-design-explained
+
 ###Sound
 - http://ruoyusun.com/2017/08/29/make-some-music.html
