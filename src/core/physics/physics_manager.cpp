@@ -85,11 +85,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		apply_external_forces(dt);
 		damp_velocities();
-		for (auto& p : particles)
-		{
-			if (!p.is_alive()) continue;
-			p.projected_position = p.pos + dt * p.vel;
-		}
+		integrate_position(dt);
 
 		check_collisions();
 
@@ -115,10 +111,7 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::apply_velocity;
 			break;
 		case simulation_state::apply_velocity:
-			for (auto& p : particles)
-			{
-				p.projected_position = p.pos + dt * p.vel;
-			}
+			integrate_position(dt);
 			current_state = simulation_state::check_collisions;
 			break;
 		case simulation_state::check_collisions:
@@ -314,6 +307,15 @@ namespace eversim { namespace core { namespace physics {
 		{
 			if (!p.is_alive()) continue;
 			p.vel *= damping; // TODO: improve
+		}
+	}
+
+	void physics_manager::integrate_position(float dt)
+	{
+		for (auto& p : particles)
+		{
+			if (!p.is_alive()) continue;
+			p.projected_position = p.pos + dt * p.vel;
 		}
 	}
 

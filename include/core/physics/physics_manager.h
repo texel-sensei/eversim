@@ -38,6 +38,7 @@ namespace eversim { namespace core { namespace physics {
 		void remove_body(body* b);
 
 		void set_level(world::level const* l);
+		
 
 		void set_particle_size(float f) { particle_radius = f; }
 		float get_particle_size() const { return particle_radius; }
@@ -140,6 +141,7 @@ namespace eversim { namespace core { namespace physics {
 		int current_iteration = 0;
 
 		void apply_external_forces(float dt);
+		void integrate_position(float dt);
 		void check_collisions();
 		void damp_velocities();
 		void project_constraints();
