@@ -1,6 +1,7 @@
 #include "editor/windows/log_window.h"
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
+#include "editor/windows/physicsbody_creator.h"
 
 #include "editor/core/window_manager.h"
 
@@ -192,6 +193,7 @@ int main(int argc, char* argv[])
 	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::log_window>();
 	windows.add_window<editor::windows::physics_inspector>(&physics);
+	windows.add_window<editor::windows::physicsbody_creator>();
 
 	// 0. time
 	const auto dt = 1.f / 60.f;

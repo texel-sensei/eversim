@@ -46,6 +46,15 @@
     "FART_LEFT": {
       "type": "RANGE",
       "keys": [ "MOUSE_BUTTON_LEFT", "GAMEPAD_ANALOGUE_LEFT_STICK" ]
+      ,
+      "keypairs": [
+        {
+          "keys": [ "KEY_A", "KEY_B" ],
+          "values": [ -1, 1 ],
+          "interval": [ -15, 20 ],
+          "function": "EXP"
+        }
+      ]
     }
 
   },
