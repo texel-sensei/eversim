@@ -90,6 +90,8 @@ TEST_CASE_METHOD(physics_test_fixture,"velocity", "[physics][physics_manager]")
 	auto* b = man.add_body(single_particle, {});
 	b->velocity = { 1.f,0.f };
 	b->gravity_scale = 0;
+	man.set_quadratic_drag(0);
+
 
 	SECTION("movement without damping"){
 		man.set_damping_coefficient(0);
@@ -128,6 +130,7 @@ TEST_CASE_METHOD(physics_test_fixture,"velocity", "[physics][physics_manager]")
 TEST_CASE_METHOD(physics_test_fixture, "gravity","[physics][physics_manager]")
 {
 	man.set_damping_coefficient(0);
+	man.set_quadratic_drag(0);
 	SECTION("change gravity"){
 		const auto g = vec2(0, -10);
 		man.set_gravity(g);
