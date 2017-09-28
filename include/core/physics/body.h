@@ -24,6 +24,8 @@ namespace eversim { namespace core { namespace physics {
 
 
 		float gravity_scale = 1.f;
+		float linear_drag = 1.f;
+		float quadratic_drag = 1.f;
 
 		void* user_data = nullptr;
 

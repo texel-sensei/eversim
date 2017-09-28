@@ -84,7 +84,7 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::integrate(float dt)
 	{
 		apply_external_forces(dt);
-		damp_velocities();
+		damp_velocities(dt);
 		integrate_position(dt);
 
 		check_collisions();
@@ -107,7 +107,7 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::damp;
 			break;
 		case simulation_state::damp:
-			damp_velocities();
+			damp_velocities(dt);
 			current_state = simulation_state::apply_velocity;
 			break;
 		case simulation_state::apply_velocity:
@@ -301,12 +301,23 @@ namespace eversim { namespace core { namespace physics {
 		}
 	}
 
-	void physics_manager::damp_velocities()
+	void physics_manager::damp_velocities(float dt)
 	{
 		for (auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
-			p.vel *= damping; // TODO: improve
+			const auto speed = length(p.vel);
+			const auto linear_damping = speed * linear_drag * p.owner->linear_drag;
+			const auto quad_damping = speed * speed * quadratic_drag * p.owner->quadratic_drag;
+			const auto damping = (linear_damping + quad_damping) * dt;
+
+			if(damping >= speed)
+			{
+				p.vel = {};
+			}else
+			{
+				p.vel = normalize(p.vel)*(speed-damping);
+			}
 		}
 	}
 
@@ -404,7 +415,13 @@ namespace eversim { namespace core { namespace physics {
 			);
 
 			const auto east = utility::math::orientation::from_radians(0);
-			const auto deriv = p.get_base_orientation() - (east + angle_dist);
+			const auto new_orientation = (east + angle_dist);
+			const auto deriv = p.get_base_orientation() - new_orientation;
+
+			if(&p == p.owner->particles.begin())
+			{
+				b->angle = p.get_base_orientation() + angle_dist;
+			}
 
 			b->angle_sum += deriv.as_radians();
 		}
@@ -414,7 +431,7 @@ namespace eversim { namespace core { namespace physics {
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
 
 			b.angle_sum /= b.particles.size();
-			b.angle = utility::math::orientation::from_radians(b.angle_sum);
+			//b.angle = utility::math::orientation::from_radians(b.angle_sum);
 		}
 	}
 

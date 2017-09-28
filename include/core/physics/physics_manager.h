@@ -75,8 +75,11 @@ namespace eversim { namespace core { namespace physics {
 		void set_gravity(glm::vec2 const& g) { gravity = g; }
 		glm::vec2 get_gravity() const { return gravity; }
 
-		void set_damping_coefficient(float f) { damping = 1-f; }
-		float get_damping_coefficient() const { return 1-damping; }
+		void set_damping_coefficient(float f) { linear_drag = f; }
+		float get_damping_coefficient() const { return linear_drag; }
+
+		void set_quadratic_drag(float f) { quadratic_drag = f; }
+		float get_quadratic_drag() const { return quadratic_drag; }
 
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle>& get_particles() { return particles; }
@@ -113,7 +116,8 @@ namespace eversim { namespace core { namespace physics {
 		body_container bodies;
 
 		glm::vec2 gravity = {0.f,-1.f};
-		float damping = 0.99f;
+		float linear_drag = 0.03f;
+		float quadratic_drag = 0.10f;
 		float particle_radius = 0.05f;
 		int num_dead_bodies = 0;
 
@@ -143,7 +147,7 @@ namespace eversim { namespace core { namespace physics {
 		void apply_external_forces(float dt);
 		void integrate_position(float dt);
 		void check_collisions();
-		void damp_velocities();
+		void damp_velocities(float dt);
 		void project_constraints();
 		void finalize_changes(float dt);
 		void call_events();
