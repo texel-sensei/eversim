@@ -1,5 +1,6 @@
 #include "editor/windows/log_window.h"
 #include <easylogging++.h>
+#include <boost/format.hpp>
 
 namespace eversim { namespace editor { namespace windows {
 	
@@ -12,14 +13,12 @@ namespace eversim { namespace editor { namespace windows {
 
 		void handle(const el::LogDispatchData* handlePtr) override
 		{
-			const auto builder = handlePtr->logMessage()->logger()->logBuilder();
-			const auto append_newline = (handlePtr->dispatchAction() == el::base::DispatchAction::NormalLog);
-			window->add_line(builder->build(handlePtr->logMessage(), append_newline));
+			window->add_line(*handlePtr->logMessage());
 		}
 	};
 
 	log_window::log_window(std::string const& name)
-		: base_window(name)
+		: base_window(name), buffer(4000)
 	{
 		const auto logger_name = "imgui_" + name;
 		el::Helpers::installLogDispatchCallback<log_handler>(logger_name);
@@ -52,7 +51,6 @@ namespace eversim { namespace editor { namespace windows {
 	void log_window::clear()
 	{
 		buffer.clear();
-		line_offsets.clear();
 	}
 
 	void log_window::draw_content()
@@ -68,23 +66,29 @@ namespace eversim { namespace editor { namespace windows {
 		if (copy)
 			ImGui::LogToClipboard();
 
-		if (filter.IsActive())
+		auto formatter = boost::format("%s\t%s");
+
+		for(auto const& line : buffer)
 		{
-			const char* buf_begin = buffer.begin();
-			const char* line = buf_begin;
-			for (int line_no = 0; line != nullptr; line_no++)
+			const auto lvl_str = el::LevelHelper::convertToString(line.level());
+			const auto msg = (formatter % lvl_str % line.message()).str();
+
+			if(filter.IsActive() && !filter.PassFilter(msg.c_str()))
 			{
-				const char* line_end = (
-					                       line_no < line_offsets.Size)
-					                       ? buf_begin + line_offsets[line_no]
-					                       : nullptr;
-				if (filter.PassFilter(line, line_end))
-					ImGui::TextUnformatted(line, line_end);
-				line = line_end && line_end[1] ? line_end + 1 : nullptr;
+				continue;
 			}
-		} else
-		{
-			ImGui::TextUnformatted(buffer.begin());
+
+			ImGui::PushStyleColor(ImGuiCol_Text, level_colors[line.level()]);
+			ImGui::TextUnformatted(msg.c_str());
+			if(ImGui::IsItemHovered())
+			{
+				auto info_format = boost::format("%s:%d [%s]");
+				const auto info_str = (
+					info_format % line.file() % line.line() % line.func()
+					).str();
+				ImGui::SetTooltip(info_str.c_str());
+			}
+			ImGui::PopStyleColor();
 		}
 
 		if (ScrollToBottom)
@@ -93,17 +97,9 @@ namespace eversim { namespace editor { namespace windows {
 		ImGui::EndChild();
 	}
 
-	void log_window::add_line(std::string const& line)
+	void log_window::add_line(el::LogMessage const& line)
 	{
-		auto old_size = buffer.size();
-		buffer.append(line.c_str());
-		for (auto new_size = buffer.size(); old_size < new_size; ++old_size)
-		{
-			if (buffer[old_size] == '\n')
-			{
-				line_offsets.push_back(old_size);
-			}
-		}
+		buffer.push_back(line);
 		ScrollToBottom = true;
 	}
 }}}
