@@ -36,6 +36,30 @@ namespace eversim { namespace core { namespace input {
 
 	class InputContext
 	{
+	public:
+		struct ButtonPair {
+		public:
+			const RawInputConstants::input rawcode_a;
+			const RawInputConstants::input rawcode_b;
+			const glm::vec2 values;
+			const glm::vec2 interval;
+			const std::function<double(double)> function;
+
+			const InputConstants::action linked_action;
+			
+			InputContext& owner;
+
+			ButtonPair(const std::string& a, 
+				const std::string& b, const glm::vec2& v, const glm::vec2& i,
+				const std::function<double(double)> f,
+				const std::string& action,
+				InputContext& owner) :
+					rawcode_a(RawInputConstants::input::_from_string(a.c_str())), 
+					rawcode_b(RawInputConstants::input::_from_string(b.c_str())),
+					values(v), interval(i), function(f), 
+					linked_action(owner.action_enums.add(action)), owner(owner)
+			{}
+		};
 	private:
 		std::string name;
 
@@ -46,6 +70,7 @@ namespace eversim { namespace core { namespace input {
 		std::map<RawInputConstants::input,std::set<InputConstants::action>> buttons;
 		std::map<RawInputConstants::input,std::set<InputConstants::action>> states;
 		std::map<RawInputConstants::input,std::set<InputConstants::action>> ranges;
+		std::vector<ButtonPair> buttonpair_ranges;
 
 		//map <action,state>
 		std::map<InputConstants::action, bool> button_states;
@@ -60,12 +85,15 @@ namespace eversim { namespace core { namespace input {
 		std::map<RawInputConstants::input,InputEvent> input_map;
 		std::vector<std::map<RawInputConstants::input, InputEvent>::iterator> input_iterators;
 
+		std::set<RawInputConstants::input> handled_inputs;
+
 		pairmap input_range_pairs;
 
 		InputConstants::input_type get_input_type(const RawInputConstants::input& b) const;
 
 		void create_range_pair(RawInputConstants::input a, RawInputConstants::input b, RawInputConstants::input c);
 		void create_grouped_inputs();
+		void create_button_range_inputs(ButtonPair &bp);
 
 		void add_input_pair(
 			const std::string& a,
@@ -80,6 +108,16 @@ namespace eversim { namespace core { namespace input {
 		InputContext& operator=(const InputContext& other) noexcept;
 
 		void register_action(const std::string& type,const std::string& action, const std::string& rawcode);
+		void register_button_to_range(
+			const std::string& action,
+			const std::string& rawcode_a,
+			const std::string& rawcode_b, 
+			const glm::vec2 values,
+			const glm::vec2 interval,
+			std::function<double(double)> function
+		);
+
+		void register_handled_input(const std::string& a);
 		
 		void register_function_button(const std::string& a, button_function f);
 		void register_function_state(const std::string& a, state_function f);

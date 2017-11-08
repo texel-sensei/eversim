@@ -43,20 +43,16 @@
       "type": "RANGE",
       "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK_Y" ]
     },
-    "FART_LEFT": {
+    "STEER": {
       "type": "RANGE",
-      "keys": [ "MOUSE_BUTTON_LEFT", "GAMEPAD_ANALOGUE_LEFT_STICK" ]
-      ,
-      "keypairs": [
-        {
-          "keys": [ "KEY_A", "KEY_B" ],
-          "values": [ -1, 1 ],
-          "interval": [ -15, 20 ],
-          "function": "EXP"
-        }
-      ]
+      "keys": [ "GAMEPAD_ANALOGUE_LEFT_STICK" ],
+      "keypair_0": {
+        "keys": [ "KEY_A", "KEY_D" ],
+        "values": [ 1,1 ],
+        "interval": [ -1, 1 ],
+        "function": "EXP"
+      }
     }
-
   },
   "midjump": {
     "DOUBLEJUMP": {
