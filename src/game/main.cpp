@@ -209,8 +209,9 @@ int main(int argc, char* argv[])
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
 
 	inputhandler_ptr->get_context("game")->register_function_range(
-		"STEER_X",
+		"STEER",
 		[&](input::InputContext& context, glm::vec2 v) {
+		//LOG(INFO) << v.x << "/" << v.y;
 		double value = v.x;
 		if (std::abs(value) - 0.2 < 0.) return;
 		double a = (value < 0.) ? -1. : 1.;

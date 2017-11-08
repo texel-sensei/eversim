@@ -55,6 +55,22 @@ namespace eversim {	namespace core { namespace input {
 		}
 	}
 
+	void InputContext::register_button_to_range(
+		const std::string& action,
+		const std::string& rawcode_a,
+		const std::string& rawcode_b,
+		const glm::vec2 values,
+		const glm::vec2 interval,
+		std::function<double(double)> function
+	)
+	{
+		buttonpair_ranges.emplace_back(
+			rawcode_a, rawcode_b, values, interval, function, action, *this
+		);
+		register_handled_input(rawcode_a);
+		register_handled_input(rawcode_b);
+	}
+
 	vector<RawInputConstants::input> InputContext::get_buttons() const
 	{
 		vector<RawInputConstants::input> res;
@@ -177,6 +193,8 @@ namespace eversim {	namespace core { namespace input {
 			handeled = handeled || (action_it != m.end());
 		}
 
+		handeled = handeled || (handled_inputs.count( event.get_input_enum() ) > 0);
+
 		if (handeled)
 			enqueue_event(event);
 
@@ -231,6 +249,11 @@ namespace eversim {	namespace core { namespace input {
 		range_functions[a] = f;
 	}
 
+	void InputContext::register_handled_input(const std::string& a)
+	{
+		handled_inputs.emplace(RawInputConstants::input::_from_string(a.c_str()));
+	}
+
 	void InputContext::create_range_pair(
 		RawInputConstants::input a, 
 		RawInputConstants::input b, 
@@ -251,8 +274,89 @@ namespace eversim {	namespace core { namespace input {
 				auto& event = lsy->second;
 				val.y = event.get_range_value().x;
 			}
+
+			auto action_it = ranges.find(c);
+			if (action_it != ranges.end()) {
+				for (auto& action : action_it->second)
+				{
+					auto& range_state_value = range_states[action];
+					if (!lsxb) {
+						val.x = range_state_value.x;
+					}
+					if (!lsyb) {
+						val.y = range_state_value.y;
+						break;
+					}
+					if (!lsxb) break;
+				}
+			}
 			enqueue_event(InputEvent::create_range(c, val));
 		}
+	}
+
+	void InputContext::create_button_range_inputs(ButtonPair &bp)
+	{
+		
+		auto a = bp.rawcode_a;
+		auto b = bp.rawcode_b;
+
+		auto it_a = find_if(begin(input_iterators), end(input_iterators), 
+		[&](const auto& event_it) 
+		{ 
+			const auto& event = event_it->second;
+			const auto input_enum = event.get_input_enum();
+			return a == input_enum;  
+		}
+		);
+
+		auto it_b = find_if(begin(input_iterators), end(input_iterators),
+			[&](const auto& event_it)
+		{
+			const auto& event = event_it->second;
+			const auto input_enum = event.get_input_enum();
+			return b == input_enum;
+		}
+		);
+
+		
+		auto fa = it_a != input_iterators.end();
+		auto fb = it_b != input_iterators.end();
+
+		auto val_a = (fa) ? bp.values[0] : 0.;
+		auto val_b = (fb) ? bp.values[1] : 0.;
+
+		if (fa || fb) {
+
+			auto handle = [&](auto it, auto& val){
+				auto run = it != input_iterators.end();
+				if (!run) return 0;
+				if (run && (*it)->second.get_event_type()._to_integral() == RawInputConstants::event_type::BUTTON_UP)
+				{
+					auto& ev = (*it)->second;
+					val = 0.;
+					return 0;
+				}
+				return 1;
+			};
+
+			auto limit = [](auto& val, auto bp_interval) {
+				val = std::max(bp_interval[0], val);
+				val = std::min(bp_interval[1], val);
+			};
+
+			auto cnt = handle(it_a,val_a) + handle(it_b,val_b);
+			float val = 0.;
+			if (cnt == 1) {
+				val = (fa) ? -val_a : val_b;
+				limit(val, bp.interval);
+			}
+			else {
+				val = (bp.function(val_b) - bp.function(val_a)) / 2;
+				limit(val, bp.interval);
+			}
+			range_states[bp.linked_action] = { val,val };
+		}
+		
 	}
 
 	void InputContext::create_grouped_inputs()
@@ -262,6 +366,10 @@ namespace eversim {	namespace core { namespace input {
 		for (auto& e : input_range_pairs) {
 			create_range_pair(e.second.first,e.second.second,e.first);
 		}	
+
+		for (auto& button_pair : buttonpair_ranges) {
+			create_button_range_inputs(button_pair);
+		}
 	}
 
 	void InputContext::add_input_pair(
@@ -374,6 +482,8 @@ namespace eversim {	namespace core { namespace input {
 				it->second(*this,s.second);
 			}
 		}
+
+
 	}
 
 	void InputContext::list_actions() const
