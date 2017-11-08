@@ -199,7 +199,8 @@ add_executable(${TEST_BIN} ${TEST_SOURCES} ${TEST_HEADERS})
 target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
 target_include_directories(${TEST_BIN} PRIVATE ${TEST_DIR}/include)
 
-source_group("include" ${TEST_HEADERS})
+message("asdasd" ${TEST_HEADERS})
+source_group("include" FILES ${TEST_HEADERS})
 
 enable_testing()
 include(ParseAndAddCatchTests)
