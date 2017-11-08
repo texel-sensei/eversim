@@ -2,6 +2,7 @@
 #include "editor/windows/performance_display.h"
 #include "editor/windows/physics_inspector.h"
 #include "editor/windows/physicsbody_creator.h"
+#include "editor/windows/game_window.h"
 
 #include "editor/core/window_manager.h"
 
@@ -25,11 +26,13 @@
 
 #include "core/input/contextloader.h"
 #include "core/input/gamepadhandler.h"
-#include "core/input/inputhandler.h"
+#include "core/utility/filesystem_wrapper.h"
 
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <imgui_impl_sdl_gl3.h>
+#include "core/input/inputhandler.h"
+#include "core/utility/stacktrace.h"
 #include <easylogging++.h>
 
 
@@ -96,7 +99,6 @@ void init_rendering(rendering::render_manager& renderer)
 void init_logging(int argc, char* argv[])
 {
 	using namespace utility;
-
 	START_EASYLOGGINGPP(argc, argv);
 	el::Configurations default_config;
 	default_config.setToDefault();
@@ -104,14 +106,44 @@ void init_logging(int argc, char* argv[])
 	el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 	default_config.setGlobally(el::ConfigurationType::Filename, "logs/%datetime{%Y-%M-%d %H-%m-%s}.log");
 
+	el::Helpers::setCrashHandler([](int sig)
+	{
+		const auto marker = std::string(80, '=');
+		LOG(ERROR) << "\n" << marker <<"\nApplication crash!\n" << marker;
+		stacktrace trace;
+		fill_stacktrace(&trace);
+		for(auto const& frame : trace)
+		{
+			LOG(ERROR) 
+				<< frame.get_simple_filename()
+				<< ":" << frame.get_line()
+				<< " " << frame.get_name()
+			;
+		}
+		if(trace.is_partial())
+		{
+			LOG(ERROR) << "...";
+		}
+		el::Helpers::logCrashReason(sig, true);
+		el::Loggers::flushAll();
+		el::Helpers::crashAbort(sig);
+		el::Loggers::flushAll();
+	});
+	el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
+
 	if (fs::exists("log.conf")) {
 		default_config.parseFromFile("log.conf");
 	}
+
+	// create directory if it's missing
+	if (!fs::exists("logs"))
+		fs::create_directory("logs");
+
 	el::Loggers::reconfigureAllLoggers(default_config);
 
 	// collect all files in logs/ directory
-	auto dir_begin = fs::directory_iterator("logs");
-	auto dir_end = fs::directory_iterator();
+	const auto dir_begin = fs::directory_iterator("logs");
+	const auto dir_end = fs::directory_iterator();
 	vector<fs::path> logfiles(dir_begin, dir_end);
 
 	// remove all files that do not end in '.log'
@@ -119,9 +151,11 @@ void init_logging(int argc, char* argv[])
 	logfiles.erase(remove_if(logfiles.begin(), logfiles.end(), is_no_logfile), logfiles.end());
 	sort(logfiles.begin(), logfiles.end());
 
-	if (logfiles.size() > NUM_LOGFILES)
+	const auto extra = int(logfiles.size()) - NUM_LOGFILES;
+
+	if (extra > 0)
 	{
-		const auto end = logfiles.begin() + NUM_LOGFILES-1;
+		const auto end = logfiles.begin() + extra;
 		for (auto it = logfiles.begin(); it != end; ++it)
 		{
 			LOG(INFO) << "Deleting logfile " << it->string();
@@ -190,9 +224,10 @@ int main(int argc, char* argv[])
 
 	// Create editor windows
 	editor::core::window_manager windows;
-	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::log_window>();
 	windows.add_window<editor::windows::physics_inspector>(&physics);
+	auto* gamewindow = windows.add_window<editor::windows::game_window>();
+	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::physicsbody_creator>();
 
 	// 0. time
@@ -305,9 +340,13 @@ int main(int argc, char* argv[])
 			rendering::draw_point(p.pos);
 		}
 
+		gamewindow->bind();
 		{
 			// draw game
 			utility::scoped_timer tim(pd->get_reporter("Render loop"));
+			
+			glClearColor(0.623, 0.76, 0.729, 1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			renderer.draw(cam);
 		}
 
@@ -316,6 +355,7 @@ int main(int argc, char* argv[])
 			utility::scoped_timer tim(pd->get_reporter("debug rendering"));
 			renderer.do_draw(cam);
 		}
+		gamewindow->unbind();
 
 		{
 			// draw gui

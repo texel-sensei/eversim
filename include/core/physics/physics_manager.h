@@ -38,6 +38,7 @@ namespace eversim { namespace core { namespace physics {
 		void remove_body(body* b);
 
 		void set_level(world::level const* l);
+		
 
 		void set_particle_size(float f) { particle_radius = f; }
 		float get_particle_size() const { return particle_radius; }
@@ -74,8 +75,11 @@ namespace eversim { namespace core { namespace physics {
 		void set_gravity(glm::vec2 const& g) { gravity = g; }
 		glm::vec2 get_gravity() const { return gravity; }
 
-		void set_damping_coefficient(float f) { damping = 1-f; }
-		float get_damping_coefficient() const { return 1-damping; }
+		void set_damping_coefficient(float f) { linear_drag = f; }
+		float get_damping_coefficient() const { return linear_drag; }
+
+		void set_quadratic_drag(float f) { quadratic_drag = f; }
+		float get_quadratic_drag() const { return quadratic_drag; }
 
 		particle& get_particle(int idx) { return particles.at(idx); }
 		std::vector<particle>& get_particles() { return particles; }
@@ -106,13 +110,14 @@ namespace eversim { namespace core { namespace physics {
 		std::vector<particle> particles;
 
 		boost::base_collection<constraint> constraints;
-		std::vector<distance_constraint> collision_constraints;
-		std::vector<static_collision_constraint> static_collision_constraints;
+		utility::object_pool<distance_constraint, 200> collision_constraints;
+		utility::object_pool<static_collision_constraint, 200> static_collision_constraints;
 
 		body_container bodies;
 
 		glm::vec2 gravity = {0.f,-1.f};
-		float damping = 0.99f;
+		float linear_drag = 0.03f;
+		float quadratic_drag = 0.10f;
 		float particle_radius = 0.05f;
 		int num_dead_bodies = 0;
 
@@ -140,8 +145,9 @@ namespace eversim { namespace core { namespace physics {
 		int current_iteration = 0;
 
 		void apply_external_forces(float dt);
+		void integrate_position(float dt);
 		void check_collisions();
-		void damp_velocities();
+		void damp_velocities(float dt);
 		void project_constraints();
 		void finalize_changes(float dt);
 		void call_events();

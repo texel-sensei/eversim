@@ -222,15 +222,19 @@ namespace eversim { namespace core { namespace utility {
 			return last;
 		}
 
+		void clear()
+		{
+			erase(begin(), end());
+		}
+
 	private:
 		struct node {
 			static_assert(sizeof(T) >= sizeof(node*), "Objects in a pool must at leas have the size of a pointer!");
 			
 			size_t indexof(T const* ptr) const noexcept
 			{
-				// can't use EVERSIM_ASSERT here because indexof is noexcept
-				assert(ptr >= begin());
-				assert(ptr < end());
+				EVERSIM_ASSERT(ptr >= begin());
+				EVERSIM_ASSERT(ptr < end());
 				return ptr - begin();
 			}
 

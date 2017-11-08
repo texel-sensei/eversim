@@ -8,15 +8,15 @@
 #include <memory>
 #include <bitset>
 
-namespace eversim{namespace core{
-	namespace utility {
+namespace eversim::core{
+	namespace utility::math {
 		struct line;
 	}
 	namespace rendering {
 		class render_manager;
 		class RenderableEntity;
 	}
-}}
+}
 
 namespace eversim { namespace core { namespace world {
 
@@ -50,7 +50,7 @@ namespace eversim { namespace core { namespace world {
 		 * Note: The returned lines are not in the correct position!
 		 * They are centered around (0,0) and not the position of the tile!
 		*/
-		utility::array_view<const utility::line> get_collision_shape() const;
+		utility::array_view<const utility::math::line> get_collision_shape() const;
 
 		/*
 		 * calculates the (internal) used 4 bit index for the collision shape.

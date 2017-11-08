@@ -15,6 +15,10 @@ namespace eversim { namespace core { namespace world {
 					return "unknown ID";
 				case level_error::UnknownTile:
 					return "unkown tile";
+				case level_error::MissingIDTable: 
+					return "ID table missing";
+				case level_error::MissingLayout:
+					return "Layout missing";
 				default:
 					return "(unknown)";
 				}

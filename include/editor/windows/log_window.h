@@ -1,5 +1,7 @@
 #pragma once
 #include "editor/core/base_window.h"
+#include <boost/circular_buffer.hpp>
+#include <easylogging++.h>
 
 namespace eversim { namespace editor { namespace windows {
 
@@ -19,14 +21,20 @@ namespace eversim { namespace editor { namespace windows {
 		void draw_content() override final;
 
 	private:
-		ImGuiTextBuffer buffer;
+		boost::circular_buffer<el::LogMessage> buffer;
 		ImGuiTextFilter filter;
-		ImVector<int> line_offsets;
 		bool ScrollToBottom = true;
+		std::map<el::Level, ImVec4> level_colors = {
+			{ el::Level::Error,   { 1,0,0,1}},
+			{ el::Level::Warning, { 1,1,0,1 } },
+			{ el::Level::Debug,   { 1,1,1,1 } },
+			{ el::Level::Info,    { 1,.6f,0,1 } },
+			{ el::Level::Trace,   { .6f,.6f,.6f,1 } },
+		};
 
 		class log_handler;
 		log_handler* handler;
-		void add_line(std::string const& line);
+		void add_line(el::LogMessage const&);
 	};
 
 }}}

@@ -1,7 +1,10 @@
 #pragma once
 #include "core/utility/time/clock.h"
+#include "core/utility/math/angular.h"
+
 #include "core/system/errors.h"
 #include "core/system/component.h"
+
 #include <glm/glm.hpp>
 #include <boost/range/any_range.hpp>
 #include <vector>
@@ -28,8 +31,8 @@ namespace eversim {namespace core{namespace system {
 		glm::vec2 get_scale() const { return scale; }
 		void set_scale(glm::vec2 s) { scale = s; }
 
-		float get_angle() const { return angle; }
-		void set_angle(float a) { angle = a; }
+		utility::math::orientation get_angle() const { return angle; }
+		void set_angle(utility::math::orientation a) { angle = a; }
 
 		gameobject* clone() const;
 
@@ -70,7 +73,7 @@ namespace eversim {namespace core{namespace system {
 
 		glm::vec2 position;
 		glm::vec2 scale{1.f,1.f};
-		float angle = 0.f;
+		utility::math::orientation angle;
 
 		utility::clock::duration frametime;
 

@@ -1,0 +1,15 @@
+#Link stuff
+
+##Assets
+- https://www.reddit.com/r/gamedev/comments/6x5omk/free_3000_hd_footage_items_sfx_light_leaks/
+
+##Tutorials
+
+###General Design
+- http://robert.zubek.net/docs/games-studio-2017/8-software-patterns.pdf
+
+###Rendering
+- https://godotengine.org/article/godot-3-renderer-design-explained
+
+###Sound
+- http://ruoyusun.com/2017/08/29/make-some-music.html

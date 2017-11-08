@@ -8,6 +8,8 @@ namespace eversim { namespace core { namespace world {
 		// 0 means no error
 		UnknownID = 1,	// Level contains an ID without corresponding name
 		UnknownTile,	// Tile name is not known
+		MissingIDTable, // ID table file in level is missing
+		MissingLayout,	// Layout file in level is missing
 	};
 
 	enum class tile_error {

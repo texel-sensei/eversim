@@ -36,7 +36,8 @@ namespace eversim { namespace core { namespace physics {
 
 		auto const& p_tmpl = templ.particles;
 		bdy->particles = allocate_particles(p_tmpl.size());
-		bdy->position = bdy->old_position = pos;
+		auto midpoint = glm::vec2();
+		
 
 		transform(
 			p_tmpl.begin(), p_tmpl.end(),
@@ -47,8 +48,15 @@ namespace eversim { namespace core { namespace physics {
 			p.pos = desc.pos * scale + pos;
 			p.owner = bdy;
 			p.inv_mass = 1.f / desc.mass;
+			midpoint += p.pos;
 			return p;
 		});
+
+		midpoint /= float(bdy->particles.size());
+
+		bdy->position = bdy->old_position = midpoint;
+
+		bdy->init(bdy->particles);
 
 		// create constraints
 		for (auto const& cd : templ.constraints)
@@ -76,12 +84,8 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::integrate(float dt)
 	{
 		apply_external_forces(dt);
-		damp_velocities();
-		for (auto& p : particles)
-		{
-			if (!p.is_alive()) continue;
-			p.projected_position = p.pos + dt * p.vel;
-		}
+		damp_velocities(dt);
+		integrate_position(dt);
 
 		check_collisions();
 
@@ -103,14 +107,11 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::damp;
 			break;
 		case simulation_state::damp:
-			damp_velocities();
+			damp_velocities(dt);
 			current_state = simulation_state::apply_velocity;
 			break;
 		case simulation_state::apply_velocity:
-			for (auto& p : particles)
-			{
-				p.projected_position = p.pos + dt * p.vel;
-			}
+			integrate_position(dt);
 			current_state = simulation_state::check_collisions;
 			break;
 		case simulation_state::check_collisions:
@@ -137,7 +138,7 @@ namespace eversim { namespace core { namespace physics {
 			current_state = simulation_state::external;
 			break;
 		default:;
-			assert(!"unknown state!");
+			EVERSIM_THROW(generic_error::InvalidEnum, "physics step");
 		}
 	}
 
@@ -182,7 +183,7 @@ namespace eversim { namespace core { namespace physics {
 							auto c = distance_constraint{2*particle_radius};
 							c.set_type(constraint_type::inequality);
 							c.particles = {&p, other};
-							collision_constraints.emplace_back(c);
+							collision_constraints.insert(c);
 						}
 					}
 				}
@@ -295,15 +296,37 @@ namespace eversim { namespace core { namespace physics {
 		{
 			b.position = {};
 			b.velocity = {};
+			b.on_ground = false;
+			b.angle_sum = 0;
 		}
 	}
 
-	void physics_manager::damp_velocities()
+	void physics_manager::damp_velocities(float dt)
 	{
 		for (auto& p : particles)
 		{
 			if (!p.is_alive()) continue;
-			p.vel *= damping; // TODO: improve
+			const auto speed = length(p.vel);
+			const auto linear_damping = speed * linear_drag * p.owner->linear_drag;
+			const auto quad_damping = speed * speed * quadratic_drag * p.owner->quadratic_drag;
+			const auto damping = (linear_damping + quad_damping) * dt;
+
+			if(damping >= speed)
+			{
+				p.vel = {};
+			}else
+			{
+				p.vel = normalize(p.vel)*(speed-damping);
+			}
+		}
+	}
+
+	void physics_manager::integrate_position(float dt)
+	{
+		for (auto& p : particles)
+		{
+			if (!p.is_alive()) continue;
+			p.projected_position = p.pos + dt * p.vel;
 		}
 	}
 
@@ -326,9 +349,7 @@ namespace eversim { namespace core { namespace physics {
 					break;
 				}
 			default:
-				{
-					assert(!"Unhandled constraint type!");
-				}
+				EVERSIM_THROW(generic_error::InvalidEnum, "physics constraint_type");
 			}
 
 			static thread_local glm::vec2 cache[physics_manager::max_constraint_arity];
@@ -388,11 +409,29 @@ namespace eversim { namespace core { namespace physics {
 			auto* const b = p.owner;
 			b->velocity += p.vel;
 			b->position += p.pos;
+			
+			const auto angle_dist = utility::math::angle_between_points(
+				b->old_position, p.pos
+			);
+
+			const auto east = utility::math::orientation::from_radians(0);
+			const auto new_orientation = (east + angle_dist);
+			const auto deriv = p.get_base_orientation() - new_orientation;
+
+			if(&p == p.owner->particles.begin())
+			{
+				b->angle = p.get_base_orientation() + angle_dist;
+			}
+
+			b->angle_sum += deriv.as_radians();
 		}
 		for(auto& b : get_bodies())
 		{
 			b.old_position = b.position = b.position/float(b.particles.size());
 			b.old_velocity = b.velocity = b.velocity/float(b.particles.size());
+
+			b.angle_sum /= b.particles.size();
+			//b.angle = utility::math::orientation::from_radians(b.angle_sum);
 		}
 	}
 
@@ -405,7 +444,7 @@ namespace eversim { namespace core { namespace physics {
 			auto p1 = c.particles[0];
 			auto p2 = c.particles[1];
 
-			assert(p1.base != p2.base && "Collision between particles of the same body is not allowed!");
+			EVERSIM_ASSERT(p1.base != p2.base && "Collision between particles of the same body is not allowed!");
 
 			if(p1.base > p2.base)
 			{
@@ -445,7 +484,7 @@ namespace eversim { namespace core { namespace physics {
 
 	void physics_manager::particle_tile_collision(particle& p)
 	{
-		assert(level);
+		EVERSIM_ASSERT(level);
 		
 		const auto pos = p.projected_position;
 
@@ -475,7 +514,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		const auto mpos = particle.pos - tile.position();
 		const auto mprojpos = particle.projected_position - tile.position();
-		const auto ray = utility::line{ mpos, mprojpos };
+		const auto ray = utility::math::line{ mpos, mprojpos };
 
 		for(auto const& side : tile.get_collision_shape())
 		{
@@ -488,7 +527,8 @@ namespace eversim { namespace core { namespace physics {
 			{
 				const auto entry = ray.lerp(*intersection) + tile.position();
 
-				static_collision_constraints.emplace_back(tile, particle, normal, entry);
+				particle.owner->on_ground = true;
+				static_collision_constraints.emplace(tile, particle, normal, entry);
 			}
 
 			const auto dist = side.distance_to_point(mpos);
@@ -496,7 +536,8 @@ namespace eversim { namespace core { namespace physics {
 			{
 				const auto entry = side.closest_point(mpos) + tile.position();
 
-				static_collision_constraints.emplace_back(tile, particle, normal, entry);
+				particle.owner->on_ground = true;
+				static_collision_constraints.emplace(tile, particle, normal, entry);
 			}
 		}
 		

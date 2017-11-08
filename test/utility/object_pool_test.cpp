@@ -218,6 +218,20 @@ TEST_CASE("object_pool memory reuse", "[utility][object_pool]")
 	REQUIRE(mem == new_mem);
 }
 
+TEST_CASE("object_pool clear", "[utility][object_pool]")
+{
+	object_pool<long long, 4> the_pool;
+	the_pool.clear();
+	REQUIRE(the_pool.empty());
+
+	for(int i = 0; i < 500; ++i)
+	{
+		the_pool.emplace(i);
+	}
+	the_pool.clear();
+	REQUIRE(the_pool.empty());
+}
+
 TEST_CASE("object_pool insert/erase", "[utility][object_pool]")
 {
 	struct gadget {

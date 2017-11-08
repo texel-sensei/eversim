@@ -4,7 +4,7 @@
 #include "core/rendering/render_manager.h"
 #include "core/rendering/renderable_entity.h"
 
-#include "core/utility/matrix_helper.h"
+#include "core/utility/math/matrix_helper.h"
 
 #include <glm/gtc/matrix_transform.inl>
 
@@ -37,8 +37,8 @@ namespace eversim { namespace core { namespace system {
 		
 		display->set_Position(obj.get_position() + offset);
 		display->set_Scale(obj.get_scale());
-		display->set_Center(offset);
-		display->set_Rotation(obj.get_angle());
+		display->set_Center(-offset);
+		display->set_Rotation(-obj.get_angle().as_radians());
 	}
 
 }}}

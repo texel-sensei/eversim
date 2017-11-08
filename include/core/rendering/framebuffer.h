@@ -37,6 +37,7 @@ namespace eversim {
 				Framebuffer& operator=(Framebuffer&& buffer) noexcept;
 
 				void bind() const;
+				void unbind() const;
 				std::shared_ptr<FramebufferAutoUnbind> bind_auto_unbind() const;
 
 				void clear(const glm::fvec4 col = glm::fvec4(1.f)) const;

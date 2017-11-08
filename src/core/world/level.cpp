@@ -137,7 +137,7 @@ namespace eversim { namespace core { namespace world {
 		return true;
 	}
 
-	utility::array_view<const utility::line> level::get_collision_shape(unsigned char sides) const
+	utility::array_view<const utility::math::line> level::get_collision_shape(unsigned char sides) const
 	{
 		EVERSIM_ASSERT(sides < 16);
 
