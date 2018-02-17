@@ -25,7 +25,7 @@
 #include "core/utility/filesystem_wrapper.h"
 
 #include "core/input/contextloader.h"
-#include "core/input/gamepadhandler.h"
+#include "core/input/devicehandler.h"
 #include "core/utility/filesystem_wrapper.h"
 
 #include <glm/glm.hpp>
@@ -45,7 +45,7 @@ using namespace eversim;
 using namespace eversim::core;
 
 std::shared_ptr<input::InputHandler> inputhandler_ptr = nullptr;
-input::GamepadHandler ghandler;
+input::DeviceHandler ghandler;
 
 // Keep only this much logfiles around. If there are more, then the oldest ones are deleted
 constexpr int NUM_LOGFILES = 10;

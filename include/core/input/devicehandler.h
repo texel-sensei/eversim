@@ -1,21 +1,22 @@
 #pragma once
 
 #include "core/utility/sdl.h"
+#include "core/input/inputdevice.h"
 
 #include <map>
 
 namespace eversim {
 	namespace core {
 		namespace input {
-			class GamepadHandler {
+			class DeviceHandler {
 			private:
-				std::map<int,SDL_Joystick*> joysticks;
+				std::map<int,InputDevice> devices;
 			public:
 				void handle_event(SDL_Event& event);
 
-				const std::map<int, SDL_Joystick*>& get_joysticks() const
+				const std::map<int, InputDevice>& get_devices() const
 				{
-					return joysticks;
+					return devices;
 				}
 			};
 		}
