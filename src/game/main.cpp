@@ -20,6 +20,7 @@
 
 #include "core/system/components/physics_component.h"
 #include "core/system/components/rendering_component.h"
+#include "game/components/playercontroller.h"
 #include "core/system/game.h"
 
 #include "core/utility/filesystem_wrapper.h"
@@ -242,55 +243,7 @@ int main(int argc, char* argv[])
 
 	player->add_component<system::physics_component>(physics, *player_body_template);
 	player->add_component<system::rendering_component>(renderer, "brick_gray0/big_kobold.png");
-
-	inputhandler_ptr->get_context("game")->register_function_range(
-		"STEER",
-		[&](input::InputContext& context, glm::vec2 v) {
-		//LOG(INFO) << v.x << "/" << v.y;
-		double value = v.x;
-		if (std::abs(value) - 0.2 < 0.) return;
-		double a = (value < 0.) ? -1. : 1.;
-		auto pc = player->get_component<system::physics_component>();
-		auto& velocity = pc->get_body().velocity;
-		velocity += 3.f*dt*glm::vec2(a*std::exp(std::abs(value)), 0);
-	}
-	);
-
-	inputhandler_ptr->get_context("game")->register_function_button(
-		"JUMP",
-		[&](input::InputContext& context) 
-	{
-		auto pc = player->get_component<system::physics_component>();
-		auto& velocity = pc->get_body().velocity;
-		velocity += 5.f*glm::vec2(0, 1);
-		inputhandler_ptr->push_context("midjump");
-	}
-	);
-
-	inputhandler_ptr->get_context("midjump")->register_function_button(
-		"DOUBLEJUMP",
-		[&](input::InputContext& context)
-	{
-		auto pc = player->get_component<system::physics_component>();
-		auto& velocity = pc->get_body().velocity;
-		velocity += 3.5f*glm::vec2(0, 1);
-		inputhandler_ptr->push_context("midjumpjumped");
-	}
-	);
-
-	utility::Delegate delg;
-	delg.connect([](physics::body* ptr, 
-		physics::events::static_col_list const& list) 
-	{
-		for (const auto& sc : list)
-		{
-			if (std::abs(sc.normal.y - 1.) < 0.001)
-			{
-				inputhandler_ptr->pop({std::string("midjumpjumped") , "midjump"});
-				break;
-			}
-		}
-	}, physics.level_collision_events());
+	player->add_component<game::components::PlayerController>(*inputhandler_ptr);
 
 	// setup camera
 	rendering::Camera cam("default_cam",

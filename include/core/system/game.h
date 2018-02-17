@@ -39,6 +39,7 @@ namespace eversim {namespace core {namespace system {
 		 * Returns the current time. The returned value stays the same for the whole frame.
 		 */
 		utility::clock::time_point get_time() const;
+		physics::physics_manager& get_physics();
 	private:
 		physics::physics_manager* physics;
 		std::shared_ptr<utility::clock> game_clock;

@@ -98,5 +98,10 @@ namespace eversim { namespace core { namespace system {
 		return frame_started;
 	}
 
+	physics::physics_manager & game::get_physics()
+	{
+		return *physics;
+	}
+
 
 }}}
