@@ -22,7 +22,7 @@ namespace eversim { namespace core {
 		eversim_error(std::error_code errc, std::string const& message, source_location const& loc);
 		eversim_error(std::error_code errc, char const* message, source_location const& loc);
 
-		char const* what() const override;
+		char const* what() const noexcept override;
 	private:
 		source_location loc;
 		std::string message;

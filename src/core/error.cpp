@@ -41,7 +41,7 @@ namespace eversim {namespace core {
 		message = ss.str();
 	}
 
-	char const* eversim_error::what() const
+	char const* eversim_error::what() const noexcept
 	{
 		return message.c_str();
 	}
