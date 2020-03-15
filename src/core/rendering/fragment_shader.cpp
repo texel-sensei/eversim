@@ -1,4 +1,4 @@
-#include "core\rendering\fragment_shader.h"
+#include "core/rendering/fragment_shader.h"
 
 using namespace std;
 

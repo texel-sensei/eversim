@@ -1,7 +1,7 @@
 #include "core/world/level.h"
 #include "core/world/tile.h"
 #include "core/world/errors.h"
-#include <glm/detail/type_mat.hpp>
+#include <glm/glm.hpp>
 #include <easylogging++.h>
 
 using namespace boost;

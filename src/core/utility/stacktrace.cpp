@@ -1,8 +1,11 @@
 #include "core/utility/stacktrace.h"
 
-#include <windows.h>
-#include <processthreadsapi.h>
-#include <DbgHelp.h>
+#if defined(_WIN32)
+#	include <windows.h>
+#	include <processthreadsapi.h>
+#	include <DbgHelp.h>
+#endif
+
 #include <csignal>
 #include <string>
 

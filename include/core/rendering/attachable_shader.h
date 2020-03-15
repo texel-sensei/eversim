@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <easylogging++.h>
 
 #include <fstream>
@@ -35,7 +35,7 @@ namespace eversim {
 				void compile(const std::string& filename)
 				{
 					std::ifstream file(filename);
-					if (!file) throw std::exception("Could not open source file for compilation");
+					if (!file) throw std::runtime_error("Could not open source file for compilation");
 					compile(file);
 				}
 

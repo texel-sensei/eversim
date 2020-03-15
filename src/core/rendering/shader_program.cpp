@@ -105,7 +105,7 @@ namespace eversim {
 			void ShaderProgram::attach(const AttachableShader& shader) const
 			{
 				if (!shader.created)
-					throw exception(string("The shader you try to attach is not yet compiled. Tried to attach: " + shader.name).c_str());
+					throw runtime_error(string("The shader you try to attach is not yet compiled. Tried to attach: " + shader.name).c_str());
 				glAttachShader(id, shader.getID());
 				//TODO Error
 				LOG(INFO) << "attached " << shader.name << " to " << name;
@@ -171,7 +171,7 @@ namespace eversim {
 				}
 				break;
 				default:
-					throw std::exception("Unknown GLenum when attaching a shader");
+					throw std::runtime_error("Unknown GLenum when attaching a shader");
 					break;
 				}
 			}

@@ -12,12 +12,13 @@
 
 #include <easylogging++.h>
 
-#include <glm/detail/type_mat.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 
 #include <boost/range/join.hpp>
 
-#include <ppl.h>
+// PPL is windows only lib for parallel processing
+//#include <ppl.h>
 
 #include <algorithm>
 #include <bitset>
@@ -37,7 +38,7 @@ namespace eversim { namespace core { namespace physics {
 		auto const& p_tmpl = templ.particles;
 		bdy->particles = allocate_particles(p_tmpl.size());
 		auto midpoint = glm::vec2();
-		
+
 
 		transform(
 			p_tmpl.begin(), p_tmpl.end(),
@@ -133,7 +134,7 @@ namespace eversim { namespace core { namespace physics {
 			finalize_changes(dt);
 			current_state = simulation_state::call_events;
 			break;
-		case simulation_state::call_events: 
+		case simulation_state::call_events:
 			call_events();
 			current_state = simulation_state::external;
 			break;
@@ -149,8 +150,10 @@ namespace eversim { namespace core { namespace physics {
 
 		possible_collisions.set_cell_size(2.f*particle_radius);
 		possible_collisions.reset(particles.size(), particles.size() * 2);
-		
-		concurrency::parallel_for_each(begin(particles), end(particles), 
+
+		// TODO: this is a windows only thing
+		// concurrency::parallel_for_each(begin(particles), end(particles),
+		for_each(begin(particles), end(particles),
 			[this](particle& p)
 		{
 			if (p.is_alive())
@@ -221,7 +224,7 @@ namespace eversim { namespace core { namespace physics {
 	{
 		constraints.insert(*c);
 	}
-	
+
 
 	utility::array_view<particle> physics_manager::allocate_particles(size_t num)
 	{
@@ -409,7 +412,7 @@ namespace eversim { namespace core { namespace physics {
 			auto* const b = p.owner;
 			b->velocity += p.vel;
 			b->position += p.pos;
-			
+
 			const auto angle_dist = utility::math::angle_between_points(
 				b->old_position, p.pos
 			);
@@ -460,7 +463,7 @@ namespace eversim { namespace core { namespace physics {
 		{
 			auto& p = *c.particles[0];
 			auto& l = bl_collisions[p.owner];
-			
+
 			l.push_back({&p, c.tile(), c.normal()});
 		}
 
@@ -485,7 +488,7 @@ namespace eversim { namespace core { namespace physics {
 	void physics_manager::particle_tile_collision(particle& p)
 	{
 		EVERSIM_ASSERT(level);
-		
+
 		const auto pos = p.projected_position;
 
 		auto const& t = level->get_tile_by_pos(pos);
@@ -500,7 +503,7 @@ namespace eversim { namespace core { namespace physics {
 			t.get_neighbour({  0,dy }),
 			t.get_neighbour({ dx,dy }),
 		};
-		
+
 		for(auto const* tile : tiles)
 		{
 			if(!tile || !tile->has_collision())
@@ -540,7 +543,7 @@ namespace eversim { namespace core { namespace physics {
 				static_collision_constraints.emplace(tile, particle, normal, entry);
 			}
 		}
-		
+
 	}
 
 }}}

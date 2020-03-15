@@ -1,4 +1,4 @@
-#include "core\rendering\geometry_shader.h"
+#include "core/rendering/geometry_shader.h"
 
 #include <string>
 

@@ -50,7 +50,7 @@ namespace eversim { namespace core { namespace world {
 			);
 		default:
 			using namespace std;
-			LOG(ERROR) << "Invalid enumeration value in " __FUNCTION__
+			LOG(ERROR) << "Invalid enumeration value in "
 				<< " tile @(" << idx.x << ", " << idx.y << ")";
 			EVERSIM_THROW(make_error_code(errc::invalid_argument), "Invalid enumeration!");
 		}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cfloat>
+#include <stdlib.h>
 
 namespace ImGui {
 	// Plot value over time

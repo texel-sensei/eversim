@@ -48,7 +48,7 @@ namespace eversim {
 
 					if (error) {
 						LOG(ERROR) << "lodepng decoding error of file " << s;
-						throw std::exception(("lodepng decoding error of file "+s).c_str());
+						throw std::runtime_error(("lodepng decoding error of file "+s).c_str());
 					}
 
 					glm::ivec2 res = {w,h};

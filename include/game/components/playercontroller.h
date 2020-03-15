@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core\system\component.h"
-#include "core\input\inputhandler.h"
+#include "core/system/component.h"
+#include "core/input/inputhandler.h"
 
-#include "core\utility\event_delegate.h"
+#include "core/utility/event_delegate.h"
 
 namespace eversim::game::components {
 	class PlayerController : public core::system::component {

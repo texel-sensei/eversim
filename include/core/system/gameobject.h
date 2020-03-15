@@ -14,6 +14,8 @@
 
 namespace eversim {namespace core{namespace system {
 
+	class game;
+
 	class gameobject {
 		friend class game;
 		struct creation_key{};

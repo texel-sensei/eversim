@@ -20,6 +20,8 @@ namespace eversim::core{
 
 namespace eversim { namespace core { namespace world {
 
+	class level;
+
 	struct tile_descriptor;
 	extern tile_descriptor blank_tile;
 

@@ -159,9 +159,10 @@ namespace eversim {	namespace core { namespace input {
 
 	void InputContext::enqueue_event(const InputEvent& event)
 	{
-		auto& mpair = input_map.emplace(event.get_input_enum(),event);
+		auto const& event_enum = event.get_input_enum();
+		auto const& mpair = input_map.emplace(event_enum,event);
 
-		auto& it = mpair.first;
+		auto const& it = mpair.first;
 
 		if (!mpair.second) {
 			auto new_end = remove_if(begin(input_iterators), end(input_iterators), 
@@ -259,8 +260,8 @@ namespace eversim {	namespace core { namespace input {
 		RawInputConstants::input b, 
 		RawInputConstants::input c)
 	{
-		auto& lsx = input_map.find(a);
-		auto& lsy = input_map.find(b);
+		auto const& lsx = input_map.find(a);
+		auto const& lsy = input_map.find(b);
 		const auto lsxb = lsx != input_map.end();
 		const auto lsyb = lsy != input_map.end();
 		if (lsxb || lsyb)

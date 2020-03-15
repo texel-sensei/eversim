@@ -1,5 +1,5 @@
 #pragma once
-#include "core\rendering\attachable_shader.h"
+#include "core/rendering/attachable_shader.h"
 
 namespace eversim {
 	namespace core {

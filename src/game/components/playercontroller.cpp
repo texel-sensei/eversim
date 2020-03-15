@@ -1,11 +1,11 @@
-#include "game\components\playercontroller.h"
+#include "game/components/playercontroller.h"
 
-#include "core\system\gameobject.h"
-#include "core\system\components\physics_component.h"
-#include "core\system\game.h"
+#include "core/system/gameobject.h"
+#include "core/system/components/physics_component.h"
+#include "core/system/game.h"
 
-#include "core\physics\physics_manager.h"
-#include "core\physics\body.h"
+#include "core/physics/physics_manager.h"
+#include "core/physics/body.h"
 
 
 

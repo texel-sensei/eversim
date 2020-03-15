@@ -83,7 +83,7 @@ namespace eversim {
 				if (entity_ptr.expired())
 				{
 					LOG(ERROR) << "DrawcallEntity: add_entity of expired entity";
-					throw exception("DrawcallEntity: add_entity of expired entity");
+					throw runtime_error("DrawcallEntity: add_entity of expired entity");
 				}
 
 				touch();
@@ -107,7 +107,7 @@ namespace eversim {
 				if(tex_wkptr.expired())
 				{
 					LOG(ERROR) << "DrawcallEntity: entity has an expired texture";
-					throw exception("DrawcallEntity: entity has an expired texture");
+					throw runtime_error("DrawcallEntity: entity has an expired texture");
 				}
 
 				auto* tex = &(*(tex_wkptr.lock()));

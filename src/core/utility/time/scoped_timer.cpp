@@ -23,13 +23,13 @@ namespace eversim { namespace core { namespace utility {
 	}
 
 	scoped_timer::scoped_timer(shared_ptr<utility::clock> clk, reporter_function rep)
-		: clock(move(clk)), starting_time(clock->now()), reporter(move(rep))
+		: clock_(move(clk)), starting_time(clock_->now()), reporter(move(rep))
 	{
 	}
 
 	scoped_timer::~scoped_timer()
 	{
-		const auto end_time = clock->now();
+		const auto end_time = clock_->now();
 		const auto duration = end_time - starting_time;
 		reporter(duration);
 	}

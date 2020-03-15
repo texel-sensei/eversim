@@ -95,12 +95,15 @@ namespace eversim {
 			void Spritemap::init_shader()
 			{
 				program.create();
+				auto vertex_shader_stream = std::istringstream(vertex_shader);
+				auto geometry_shader_stream = std::istringstream(geometry_shader);
+				auto fragment_shader_stream = std::istringstream(fragment_shader);
 				program.attach
 				(
 				{
-					{ std::istringstream(vertex_shader),GL_VERTEX_SHADER },
-					{ std::istringstream(geometry_shader),GL_GEOMETRY_SHADER },
-					{ std::istringstream(fragment_shader),GL_FRAGMENT_SHADER }
+					{ vertex_shader_stream, GL_VERTEX_SHADER },
+					{ geometry_shader_stream, GL_GEOMETRY_SHADER },
+					{ fragment_shader_stream, GL_FRAGMENT_SHADER }
 				}
 				);
 				program.link();

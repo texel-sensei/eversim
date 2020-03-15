@@ -1,4 +1,4 @@
-#include "core\rendering\vertex_shader.h"
+#include "core/rendering/vertex_shader.h"
 
 #include <GL/glew.h>
 

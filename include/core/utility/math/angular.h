@@ -2,7 +2,7 @@
 
 #include "core/utility/math/constants.h"
 
-#include <glm/detail/type_vec2.hpp>
+#include <glm/glm.hpp>
 #include <boost/operators.hpp>
 
 #include <complex>
@@ -87,8 +87,8 @@ namespace eversim::core::utility::math
 		, boost::equality_comparable<rotation>
 		>>>
 	{
-		using base = detail::angular_base<rotation>;
-		friend class base;
+		typedef detail::angular_base<rotation> base;
+		friend class detail::angular_base<rotation>;
 		friend class orientation;
 	public:
 		rotation() = default;
@@ -133,8 +133,8 @@ namespace eversim::core::utility::math
 			, boost::equality_comparable<orientation>
 		>
 	{
-		using base = detail::angular_base<orientation>;
-		friend class base;
+		typedef detail::angular_base<orientation> base;
+		friend class detail::angular_base<orientation>;
 	public:
 		orientation() = default;
 

@@ -26,7 +26,7 @@ namespace eversim {namespace core{namespace utility {
 
 		scoped_timer(scoped_timer const&) = delete;
 	private:
-		std::shared_ptr<clock> clock;
+		std::shared_ptr<clock> clock_;
 		const clock::time_point starting_time;
 
 		reporter_function reporter;

@@ -22,7 +22,7 @@ namespace ImGui {
 
 	// Plot value over time
 	// Call with 'value == FLT_MAX' to draw without adding new value to the buffer
-	void ImGui::PlotVar(const char* label, float value, float scale_min, float scale_max, size_t buffer_size)
+	void PlotVar(const char* label, float value, float scale_min, float scale_max, size_t buffer_size)
 	{
 		assert(label);
 		if (buffer_size == 0)
@@ -63,7 +63,7 @@ namespace ImGui {
 		PopID();
 	}
 
-	void ImGui::PlotVarFlushOldEntries()
+	void PlotVarFlushOldEntries()
 	{
 		int current_frame = GetFrameCount();
 		for (PlotVarsMap::iterator it = g_PlotVarsMap.begin(); it != g_PlotVarsMap.end();)

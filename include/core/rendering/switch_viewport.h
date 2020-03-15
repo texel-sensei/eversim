@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core\utility\plattform.h"
+#include "core/utility/plattform.h"
 
 class switch_viewport{
         public:
