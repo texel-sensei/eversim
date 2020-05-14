@@ -1,13 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.17)
+project (eversim)
 
 set(EXTERNALS ${CMAKE_CURRENT_SOURCE_DIR}/external)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set(MAIN_INCLUDE_DIR "" CACHE FILEPATH "Path to your lib includes")
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${MAIN_INCLUDE_DIR}/include)
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${MAIN_INCLUDE_DIR}/lib)
-include_directories(${MAIN_INCLUDE_DIR}/include)
-LINK_DIRECTORIES(${MAIN_INCLUDE_DIR}/lib)
 
 #######################################################################
 #                               options                               #
@@ -16,19 +11,16 @@ if(UNIX)
 	INCLUDE(FindPkgConfig)
 endif(UNIX)
 
-project (eversim)
 set (PROGRAM_VERSION_MAJOR 0)
 set (PROGRAM_VERSION_MINOR 1)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 #######################################################################
 #                              Externals                              #
 #######################################################################
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CXX_STANDARD_REQUIRED ON)
 
@@ -43,22 +35,15 @@ endif()
 
 #OPENGL
 find_package(OpenGL REQUIRED)
-include_directories( ${OPENGL_INCLUDE_DIRS})
-SET(LIBS ${LIBS} ${OPENGL_LIBRARIES})
 
 #SDL2
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR})
-SET(LIBS ${LIBS} ${SDL2_LIBRARY})
 
 #GLEW
 find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIRS} )
-SET(LIBS ${LIBS} ${GLEW_LIBRARIES})
 
 #GLM
-find_package(GLM REQUIRED)
-include_directories(${GLM_INCLUDE_DIRS})
+find_package(glm REQUIRED)
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
 #dear imgui
@@ -67,21 +52,24 @@ add_library(imgui ${IMGUI_SOURCES})
 set_target_properties (imgui PROPERTIES FOLDER externals)
 target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
 include_directories(${EXTERNALS}/imgui/include/)
-SET(LIBS ${LIBS} imgui)
 
 #loadpng
 file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
 add_library(lodepng ${LODEPNG_SOURCES})
-set_target_properties (lodepng PROPERTIES FOLDER externals)
+set_target_properties (lodepng PROPERTIES
+	FOLDER externals
+	POSITION_INDEPENDENT_CODE ON
+)
 target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
 include_directories(${EXTERNALS}/lodepng/include/)
-SET(LIBS ${LIBS} lodepng)
 
 #soil
 add_subdirectory(${EXTERNALS}/soil)
-set_target_properties (SOIL PROPERTIES FOLDER externals)
+set_target_properties (SOIL PROPERTIES
+	FOLDER externals
+	POSITION_INDEPENDENT_CODE ON
+)
 include_directories(${EXTERNALS}/soil/include/)
-SET(LIBS ${LIBS} SOIL)
 
 #catch
 set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
@@ -105,12 +93,20 @@ link_directories(${Boost_LIBRARY_DIR_RELEASE})
 include_directories(${EXTERNALS}/poly_collection/include)
 
 #easyloggingpp
-option(build_static_lib "Build easyloggingpp as a static library" ON)
-add_definitions(-DELPP_FEATURE_ALL -DELPP_NO_DEFAULT_LOG_FILE)
-add_subdirectory(${EXTERNALS}/easyloggingpp)
-set_target_properties (easyloggingpp PROPERTIES FOLDER externals)
-include_directories(${EXTERNALS}/easyloggingpp/src)
-SET(LIBS ${LIBS} easyloggingpp)
+add_library(easyloggingpp SHARED
+	external/easyloggingpp/src/easylogging++.h
+	external/easyloggingpp/src/easylogging++.cc
+)
+target_compile_definitions(easyloggingpp
+	PUBLIC
+	-DELPP_FEATURE_ALL 
+	-DELPP_NO_DEFAULT_LOG_FILE
+)
+set_target_properties (easyloggingpp PROPERTIES
+	FOLDER externals 
+	POSITION_INDEPENDENT_CODE ON
+)
+target_include_directories(easyloggingpp PUBLIC ${EXTERNALS}/easyloggingpp/src)
 
 ############# COMPILER FLAGS ###############
 
@@ -138,7 +134,8 @@ file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
 
-add_library(eversim STATIC ${CORE_HEADERS} ${CORE_SOURCES})
+add_subdirectory(src)
+
 add_library(editor STATIC ${EDITOR_HEADERS} ${EDITOR_SOURCES})
 add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
 
@@ -182,8 +179,7 @@ source_group("core" REGULAR_EXPRESSION /editor/core/)
 source_group("windows" REGULAR_EXPRESSION /editor/windows/)
 
 
-target_link_libraries(eversim ${LIBS} dl)
-target_link_libraries(editor eversim)
+target_link_libraries(editor eversim imgui)
 target_link_libraries(game editor eversim)
 
 #######################################################################
@@ -199,7 +195,6 @@ add_executable(${TEST_BIN} ${TEST_SOURCES} ${TEST_HEADERS})
 target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
 target_include_directories(${TEST_BIN} PRIVATE ${TEST_DIR}/include)
 
-message("asdasd" ${TEST_HEADERS})
 source_group("include" FILES ${TEST_HEADERS})
 
 enable_testing()

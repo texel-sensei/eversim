@@ -1,0 +1,51 @@
+add_library(rendering SHARED
+	attachable_shader.h
+	buffer.cpp
+	buffer.h
+	camera.cpp
+	camera.h
+	canvas.cpp
+	canvas.h
+	drawcall_entity.cpp
+	drawcall_entity.h
+	fragment_shader.cpp
+	fragment_shader.h
+	framebuffer.cpp
+	framebuffer.h
+	geometry_shader.cpp
+	geometry_shader.h
+	mesh.cpp
+	mesh.h
+	multibuffer.cpp
+	multibuffer.h
+	renderable_entity.cpp
+	renderable_entity.h
+	render_manager.cpp
+	render_manager.h
+	shader_loader.h
+	shader_program.cpp
+	shader_program.h
+	shader_storage_buffer.h
+	spritemap.cpp
+	spritemap.h
+	switch_viewport.h
+	texture_base_class.cpp
+	texture_base_class.h
+	texture.cpp
+	texture.h
+	texture_loader.h
+	vertex_shader.cpp
+	vertex_shader.h
+)
+
+target_link_libraries(rendering
+	PUBLIC
+		OpenGL::GL
+		GLEW::GLEW
+		easyloggingpp
+		core_error
+		utility
+		glm
+		Boost::boost
+		lodepng
+)
