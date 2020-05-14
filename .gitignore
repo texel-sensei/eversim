@@ -38,3 +38,7 @@ bin/
 *.exe
 *.out
 *.app
+
+# Temp files
+logs/
+imgui.ini
