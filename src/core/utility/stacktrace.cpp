@@ -1,10 +1,13 @@
 #include "core/utility/stacktrace.h"
+#include <boost/stacktrace/stacktrace_fwd.hpp>
 
 #if defined(_WIN32)
 #	include <windows.h>
 #	include <processthreadsapi.h>
 #	include <DbgHelp.h>
 #endif
+
+#include <boost/stacktrace.hpp>
 
 #include <csignal>
 #include <string>
@@ -163,6 +166,12 @@ namespace eversim::core::utility
 	}
 
 #else
-	void fill_stacktrace(stacktrace* trace) {}
+	void fill_stacktrace(stacktrace* trace) {
+		auto current = boost::stacktrace::stacktrace();
+
+		for(auto&& frame : current) {
+			trace->add_frame(frame.name().c_str(), frame.source_file().c_str(), frame.source_line());
+		}
+	}
 #endif
 }

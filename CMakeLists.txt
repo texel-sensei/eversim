@@ -182,7 +182,7 @@ source_group("core" REGULAR_EXPRESSION /editor/core/)
 source_group("windows" REGULAR_EXPRESSION /editor/windows/)
 
 
-target_link_libraries(eversim ${LIBS})
+target_link_libraries(eversim ${LIBS} dl)
 target_link_libraries(editor eversim)
 target_link_libraries(game editor eversim)
 
