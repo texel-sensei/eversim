@@ -231,8 +231,6 @@ namespace eversim { namespace core { namespace physics {
 		const auto oldsize = particles.size();
 		const auto old_capacity = particles.capacity();
 
-		const auto* old_begin = particles.data();
-
 		if (oldsize + num > old_capacity)
 		{
 			auto newvec = vector<particle>();
@@ -252,7 +250,7 @@ namespace eversim { namespace core { namespace physics {
 			particles.swap(newvec);
 		}
 		particles.resize(oldsize + num);
-		return utility::make_array_view(particles).slice(oldsize, 0);
+		return utility::make_array_view(particles).subspan(oldsize);
 	}
 
 	void physics_manager::cleanup_dead_bodies()
@@ -356,7 +354,7 @@ namespace eversim { namespace core { namespace physics {
 			}
 
 			static thread_local glm::vec2 cache[physics_manager::max_constraint_arity];
-			auto grad = utility::make_array_view(cache).slice_n(0, c.get_arity());
+			auto grad = utility::make_array_view(cache).subspan(0, c.get_arity());
 			c.grad(grad);
 
 			const auto sum = [&]
@@ -421,7 +419,7 @@ namespace eversim { namespace core { namespace physics {
 			const auto new_orientation = (east + angle_dist);
 			const auto deriv = p.get_base_orientation() - new_orientation;
 
-			if(&p == p.owner->particles.begin())
+			if(&p == p.owner->particles.data())
 			{
 				b->angle = p.get_base_orientation() + angle_dist;
 			}

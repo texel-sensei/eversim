@@ -78,8 +78,10 @@ namespace {
 			{
 				if (!p.is_alive()) continue;
 				auto owner = p.owner;
-				REQUIRE(owner->get_particles().begin() <= &p);
-				REQUIRE(&p < owner->get_particles().end());
+				const auto begin_ptr = owner->get_particles().data();
+				const auto end_ptr = begin_ptr + owner->get_particles().size();
+				REQUIRE(begin_ptr <= &p);
+				REQUIRE(&p < end_ptr);
 			}
 		}
 	};

@@ -20,7 +20,7 @@ namespace eversim { namespace core { namespace world {
 
 		// pass null-view to initialize all tiles to blank
 		// if we use a null-view we don't need to check size
-		if(data){
+		if(!data.empty()){
 			if(data.size() < num_tiles)
 			{
 				LOG(ERROR) << "Not enough data passed to level c'tor! Size is ("
@@ -43,7 +43,7 @@ namespace eversim { namespace core { namespace world {
 				auto& t = get_tile_by_index({ x,y });
 				t = tile{ { x,y }, tile_size };
 				t.lvl = this;
-				if(data)
+				if(!data.empty())
 				{
 					auto const* d = descriptors[size.y - y - 1][x];
 					if (d){
