@@ -5,9 +5,10 @@
 
 #include <imgui/imgui_internal.h>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 using namespace std;
+using namespace fmt;
 using namespace eversim::core;
 
 namespace eversim { namespace editor { namespace windows {
@@ -21,7 +22,7 @@ namespace eversim { namespace editor { namespace windows {
 	void physics_inspector::display_particle_info()
 	{
 		auto const& particles = physics->get_particles();
-		auto name = (boost::format("Particles: %d/%d###cat") % particles.size() % particles.capacity()).str();
+		auto name = format("Particles: {}/{}###cat", particles.size(), particles.capacity());
 		if (!ImGui::CollapsingHeader(name.c_str()))
 			return;
 		ImGui::Indent();
@@ -30,7 +31,7 @@ namespace eversim { namespace editor { namespace windows {
 		{
 			auto col = p.is_alive() ? ImVec4(1, 1, 1, 1) : ImVec4(0.6, 0.6, 0.6, 1);
 			ImGui::PushStyleColor(ImGuiCol_Text, col);
-			ImGui::Text("Particle #%d", &p - begin);
+			ImGui::Text("Particle #%td", &p - begin);
 			ImGui::SameLine(300);
 			ImGui::Text("Body %s", body_name(p.owner).c_str());
 
@@ -99,7 +100,7 @@ namespace eversim { namespace editor { namespace windows {
 		const auto it = body_names.find(b);
 		if (it == body_names.end())
 		{
-			return (boost::format("%p") % b).str();
+			return format("{}", static_cast<const void*>(b));
 		}
 		return it->second;
 	}

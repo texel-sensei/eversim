@@ -9,7 +9,7 @@
 
 #include <soil/SOIL.h>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <boost/range/adaptors.hpp>
 
 #include <stdexcept>
@@ -78,7 +78,7 @@ shared_ptr<level> level_loader::load_file(string const& filename)
 			if (idtable.find(id) == idtable.end())
 			{
 				EVERSIM_THROW(level_error::UnknownID,
-					(boost::format("Unknown id %d at tile (%d,%d)") % id % x % y).str()
+					fmt::format("Unknown id {} at tile ({},{})", id, x, y)
 				);
 			}
 			const auto desc_name = idtable[id];

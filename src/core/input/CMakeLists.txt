@@ -18,6 +18,7 @@ add_library(input SHARED
 target_link_libraries(input
 	PUBLIC
 		core_error
+		eversim_common
 		utility
 		easyloggingpp
 		Boost::boost

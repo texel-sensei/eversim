@@ -1,10 +1,11 @@
 #include "editor/windows/log_window.h"
 #include <easylogging++.h>
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace eversim { namespace editor { namespace windows {
 	
 	using namespace editor::core;
+	using namespace fmt;
 
 	class log_window::log_handler : public el::LogDispatchCallback {
 	public:
@@ -66,12 +67,11 @@ namespace eversim { namespace editor { namespace windows {
 		if (copy)
 			ImGui::LogToClipboard();
 
-		auto formatter = boost::format("%s\t%s");
 
 		for(auto const& line : buffer)
 		{
 			const auto lvl_str = el::LevelHelper::convertToString(line.level());
-			const auto msg = (formatter % lvl_str % line.message()).str();
+			const auto msg = format("{}\t{}", lvl_str, line.message());
 
 			if(filter.IsActive() && !filter.PassFilter(msg.c_str()))
 			{
@@ -82,10 +82,7 @@ namespace eversim { namespace editor { namespace windows {
 			ImGui::TextUnformatted(msg.c_str());
 			if(ImGui::IsItemHovered())
 			{
-				auto info_format = boost::format("%s:%d [%s]");
-				const auto info_str = (
-					info_format % line.file() % line.line() % line.func()
-					).str();
+				const auto info_str = format("{}:{} [{}]", line.file(), line.line(), line.func());
 				ImGui::SetTooltip(info_str.c_str());
 			}
 			ImGui::PopStyleColor();

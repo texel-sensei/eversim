@@ -16,6 +16,7 @@ add_library(world SHARED
 target_link_libraries(world
 	PUBLIC
 		core_error
+		eversim_common
 		glm	
 		easyloggingpp
 		utility

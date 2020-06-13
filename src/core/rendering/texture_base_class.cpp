@@ -1,5 +1,3 @@
-#pragma once
-
 #include "core/rendering/texture_base_class.h"
 
 namespace eversim

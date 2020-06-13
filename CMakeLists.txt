@@ -50,8 +50,8 @@ add_definitions(-DGLM_FORCE_RADIANS=1)
 file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
 add_library(imgui ${IMGUI_SOURCES})
 set_target_properties (imgui PROPERTIES FOLDER externals)
-target_include_directories(imgui PUBLIC ${EXTERNALS}/imgui/include/imgui)
-include_directories(${EXTERNALS}/imgui/include/)
+target_include_directories(imgui SYSTEM PUBLIC ${EXTERNALS}/imgui/include/imgui)
+include_directories(SYSTEM ${EXTERNALS}/imgui/include/)
 
 #loadpng
 file(GLOB_RECURSE LODEPNG_SOURCES ${EXTERNALS}/lodepng/src/*.cpp)
@@ -60,24 +60,24 @@ set_target_properties (lodepng PROPERTIES
 	FOLDER externals
 	POSITION_INDEPENDENT_CODE ON
 )
-target_include_directories(lodepng PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
-include_directories(${EXTERNALS}/lodepng/include/)
+target_include_directories(lodepng SYSTEM PUBLIC ${EXTERNALS}/lodepng/include/lodepng)
+include_directories(SYSTEM ${EXTERNALS}/lodepng/include/)
 
 #soil
 add_subdirectory(${EXTERNALS}/soil)
-set_target_properties (SOIL PROPERTIES
+set_target_properties(SOIL PROPERTIES
 	FOLDER externals
 	POSITION_INDEPENDENT_CODE ON
 )
-include_directories(${EXTERNALS}/soil/include/)
+include_directories(SYSTEM ${EXTERNALS}/soil/include/)
 
 #catch
 set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
 add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
+target_include_directories(Catch SYSTEM INTERFACE ${CATCH_INCLUDE_DIR})
 
 #better enums
-include_directories(${EXTERNALS}/better-enums)
+include_directories(SYSTEM ${EXTERNALS}/better-enums)
 add_definitions(-DBETTER_ENUMS_MACRO_FILE="${EXTERNALS}/better-enums/enum_macros.h")
 
 #boost
@@ -106,20 +106,27 @@ set_target_properties (easyloggingpp PROPERTIES
 	FOLDER externals 
 	POSITION_INDEPENDENT_CODE ON
 )
-target_include_directories(easyloggingpp PUBLIC ${EXTERNALS}/easyloggingpp/src)
+target_include_directories(easyloggingpp SYSTEM PUBLIC ${EXTERNALS}/easyloggingpp/src)
+
+# fmt (TODO: remove when compiler supports C++20 std::format)
+add_subdirectory(${EXTERNALS}/fmt)
+set_target_properties(fmt PROPERTIES
+	FOLDER externals
+	POSITION_INDEPENDENT_CODE ON
+)
+
 
 ############# COMPILER FLAGS ###############
 
 if(WIN32)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") #multiprocessor compilation for visual studio
 	SET(LIBS ${LIBS} DbgHelp)
+	add_definitions(-DNOMINMAX)
 endif(WIN32)
 
-add_definitions(-DNOMINMAX)
 
 ############# SOURCE ###############
 
-set(CMAKE_CXX_STANDARD 17)
 if(MSVC)
 add_definitions(-D_HAS_AUTO_PTR_ETC) # required to use boost with c++17
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
@@ -133,6 +140,13 @@ file(GLOB_RECURSE EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.h)
 file(GLOB_RECURSE CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.cpp)
 file(GLOB_RECURSE GAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp)
 file(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp)
+
+# Common settings/dependencies for every eversim module
+add_library(eversim_common INTERFACE)
+target_compile_features(eversim_common INTERFACE cxx_std_20)
+target_link_libraries(eversim_common INTERFACE
+	fmt
+)
 
 add_subdirectory(src)
 

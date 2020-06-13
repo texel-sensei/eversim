@@ -30,6 +30,7 @@ target_link_libraries(physics
 		Boost::boost
 
 		core_error
+		eversim_common
 		world
 		rendering
 		easyloggingpp

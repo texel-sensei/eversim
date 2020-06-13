@@ -43,4 +43,5 @@ target_link_libraries(utility
 		Boost::boost
 		dl
 		easyloggingpp
+		eversim_common
 )

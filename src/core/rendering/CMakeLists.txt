@@ -44,6 +44,7 @@ target_link_libraries(rendering
 		GLEW::GLEW
 		easyloggingpp
 		core_error
+		eversim_common
 		utility
 		glm
 		Boost::boost

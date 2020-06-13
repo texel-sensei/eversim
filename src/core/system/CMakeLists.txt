@@ -17,6 +17,7 @@ add_library(system SHARED
 target_link_libraries(system
 	PUBLIC
 		core_error
+		eversim_common
 		utility
 		physics
 		easyloggingpp
