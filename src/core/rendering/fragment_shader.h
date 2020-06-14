@@ -1,19 +1,15 @@
 #pragma once
 #include "core/rendering/attachable_shader.h"
 
-namespace eversim {
-	namespace core {
-		namespace rendering {
-			class FragmentShader :
-				public AttachableShader
-			{
-			public:
-				explicit FragmentShader(const std::string& name);
-				~FragmentShader();
+namespace eversim::core::rendering {
+	class FragmentShader :
+		public AttachableShader
+	{
+		public:
+			explicit FragmentShader(const std::string& name);
+			~FragmentShader();
 
-				void create(const std::string& filename) override;
-				void create(std::istream& file) override;
-			};
-		}
-	}
+			void create(const std::string& filename) override;
+			void create(std::istream& file) override;
+	};
 }

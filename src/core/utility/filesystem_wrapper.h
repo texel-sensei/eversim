@@ -2,7 +2,6 @@
 
 #include <filesystem>
 
-namespace eversim { namespace core { namespace utility
-{
+namespace eversim::core::utility {
 	namespace fs = std::filesystem;
-} } }
+}

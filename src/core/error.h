@@ -4,7 +4,7 @@
 #include <cassert>
 
 
-namespace eversim { namespace core {
+namespace eversim::core {
 
 	struct source_location {
 		int line;
@@ -33,14 +33,13 @@ namespace eversim { namespace core {
 		FileNotFound,					\
 		InvalidArgument,				\
 		InvalidEnum,					\
-		NotYetImplemented 
+		NotYetImplemented
 	)
 
 	// Because BETTER_ENUM uses an enum embedded into a type, a direct conversion doesn't work.
 	// so we need to take this embedded enum as argument
 	std::error_code make_error_code(generic_error::_enumerated);
 
-}
 }
 
 #define THROW_IMPL_GET_MACRO(_1,_2,NAME,...) NAME

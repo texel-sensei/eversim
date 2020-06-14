@@ -10,15 +10,15 @@
 #include <string>
 #include <vector>
 
-namespace eversim { namespace core { namespace utility {
-	
+namespace eversim::core::utility {
+
 	/*
 	 * CRTP based class to simplify resource loading.
 	 * Template parameters:
 	 *	T	specific class that does the loading
 	 *	KT	key to describe the loaded object
 	 *	VT	loaded type
-	 *	
+	 *
 	 *	the subclass must have the function 'load_file'
 	 *
 	 	class example_loader : public utility::resource_manager<example_loader, string, string>
@@ -85,7 +85,6 @@ namespace eversim { namespace core { namespace utility {
 
 		T const& as_derived() const noexcept {
 			return static_cast<T const&>(*this);
-		}	
+		}
 	};
-
-} /*utility*/ } /*core*/ } /*eversim*/
+}
