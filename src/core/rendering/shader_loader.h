@@ -10,43 +10,41 @@
 
 namespace eversim::core::rendering {
 
-	namespace {
-		class fragment_loader final :
-			public utility::resource_manager<fragment_loader, std::string, AttachableShader>
-		{
-			protected:
-				ptr_type load_file(std::string const& s) override
-				{
-					auto shader = std::make_shared<FragmentShader>("default_named_FragmentShader");
-					shader->create(s);
-					return shader;
-				}
-		};
+	class fragment_loader final :
+		public utility::resource_manager<fragment_loader, std::string, AttachableShader>
+	{
+		protected:
+			ptr_type load_file(std::string const& s) override
+			{
+				auto shader = std::make_shared<FragmentShader>("default_named_FragmentShader");
+				shader->create(s);
+				return shader;
+			}
+	};
 
-		class vertex_loader final :
-			public utility::resource_manager<vertex_loader, std::string, AttachableShader>
-		{
-			protected:
-				ptr_type load_file(std::string const& s) override
-				{
-					auto shader = std::make_shared<VertexShader>("default_named_VertexShader");
-					shader->create(s);
-					return shader;
-				}
-		};
+	class vertex_loader final :
+		public utility::resource_manager<vertex_loader, std::string, AttachableShader>
+	{
+		protected:
+			ptr_type load_file(std::string const& s) override
+			{
+				auto shader = std::make_shared<VertexShader>("default_named_VertexShader");
+				shader->create(s);
+				return shader;
+			}
+	};
 
-		class geometry_loader final :
-			public utility::resource_manager<geometry_loader, std::string, AttachableShader>
-		{
-			protected:
-				ptr_type load_file(std::string const& s) override
-				{
-					auto shader = std::make_shared<GeometryShader>("default_named_GeometryShader");
-					shader->create(s);
-					return shader;
-				}
-		};
-	}
+	class geometry_loader final :
+		public utility::resource_manager<geometry_loader, std::string, AttachableShader>
+	{
+		protected:
+			ptr_type load_file(std::string const& s) override
+			{
+				auto shader = std::make_shared<GeometryShader>("default_named_GeometryShader");
+				shader->create(s);
+				return shader;
+			}
+	};
 
 
 	class shader_loader {

@@ -330,9 +330,8 @@ namespace eversim { namespace core { namespace rendering {
 
 	void render_manager::draw(Camera& cam)
 	{
-
 		auto entity_fits_to_drawer = []
-		(shared_ptr<DrawcallEntity>& d, RenderableEntity& e)
+		(shared_ptr<Drawcall>& d, RenderableEntity& e)
 		{
 			return
 				(&*(d->get_Multibuffer().lock()) == &*(e.get_Multibuffer().lock())) &&
@@ -341,7 +340,7 @@ namespace eversim { namespace core { namespace rendering {
 		};
 
 		auto add_entity = []
-		(shared_ptr<DrawcallEntity>& d, weak_ptr<RenderableEntity>& e)
+		(shared_ptr<Drawcall>& d, weak_ptr<RenderableEntity>& e)
 		{
 			auto idx = d->add_entity(e);
 			e.lock()->set_Drawer(d, idx);
@@ -401,7 +400,7 @@ namespace eversim { namespace core { namespace rendering {
 			);
 
 			std::vector<std::pair<size_t, size_t>> mesh_blocks;
-			std::shared_ptr<DrawcallEntity> drawer_ptr = nullptr;
+			std::shared_ptr<Drawcall> drawer_ptr = nullptr;
 
 			for (auto& wkptr : dirty_entities)
 			{
@@ -413,7 +412,7 @@ namespace eversim { namespace core { namespace rendering {
 				} else
 				{
 					auto it = std::find_if(begin(static_drawers), end(static_drawers),
-						[&](std::shared_ptr<DrawcallEntity>& drawer)
+						[&](std::shared_ptr<Drawcall>& drawer)
 					{
 						return entity_fits_to_drawer(drawer, entity);
 					}
@@ -421,7 +420,7 @@ namespace eversim { namespace core { namespace rendering {
 
 					if(it == end(static_drawers))
 					{
-						static_drawers.push_back(make_shared<DrawcallEntity>(
+						static_drawers.push_back(make_shared<Drawcall>(
 							entity.get_ShaderProgram(),
 							entity.get_Multibuffer())
 						);

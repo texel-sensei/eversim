@@ -59,7 +59,7 @@ namespace eversim::core::rendering {
 				};
 				for(int i = h-1; i >= 0; i--)
 				{
-					for(int j = 0; j < w; j++)
+					for(unsigned int j = 0; j < w; j++)
 					{
 						auto idx = idxf(i,j) * 4;
 						image_float.push_back(static_cast<float>(image.at(idx)) / 255.f);

@@ -14,7 +14,7 @@
 
 namespace eversim::core::rendering {
 
-	class DrawcallEntity
+	class Drawcall
 	{
 		private:
 			bool valid = true;
@@ -50,7 +50,7 @@ namespace eversim::core::rendering {
 
 		public:
 
-			DrawcallEntity(
+			Drawcall(
 					std::weak_ptr<ShaderProgram> program_ptr,
 					std::weak_ptr<Multibuffer> buffer_ptr
 					);
@@ -72,12 +72,12 @@ namespace eversim::core::rendering {
 			void draw(Camera& cam);
 
 			/*
-			 * Add the data of the entity to the DrawcallEntity
+			 * Add the data of the entity to the Drawcall
 			 * returns the index of the entity data
 			 */
 			size_t add_entity(std::weak_ptr<RenderableEntity> entity);
 
-			void move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target);
+			void move_entity(size_t entity_idx, std::weak_ptr<Drawcall> target);
 			void remove_entity(size_t entity_idx);
 
 			instanced_entity_information get_entity_data(const size_t idx) const;

@@ -38,8 +38,6 @@ namespace eversim { namespace editor { namespace windows {
 		if (window->SkipItems)
 			return;
 
-		const auto texid = reinterpret_cast<ImTextureID>(fb.get_tex_id());
-
 		const auto top_left = GetWindowContentRegionMin();
 		const auto bot_right = GetWindowContentRegionMax();
 		ImGui::Image(fb.get_texture(), bot_right - top_left);

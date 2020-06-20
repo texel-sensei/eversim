@@ -60,8 +60,7 @@ namespace eversim {
 								auto& pd = data.second;
 
 								const vector<string> ids = { "keys","values","interval","function" };
-								using pit = decltype(begin(pd));
-								short cnt = 0;
+								size_t cnt = 0;
 								for (const auto& id : ids) {
 									auto it = find_if(begin(pd), end(pd),
 										[&](const auto& pairdata) { return pairdata.first == id; });

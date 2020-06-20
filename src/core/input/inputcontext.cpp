@@ -333,7 +333,6 @@ namespace eversim {	namespace core { namespace input {
 				if (!run) return 0;
 				if (run && (*it)->second.get_event_type()._to_integral() == RawInputConstants::event_type::BUTTON_UP)
 				{
-					auto& ev = (*it)->second;
 					val = 0.;
 					return 0;
 				}

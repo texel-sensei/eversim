@@ -6,8 +6,8 @@ add_library(rendering SHARED
 	camera.h
 	canvas.cpp
 	canvas.h
-	drawcall_entity.cpp
-	drawcall_entity.h
+	drawcall.cpp
+	drawcall.h
 	fragment_shader.cpp
 	fragment_shader.h
 	framebuffer.cpp

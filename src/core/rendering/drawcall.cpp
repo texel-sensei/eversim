@@ -1,4 +1,4 @@
-#include "core/rendering/drawcall_entity.h"
+#include "core/rendering/drawcall.h"
 #include "core/utility/helper.h"
 
 #include <exception>
@@ -7,13 +7,13 @@ using namespace std;
 
 namespace eversim::core::rendering {
 
-	void DrawcallEntity::invalidate_if_expired()
+	void Drawcall::invalidate_if_expired()
 	{
 		valid = !(program_ptr.expired() ||
 				buffer_ptr.expired());
 	}
 
-	DrawcallEntity::DrawcallEntity(
+	Drawcall::Drawcall(
 			std::weak_ptr<ShaderProgram> program_ptr,
 			std::weak_ptr<Multibuffer> buffer_ptr
 			) :
@@ -28,34 +28,36 @@ namespace eversim::core::rendering {
 		}
 	}
 
-	void DrawcallEntity::draw(Camera& cam)
+	void Drawcall::draw(Camera& cam)
 	{
 		invalidate_if_expired();
 		if(!valid)
 		{
-			LOG(ERROR) << "DrawcallEntity has expired weak_ptrs";
+			LOG(ERROR) << "Drawcall has expired weak_ptrs";
 			return;
 		}
 
-		auto& program = *program_ptr.lock();
-		auto& buffer = *buffer_ptr.lock();
+		auto program = program_ptr.lock();
+		auto buffer = buffer_ptr.lock();
 
-		program.use();
-		cam.use(program);
+		program->use();
+		cam.use(*program);
 
-		buffer.bind();
+		buffer->bind();
 
 		ssb.bind(42);
 
 		spritemap.bind();
 
-		glDrawArraysInstanced(buffer.type, buffer.first,
-				buffer.count, static_cast<GLsizei>(idx_add));
+		glDrawArraysInstanced(
+			buffer->type, buffer->first,
+			buffer->count, static_cast<GLsizei>(idx_add)
+		);
 
 		glUseProgram(0);
 	}
 
-	void DrawcallEntity::touch(const size_t idx)
+	void Drawcall::touch(const size_t idx)
 	{
 		touch();
 		//TODO use std::set
@@ -66,22 +68,22 @@ namespace eversim::core::rendering {
 			entity_touched.push_back(idx);
 	}
 
-	void DrawcallEntity::touch()
+	void Drawcall::touch()
 	{
 		touched = true;
 	}
 
-	bool DrawcallEntity::get_touched() const
+	bool Drawcall::get_touched() const
 	{
 		return touched;
 	}
 
-	size_t DrawcallEntity::add_entity(std::weak_ptr<RenderableEntity> entity_ptr)
+	size_t Drawcall::add_entity(std::weak_ptr<RenderableEntity> entity_ptr)
 	{
 		if (entity_ptr.expired())
 		{
-			LOG(ERROR) << "DrawcallEntity: add_entity of expired entity";
-			throw runtime_error("DrawcallEntity: add_entity of expired entity");
+			LOG(ERROR) << "Drawcall: add_entity of expired entity";
+			throw runtime_error("Drawcall: add_entity of expired entity");
 		}
 
 		touch();
@@ -104,8 +106,8 @@ namespace eversim::core::rendering {
 
 		if(tex_wkptr.expired())
 		{
-			LOG(ERROR) << "DrawcallEntity: entity has an expired texture";
-			throw runtime_error("DrawcallEntity: entity has an expired texture");
+			LOG(ERROR) << "Drawcall: entity has an expired texture";
+			throw runtime_error("Drawcall: entity has an expired texture");
 		}
 
 		auto* tex = &(*(tex_wkptr.lock()));
@@ -118,7 +120,7 @@ namespace eversim::core::rendering {
 		return idx;
 	}
 
-	void DrawcallEntity::reduce()
+	void Drawcall::reduce()
 	{
 		idx_add--;
 		if (entities.size() > extra_space && idx_add+1 <= entities.size() - extra_space)
@@ -129,7 +131,7 @@ namespace eversim::core::rendering {
 		touch();
 	}
 
-	void DrawcallEntity::move_entity(size_t entity_idx, std::weak_ptr<DrawcallEntity> target)
+	void Drawcall::move_entity(size_t entity_idx, std::weak_ptr<Drawcall> target)
 	{
 		if (idx_add == 0 || target.expired()) return;
 
@@ -142,7 +144,7 @@ namespace eversim::core::rendering {
 		remove_entity(entity_idx);
 	}
 
-	void DrawcallEntity::remove_entity(size_t entity_idx)
+	void Drawcall::remove_entity(size_t entity_idx)
 	{
 		if (entity_idx >= idx_add) return;
 
@@ -175,7 +177,7 @@ namespace eversim::core::rendering {
 
 	}
 
-	void DrawcallEntity::remove_expired_entities()
+	void Drawcall::remove_expired_entities()
 	{
 		for(size_t entity_idx = 0; entity_idx < idx_add; entity_idx++)
 		{
@@ -184,12 +186,12 @@ namespace eversim::core::rendering {
 		}
 	}
 
-	instanced_entity_information DrawcallEntity::get_entity_data(const size_t idx) const
+	instanced_entity_information Drawcall::get_entity_data(const size_t idx) const
 	{
 		return entity_info.at(idx);
 	}
 
-	void DrawcallEntity::upload()
+	void Drawcall::upload()
 	{
 		for (auto& tex : found_textures)
 		{
@@ -233,19 +235,19 @@ namespace eversim::core::rendering {
 
 	}
 
-	void DrawcallEntity::update_instanced_entity_information(const size_t idx)
+	void Drawcall::update_instanced_entity_information(const size_t idx)
 	{
 		if (idx >= idx_add) return;
 
 		auto entity_wkptr = entities.at(idx);
 		if (entity_wkptr.expired()) return;
-		auto& entity = *entity_wkptr.lock();
+		auto entity = entity_wkptr.lock();
 
-		auto unique_id = entity.get_Texture().lock()->get_unique_id();
+		auto unique_id = entity->get_Texture().lock()->get_unique_id();
 		auto* tex = found_textures[unique_id];
 
 		auto& info = entity_info.at(idx);
-		entity.get_instanced_entity_information(info);
+		entity->get_instanced_entity_information(info);
 
 		info.set_texoffset(texture_offsets[unique_id]);
 		info.set_texsize(tex->get_resolution());

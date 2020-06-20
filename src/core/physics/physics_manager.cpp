@@ -360,7 +360,7 @@ namespace eversim { namespace core { namespace physics {
 			const auto sum = [&]
 			{
 				auto sum = 0.f;
-				for (auto i = 0; i < c.get_arity(); ++i)
+				for (size_t i = 0; i < c.get_arity(); ++i)
 				{
 					sum += c.particles[i]->inv_mass * glm::length2(grad[i]);
 				}
@@ -370,7 +370,7 @@ namespace eversim { namespace core { namespace physics {
 
 			const auto k = 1.f - powf(1.f - c.stiffness, 1.f / solver_iterations);
 
-			for (auto i = 0; i < c.get_arity(); ++i)
+			for (size_t i = 0; i < c.get_arity(); ++i)
 			{
 				auto& p = c.particles[i];
 				const auto correction = -scale * p->inv_mass * grad[i] * k;
@@ -480,8 +480,6 @@ namespace eversim { namespace core { namespace physics {
 			body_level_collision_event(p.first, p.second);
 		}
 	}
-
-
 
 	void physics_manager::particle_tile_collision(particle& p)
 	{

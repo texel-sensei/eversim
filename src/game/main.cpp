@@ -56,7 +56,6 @@ bool sdl_quit = false;
 void handle_sdl_events()
 {
 	SDL_Event event;
-	auto& io = ImGui::GetIO();
 
 	while (SDL_PollEvent(&event))
 	{
@@ -230,9 +229,6 @@ int main(int argc, char* argv[])
 	auto* gamewindow = windows.add_window<editor::windows::game_window>();
 	auto* pd = windows.add_window<editor::windows::performance_display>();
 	windows.add_window<editor::windows::physicsbody_creator>();
-
-	// 0. time
-	const auto dt = 1.f / 60.f;
 
 	// prepare player
 	const auto player_body_template = body_loader.load("cube.bdy");

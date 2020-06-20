@@ -113,7 +113,7 @@ namespace eversim {
 			{
 				glGetIntegerv(GL_MAX_TEXTURE_SIZE, &resolution[0]);
 				resolution[1] = resolution[0];
-				const size_t max_size = 512;
+				const int max_size = 512;
 				if (resolution[0] > max_size)
 					resolution = { max_size,max_size };
 				init();

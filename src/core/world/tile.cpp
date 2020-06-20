@@ -5,7 +5,7 @@
 
 #include "core/rendering/render_manager.h"
 
-namespace eversim { namespace core { namespace world {
+namespace eversim::core::world {
 	tile_descriptor blank_tile = {
 		"blank"
 	};
@@ -77,7 +77,7 @@ namespace eversim { namespace core { namespace world {
 		const ivec2 offsets[] = {
 			ivec2(-1,0), ivec2(0,-1), ivec2(1,0), ivec2(0,1)
 		};
-		for(int i = 0; i < sides.size(); ++i)
+		for(size_t i = 0; i < sides.size(); ++i)
 		{
 			const auto n = get_neighbour(offsets[3-i]);
 			if(n && n->has_collision())
@@ -87,4 +87,4 @@ namespace eversim { namespace core { namespace world {
 		}
 		return sides;
 	}
-}}}
+}

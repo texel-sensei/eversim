@@ -7,7 +7,7 @@
 #include "core/rendering/texture.h"
 #include "core/rendering/camera.h"
 #include "core/rendering/shader_storage_buffer.h"
-#include "core/rendering/drawcall_entity.h"
+#include "core/rendering/drawcall.h"
 #include "core/rendering/shader_loader.h"
 
 #include <glm/glm.hpp>
@@ -44,11 +44,13 @@ namespace eversim { namespace core { namespace rendering {
 		void draw_point(glm::vec2 p);
 
 		void do_draw(Camera const& cam);
+
 		/*
 		 * Create new RenderableEntity
 		 * returns the shared ptr, keeps a weak ptr
 		 */
 		entity_shptr add_entity(const entity_type type=DYNAMIC);
+
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader 
@@ -56,6 +58,7 @@ namespace eversim { namespace core { namespace rendering {
 		* you can safely pass them
 		*/
 		texture_shptr add_texture(const std::string& path);
+
 		/*
 		* Create new Texture from the given path
 		* utilizing the texture loader and using the given filter funtion
@@ -98,13 +101,11 @@ namespace eversim { namespace core { namespace rendering {
 		std::vector<texture_shptr> textures;
 		std::vector<spritemap_shptr> spritemaps;
 
-		std::vector<std::shared_ptr<DrawcallEntity>> dynamic_drawers;
-		std::vector<std::shared_ptr<DrawcallEntity>> static_drawers;
+		std::vector<std::shared_ptr<Drawcall>> dynamic_drawers;
+		std::vector<std::shared_ptr<Drawcall>> static_drawers;
 
 		std::vector<entity_wkptr> dynamic_entities;
 		std::vector<entity_wkptr> dirty_entities;
-
-		SDL_Joystick* joy = nullptr;
 
 		void setup(bool fullscreen);
 

@@ -37,7 +37,7 @@ namespace eversim {
 
 				glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &count);
 
-				for (GLuint i = 0; i < count; i++)
+				for (GLint i = 0; i < count; i++)
 				{
 					glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, properties.size(),
 						&properties[0], values.size(), nullptr, &values[0]);
@@ -71,7 +71,7 @@ namespace eversim {
 				std::vector<GLint> values(properties.size());
 
 				glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &count);
-				for (GLuint i = 0; i < count; i++)
+				for (GLint i = 0; i < count; i++)
 				{
 					glGetProgramResourceiv(id, GL_UNIFORM, i, properties.size(),
 						&properties[0], values.size(), nullptr, &values[0]);

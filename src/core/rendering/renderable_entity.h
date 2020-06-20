@@ -12,7 +12,7 @@ namespace eversim {
 	namespace core {
 		namespace rendering {
 
-			class DrawcallEntity;
+			class Drawcall;
 
 			enum entity_type
 			{
@@ -78,12 +78,12 @@ namespace eversim {
 
 			class RenderableEntity {
 
-				std::pair<long long,std::weak_ptr<DrawcallEntity>> assigned_drawer 
-					= {-1,std::weak_ptr<DrawcallEntity>()};
-				
+				std::pair<long long,std::weak_ptr<Drawcall>> assigned_drawer
+					= {-1,std::weak_ptr<Drawcall>()};
+
 				glm::ivec2 texoffset = glm::ivec2(0,0);
 				glm::ivec2 texsize, spritesize;
-				
+
 				glm::fvec2 position = glm::fvec2(0);
 				glm::fvec2 scale = glm::fvec2(1);
 				float rotation = 0.f;
@@ -136,19 +136,19 @@ namespace eversim {
 
 				void set_Center(glm::fvec2);
 				glm::fvec2 get_Center() const;
-			
+
 				bool get_touched() const;
 
 				void set_Type(const entity_type t);
 				entity_type get_Type() const;
 
-				void set_Drawer(std::weak_ptr<DrawcallEntity>,size_t);
-				
-				std::weak_ptr<DrawcallEntity> get_Drawer() const;
+				void set_Drawer(std::weak_ptr<Drawcall>,size_t);
+
+				std::weak_ptr<Drawcall> get_Drawer() const;
 				long long get_Drawer_idx() const;
 
 				friend class render_manager;
-				friend class DrawcallEntity;
+				friend class Drawcall;
 			};
 		}
 	}

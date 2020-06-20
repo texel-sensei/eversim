@@ -19,11 +19,8 @@ namespace eversim::core::rendering {
 			const std::string name;
 			bool created = false;
 			AttachableShader(const std::string& name) : name(name)
-		{
-		}
-			virtual ~AttachableShader()
-			{
-			}
+			{}
+			virtual ~AttachableShader() { }
 
 			virtual void create(const std::string& filename) = 0;
 			virtual void create(std::istream& file) = 0;
@@ -58,7 +55,7 @@ namespace eversim::core::rendering {
 				std::vector<char> infoLog(size);
 				glGetShaderInfoLog(id, size, &length, infoLog.data());
 				std::string result("");
-				for (size_t i = 0; i < length; ++i)
+				for (GLsizei i = 0; i < length; ++i)
 				{
 					result += infoLog.at(i);
 				}

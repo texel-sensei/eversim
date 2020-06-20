@@ -1,5 +1,5 @@
 #include "core/rendering/renderable_entity.h"
-#include "core/rendering/drawcall_entity.h"
+#include "core/rendering/drawcall.h"
 
 #include "core/utility/plattform.h"
 #include "core/utility/math/matrix_helper.h"
@@ -54,20 +54,20 @@ namespace eversim {	namespace core { namespace rendering {
 		M = utility::translation(position) * M;
 
 		return M;
-	};
+	}
 
-	weak_ptr<ShaderProgram> RenderableEntity::get_ShaderProgram() const { return program; };
+	weak_ptr<ShaderProgram> RenderableEntity::get_ShaderProgram() const { return program; }
 
-	weak_ptr<TextureBase> RenderableEntity::get_Texture() const { return tex; };
+	weak_ptr<TextureBase> RenderableEntity::get_Texture() const { return tex; }
 
-	weak_ptr<Multibuffer> RenderableEntity::get_Multibuffer() const { return data; };
+	weak_ptr<Multibuffer> RenderableEntity::get_Multibuffer() const { return data; }
 
 	void RenderableEntity::set_ShaderProgram(std::shared_ptr<ShaderProgram> p)
 	{
 		program = p;
 		touch();
 	}
-	
+
 	void RenderableEntity::set_Texture(std::shared_ptr<TextureBase> p)
 	{
 		tex = p;
@@ -145,7 +145,7 @@ namespace eversim {	namespace core { namespace rendering {
 	void RenderableEntity::untouch()
 	{
 		touched = false;
-	};
+	}
 
 	bool RenderableEntity::get_touched() const
 	{
@@ -162,7 +162,7 @@ namespace eversim {	namespace core { namespace rendering {
 		return type;
 	}
 
-	void RenderableEntity::set_Drawer(std::weak_ptr<DrawcallEntity> de,size_t idx)
+	void RenderableEntity::set_Drawer(std::weak_ptr<Drawcall> de,size_t idx)
 	{
 		assigned_drawer = make_pair(idx,de);
 	}
@@ -172,7 +172,7 @@ namespace eversim {	namespace core { namespace rendering {
 		assigned_drawer.first = idx;
 	}
 
-	std::weak_ptr<DrawcallEntity> RenderableEntity::get_Drawer() const
+	std::weak_ptr<Drawcall> RenderableEntity::get_Drawer() const
 	{
 		return assigned_drawer.second;
 	}

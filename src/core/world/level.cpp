@@ -12,7 +12,7 @@ namespace eversim { namespace core { namespace world {
 	level::level(ivec2 size, utility::array_view<tile_descriptor const*> data)
 		: tiles(extents[size.y][size.x])
 	{
-		const auto num_tiles = size.x * size.y;
+		const auto num_tiles = size_t(size.x * size.y);
 
 		const auto descriptors = multi_array_ref<tile_descriptor const*, 2>(
 			data.data(), extents[size.y][size.x]
@@ -166,7 +166,7 @@ namespace eversim { namespace core { namespace world {
 				ivec2{0,1}, ivec2{1,2}, ivec2{2,3}, ivec2{3,0}
 			};
 
-			for(int i = 0; i < side_bits.size(); ++i)
+			for(size_t i = 0; i < side_bits.size(); ++i)
 			{
 				if(side_bits[3-i])
 				{
@@ -175,7 +175,7 @@ namespace eversim { namespace core { namespace world {
 					corners[idx.y] += offsets[i];
 				}
 			}
-			for(int i = 0; i < side_bits.size(); ++i)
+			for(size_t i = 0; i < side_bits.size(); ++i)
 			{
 				if(!side_bits[3-i])
 				{
@@ -204,6 +204,5 @@ namespace eversim { namespace core { namespace world {
 			}
 		}
 	}
-
 
 }}}
