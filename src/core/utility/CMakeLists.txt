@@ -39,7 +39,7 @@ target_link_libraries(utility
 		glm
 		OpenGL::GL
 		GLEW::GLEW
-		SDL2::SDL2
+		SDL2
 		Boost::boost
 		dl
 		easyloggingpp

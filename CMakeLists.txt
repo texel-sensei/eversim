@@ -38,6 +38,12 @@ find_package(OpenGL REQUIRED)
 
 #SDL2
 find_package(SDL2 REQUIRED)
+# On windows we are using the FindSDL2.cmake version that is shipped with the repo
+add_library(SDL2 INTERFACE)
+set_target_properties(SDL2 PROPERTIES
+	INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIR}"
+	INTERFACE_LINK_LIBRARIES "${SDL2_LIBRARY}"
+)
 
 #GLEW
 find_package(GLEW REQUIRED)
@@ -84,7 +90,7 @@ add_definitions(-DBETTER_ENUMS_MACRO_FILE="${EXTERNALS}/better-enums/enum_macros
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.64.0 COMPONENTS regex)
+find_package(Boost 1.64.0 REQUIRED COMPONENTS regex)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR_DEBUG})
 link_directories(${Boost_LIBRARY_DIR_RELEASE})
