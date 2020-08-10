@@ -57,6 +57,7 @@ file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
 add_library(imgui ${IMGUI_SOURCES})
 set_target_properties (imgui PROPERTIES FOLDER externals)
 target_include_directories(imgui SYSTEM PUBLIC ${EXTERNALS}/imgui/include/imgui)
+target_link_libraries(imgui PUBLIC SDL2 glm)
 include_directories(SYSTEM ${EXTERNALS}/imgui/include/)
 
 #loadpng

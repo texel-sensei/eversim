@@ -2,7 +2,7 @@
 
 #include "core/input/inputcontext.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <map>
 #include <string>

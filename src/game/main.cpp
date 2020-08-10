@@ -30,7 +30,7 @@
 #include "core/utility/filesystem_wrapper.h"
 
 #include <glm/glm.hpp>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <imgui_impl_sdl_gl3.h>
 #include "core/input/inputhandler.h"
 #include "core/utility/stacktrace.h"
