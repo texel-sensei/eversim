@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 project (eversim)
 
+set(WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(EXTERNALS ${CMAKE_CURRENT_SOURCE_DIR}/external)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -57,7 +58,7 @@ file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
 add_library(imgui ${IMGUI_SOURCES})
 set_target_properties (imgui PROPERTIES FOLDER externals)
 target_include_directories(imgui SYSTEM PUBLIC ${EXTERNALS}/imgui/include/imgui)
-target_link_libraries(imgui PUBLIC SDL2 glm)
+target_link_libraries(imgui PUBLIC SDL2 glm::glm GLEW::GLEW)
 include_directories(SYSTEM ${EXTERNALS}/imgui/include/)
 
 #loadpng
@@ -100,7 +101,8 @@ link_directories(${Boost_LIBRARY_DIR_RELEASE})
 include_directories(${EXTERNALS}/poly_collection/include)
 
 #easyloggingpp
-add_library(easyloggingpp SHARED
+add_library(easyloggingpp STATIC
+	external/easyloggingimpl.cpp
 	external/easyloggingpp/src/easylogging++.h
 	external/easyloggingpp/src/easylogging++.cc
 )

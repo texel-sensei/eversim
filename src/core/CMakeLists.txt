@@ -1,6 +1,6 @@
 # Main eversim library
 
-add_library(core_error SHARED
+add_library(core_error
 	error.h	
 	error.cpp
 )

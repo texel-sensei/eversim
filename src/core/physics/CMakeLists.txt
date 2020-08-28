@@ -1,4 +1,4 @@
-add_library(physics SHARED
+add_library(physics
 	AABB.h
 	body.cpp
 	body.h
@@ -25,7 +25,7 @@ add_library(physics SHARED
 
 target_link_libraries(physics
 	PUBLIC
-		glm
+		glm::glm
 		utility
 		Boost::boost
 

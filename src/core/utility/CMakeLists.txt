@@ -1,10 +1,6 @@
 # general utility lib
 
-add_library(utility SHARED
-	# One file needs to include the INITIALIZE_EASYLOGGINGPP
-	# macro, this is the following one:
-	logger.cpp
-
+add_library(utility
 	area.cpp
 	area.h
 	array_view.h
@@ -36,12 +32,12 @@ add_library(utility SHARED
 
 target_link_libraries(utility
 	PUBLIC
-		glm
+		glm::glm
 		OpenGL::GL
 		GLEW::GLEW
 		SDL2
 		Boost::boost
-		dl
+		#dl
 		easyloggingpp
 		eversim_common
 )

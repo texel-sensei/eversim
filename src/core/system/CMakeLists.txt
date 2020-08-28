@@ -1,4 +1,4 @@
-add_library(system SHARED
+add_library(system
 	component.cpp
 	component.h
 	errors.cpp
@@ -22,6 +22,6 @@ target_link_libraries(system
 		physics
 		easyloggingpp
 		Boost::boost
-		glm
+		glm::glm
 		rendering
 )

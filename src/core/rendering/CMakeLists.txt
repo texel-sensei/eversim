@@ -1,4 +1,4 @@
-add_library(rendering SHARED
+add_library(rendering
 	attachable_shader.h
 	buffer.cpp
 	buffer.h
@@ -46,7 +46,7 @@ target_link_libraries(rendering
 		core_error
 		eversim_common
 		utility
-		glm
+		glm::glm
 		Boost::boost
 		lodepng
 )

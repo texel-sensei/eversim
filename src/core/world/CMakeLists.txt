@@ -1,4 +1,4 @@
-add_library(world SHARED
+add_library(world
 	errors.cpp
 	errors.h
 	level.cpp
@@ -17,7 +17,7 @@ target_link_libraries(world
 	PUBLIC
 		core_error
 		eversim_common
-		glm	
+		glm::glm
 		easyloggingpp
 		utility
 		Boost::boost

@@ -1,4 +1,4 @@
-add_library(input SHARED
+add_library(input
 	contextloader.cpp
 	contextloader.h
 	devicehandler.cpp
@@ -23,5 +23,5 @@ target_link_libraries(input
 		easyloggingpp
 		Boost::boost
 		SDL2
-		glm
+		glm::glm
 )

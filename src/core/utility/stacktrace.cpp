@@ -1,12 +1,6 @@
 #include "core/utility/stacktrace.h"
 #include <boost/stacktrace/stacktrace_fwd.hpp>
 
-#if defined(_WIN32)
-#	include <windows.h>
-#	include <processthreadsapi.h>
-#	include <DbgHelp.h>
-#endif
-
 #include <boost/stacktrace.hpp>
 
 #include <csignal>
@@ -103,69 +97,6 @@ namespace eversim::core::utility
 		return begin() + num_stackframes;
 	}
 
-
-#if defined(_WIN32)
-	//The code requires you to link against the DbgHelp.lib library
-
-	void fill_stacktrace(stacktrace* trace) {
-		const auto process = GetCurrentProcess();
-		// Set up the symbol options so that we can gather information from the current
-		// executable's PDB files, as well as the Microsoft symbol servers.  We also want
-		// to undecorate the symbol names we're returned.  If you want, you can add other
-		// symbol servers or paths via a semi-colon separated list in SymInitialized.
-		::SymSetOptions(
-			SYMOPT_DEFERRED_LOADS | SYMOPT_INCLUDE_32BIT_MODULES | SYMOPT_UNDNAME
-			| SYMOPT_LOAD_LINES
-		);
-
-		if (!SymInitialize(process, "http://msdl.microsoft.com/download/symbols", TRUE)) return;
-
-		// Capture up to 25 stack frames from the current call stack.  We're going to
-		// skip the first stack frame returned because that's the GetStackWalk function
-		// itself, which we don't care about.
-		const auto num_addrs = stacktrace::MAX_STACKFRAMES;
-		void* addrs[num_addrs] = { nullptr };
-		const auto frames = CaptureStackBackTrace(0, num_addrs - 1, addrs, nullptr);
-
-		for (auto i = 1u; i < frames; i++) {
-			// Allocate a buffer large enough to hold the symbol information on the stack and get 
-			// a pointer to the buffer.  We also have to set the size of the symbol structure itself
-			// and the number of bytes reserved for the name.
-			constexpr auto buffer_size = (sizeof(SYMBOL_INFO) + 1024 + sizeof(ULONG64) - 1) / sizeof(ULONG64);
-			ULONG64 buffer[buffer_size] = { 0 };
-			auto *info = reinterpret_cast<SYMBOL_INFO *>(buffer);
-			info->SizeOfStruct = sizeof(SYMBOL_INFO);
-			info->MaxNameLen = 1024;
-
-			auto addr = reinterpret_cast<DWORD64>(addrs[i]);
-
-			// Attempt to get information about the symbol and add it to our output parameter.
-			DWORD64 displacement = 0;
-			const bool got_name = SymFromAddr(
-				process, addr,
-				&displacement, info
-			);
-			
-			IMAGEHLP_LINE64 line;
-			line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-
-			DWORD line_displacement = 0;
-			const bool got_line = SymGetLineFromAddr64(process, addr, &line_displacement, &line);
-			const auto func_name = (got_name) ? info->Name : "(?)";
-			const auto file_name = (got_line) ? line.FileName : nullptr;
-			const auto line_nr = (got_line) ? line.LineNumber : -1;
-
-			if(got_name || got_line)
-			{
-				trace->add_frame(func_name, file_name, line_nr);
-			}
-		}
-
-		SymCleanup(process);
-
-	}
-
-#else
 	void fill_stacktrace(stacktrace* trace) {
 		auto current = boost::stacktrace::stacktrace();
 
@@ -173,5 +104,4 @@ namespace eversim::core::utility
 			trace->add_frame(frame.name().c_str(), frame.source_file().c_str(), frame.source_line());
 		}
 	}
-#endif
 }
