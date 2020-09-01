@@ -1,5 +1,5 @@
 #include "core/utility/object_pool.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <algorithm>
 #include <vector>

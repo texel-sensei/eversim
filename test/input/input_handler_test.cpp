@@ -1,6 +1,6 @@
 #include "core/input/inputhandler.h"
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -9,7 +9,7 @@
 
 using namespace eversim::core::input;
 
-const auto simple_file = 
+const auto simple_file =
 R"#delim#({
   "game": {
     "JUMP": {

@@ -86,18 +86,20 @@ set_target_properties(SOIL PROPERTIES
 include_directories(SYSTEM ${EXTERNALS}/soil/include/)
 
 #catch
-set(CATCH_INCLUDE_DIR ${EXTERNALS}/catch)
-add_library(Catch INTERFACE)
-target_include_directories(Catch SYSTEM INTERFACE ${CATCH_INCLUDE_DIR})
+CPMFindPackage(
+    NAME Catch2
+    GITHUB_REPOSITORY catchorg/Catch2
+    VERSION 2.13.0
+)
 
 #better enums
 include_directories(SYSTEM ${EXTERNALS}/better-enums)
 add_definitions(-DBETTER_ENUMS_MACRO_FILE="${EXTERNALS}/better-enums/enum_macros.h")
 
 #boost
-set(Boost_USE_STATIC_LIBS ON) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 CPMFindPackage(
   NAME Boost
   GITHUB_REPOSITORY Orphis/boost-cmake
@@ -119,11 +121,11 @@ add_library(easyloggingpp STATIC
 )
 target_compile_definitions(easyloggingpp
 	PUBLIC
-	-DELPP_FEATURE_ALL 
+	-DELPP_FEATURE_ALL
 	-DELPP_NO_DEFAULT_LOG_FILE
 )
 set_target_properties (easyloggingpp PROPERTIES
-	FOLDER externals 
+	FOLDER externals
 	POSITION_INDEPENDENT_CODE ON
 )
 target_include_directories(easyloggingpp SYSTEM PUBLIC ${EXTERNALS}/easyloggingpp/src)
@@ -180,16 +182,16 @@ if (WIN32)
 	else()
       set(SDL_DLL "${SDL2_INCLUDE_DIR}/../lib/x86/SDL2.dll")
 	endif()
-	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
-	copy_if_different "${SDL_DLL}" $<TARGET_FILE_DIR:game>)  
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E
+	copy_if_different "${SDL_DLL}" $<TARGET_FILE_DIR:game>)
 
 	set(GLEW_DLL_DEBUG "${GLEW_INCLUDE_DIR}/../bin/bin/Debug/glew32d.dll")
 	set(GLEW_DLL_RELEASE "${GLEW_INCLUDE_DIR}/../bin/bin/Release/glew32.dll")
 
-	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
-	copy_if_different "${GLEW_DLL_DEBUG}" $<TARGET_FILE_DIR:game>)  
-	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E 
-	copy_if_different "${GLEW_DLL_RELEASE}" $<TARGET_FILE_DIR:game>)  
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E
+	copy_if_different "${GLEW_DLL_DEBUG}" $<TARGET_FILE_DIR:game>)
+	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E
+	copy_if_different "${GLEW_DLL_RELEASE}" $<TARGET_FILE_DIR:game>)
 endif()
 
 # core source groups
@@ -226,7 +228,7 @@ file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cpp)
 file(GLOB_RECURSE TEST_HEADERS ${TEST_DIR}/include/*.h)
 
 add_executable(${TEST_BIN} ${TEST_SOURCES} ${TEST_HEADERS})
-target_link_libraries(${TEST_BIN} Catch ${LIBS} eversim)
+target_link_libraries(${TEST_BIN} Catch2::Catch2 ${LIBS} eversim)
 target_include_directories(${TEST_BIN} PRIVATE ${TEST_DIR}/include)
 
 source_group("include" FILES ${TEST_HEADERS})

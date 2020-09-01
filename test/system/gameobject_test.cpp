@@ -2,7 +2,7 @@
 #include "core/system/component.h"
 
 #include "test_helper.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <SDL_stdinc.h>
 
 using namespace eversim::core::system;
@@ -41,7 +41,7 @@ TEST_CASE("Transform parameters", "[system][gameobject]")
 		REQUIRE_THAT(obj->get_scale(), is_approx(7, .3f));
 		REQUIRE_THAT(obj->get_angle(), is_approx(pi_over_two));
 	}
-	
+
 }
 
 TEST_CASE("Add component", "[system][gameobject]")

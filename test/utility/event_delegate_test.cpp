@@ -1,6 +1,6 @@
 
 #include "core/utility/event_delegate.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace eversim::core::utility;
 
@@ -21,7 +21,7 @@ TEST_CASE("event void dispatch", "[utility][event_delegate]") {
 	SECTION("multiple delegates"){
 		Delegate b;
 		b.connect(must_be_called_b, e);
-	
+
 		e();
 		e();
 		REQUIRE(num_calls_a == 2);

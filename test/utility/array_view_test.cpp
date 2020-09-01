@@ -1,5 +1,5 @@
 #include "core/utility/array_view.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace std;
 using namespace eversim::core::utility;

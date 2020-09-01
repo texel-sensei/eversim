@@ -1,6 +1,6 @@
 #include "core/utility/time/controllable_clock.h"
 #include "core/utility/time/scoped_timer.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace eversim::core::utility;
 

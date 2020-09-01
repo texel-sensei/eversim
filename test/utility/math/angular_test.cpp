@@ -1,6 +1,6 @@
 #include "core/utility/math/angular.h"
 #include "test_helper.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace std;
 using namespace std::literals;

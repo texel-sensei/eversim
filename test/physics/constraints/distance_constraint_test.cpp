@@ -1,5 +1,5 @@
 #include "core/physics/body_template.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/physics_manager.h"
 

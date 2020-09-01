@@ -1,5 +1,5 @@
 #include "core/physics/physics_manager.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "core/physics/body_template.h"
 #include <SDL_stdinc.h>
 #include <random>
@@ -161,7 +161,7 @@ TEST_CASE_METHOD(physics_test_fixture, "gravity","[physics][physics_manager]")
 		b3->gravity_scale = 2;
 
 		man.integrate(1);
-		
+
 		REQUIRE(b1->position.y == Approx(-1.f));
 		REQUIRE(b2->position.y == Approx(0.f));
 		REQUIRE(b3->position.y == Approx(-2.f));
@@ -223,7 +223,7 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		SECTION("insert only") {
 			check_particle_pointer_integrity();
 		}
-		
+
 		const auto remove_random = [&] {
 			auto dist = uniform_int_distribution<>(0, man.get_num_bodies()-1);
 			auto it = man.get_bodies().begin();
@@ -234,7 +234,7 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		SECTION("remove only")
 		{
 			REQUIRE(man.get_num_bodies() == N);
-			
+
 			while(man.get_num_bodies() > 0)
 			{
 				auto oldsize = man.get_num_bodies();
@@ -251,7 +251,7 @@ TEST_CASE_METHOD(physics_test_fixture, "body management", "[physics][physics_man
 		{
 			REQUIRE(man.get_num_bodies() == N);
 			auto coinflip = bernoulli_distribution(0.5);
-			
+
 			for(auto& b : man.get_bodies())
 			{
 				man.remove_body(&b);

@@ -3,7 +3,7 @@
 #include "core/world/level.h"
 #include "core/world/tile_descriptor.h"
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace eversim::core::world;
 
@@ -78,7 +78,7 @@ TEST_CASE_METHOD(level_testing_data, "data constructor", "[world][level]")
 	//  0 1 2 3 4 5
 	};
 
-	
+
 
 	SECTION("too few data")
 	{
@@ -198,7 +198,7 @@ TEST_CASE("contains index", "[world][level]")
 TEST_CASE("index / position conversion", "[world][level]")
 {
 	auto l = level({ 12,17 });
-	
+
 	l.set_tile_size(2.f);
 	auto idx = l.index_for_pos({1.5f, 2.5f});
 	REQUIRE(idx.x == 0);
@@ -287,7 +287,7 @@ TEST_CASE("tile: world to tile coordinates", "[world][tile]")
 	REQUIRE_THAT(t.to_tile_coordinates(center), is_approx(0, 0));
 	REQUIRE_THAT(t.to_tile_coordinates(center + vec2(0.125,0)), is_approx(0.1, 0));
 	REQUIRE_THAT(t.to_tile_coordinates(center - vec2(0.125, 0)), is_approx(-0.1, 0));
-	
+
 	const auto upper_left = center + vec2(-1.249, 1.249);
 	REQUIRE(&l.get_tile_by_pos(upper_left) == &t);
 	REQUIRE_THAT(t.to_tile_coordinates(upper_left), is_approx(-0.9992f, 0.9992f));

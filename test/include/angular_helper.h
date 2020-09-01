@@ -2,7 +2,7 @@
 
 #include "core/utility/math/angular.h"
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <sstream>
 
 namespace detail{
@@ -18,7 +18,7 @@ namespace detail{
 		std::string describe() const override
 		{
 			std::ostringstream ss;
-			ss << "is approximate the same as (" 
+			ss << "is approximate the same as ("
 			<< Catch::StringMaker<T>::convert(expected) << ")";
 			return ss.str();
 		}

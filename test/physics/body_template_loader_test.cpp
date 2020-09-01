@@ -1,5 +1,5 @@
 #include "core/physics/body_template.h"
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "core/physics/constraints/distance_constraint.h"
 #include "core/physics/physics_manager.h"
 
@@ -148,7 +148,7 @@ TEST_CASE("full template loader", "[physics][body_template_loader]")
 	{
 		SECTION("simple")
 		{
-			auto txt = 
+			auto txt =
 			R"(
 				2
 				0 0 1.0
