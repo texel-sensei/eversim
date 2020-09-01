@@ -98,7 +98,12 @@ add_definitions(-DBETTER_ENUMS_MACRO_FILE="${EXTERNALS}/better-enums/enum_macros
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.64.0 REQUIRED COMPONENTS regex)
+CPMFindPackage(
+  NAME Boost
+  GITHUB_REPOSITORY Orphis/boost-cmake
+  VERSION 1.67.0
+  FIND_PACKAGE_ARGUMENTS "COMPONENTS regex"
+)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR_DEBUG})
 link_directories(${Boost_LIBRARY_DIR_RELEASE})
