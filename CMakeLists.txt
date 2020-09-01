@@ -35,7 +35,7 @@ endif()
 ############# Required LIBRARIES ###############
 
 #CPM
-include(cmake/CPM/CPM.cmake)
+include(cmake/CPM.cmake)
 
 #OPENGL
 find_package(OpenGL REQUIRED)
