@@ -37,7 +37,10 @@ target_link_libraries(utility
 		GLEW::GLEW
 		SDL2
 		Boost::boost
-		#dl
 		easyloggingpp
 		eversim_common
 )
+
+if(UNIX)
+	target_link_libraries(utility PUBLIC dl)
+endif()

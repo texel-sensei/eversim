@@ -52,6 +52,9 @@ find_package(GLEW REQUIRED)
 #GLM
 find_package(glm REQUIRED)
 add_definitions(-DGLM_FORCE_RADIANS=1)
+if(NOT WIN32)
+	add_library(glm::glm ALIAS glm)
+endif()
 
 #dear imgui
 file(GLOB_RECURSE IMGUI_SOURCES ${EXTERNALS}/imgui/src/*.cpp)
