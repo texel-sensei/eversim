@@ -1,7 +1,7 @@
 #include "core/physics/physics_manager.h"
 #include <catch2/catch.hpp>
 #include "core/physics/body_template.h"
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include <random>
 
 using namespace std;

@@ -3,7 +3,7 @@
 #include "core/input/rawinputconstants.h"
 #include "core/input/inputconstants.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <easylogging++.h>
 

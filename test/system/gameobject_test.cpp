@@ -3,7 +3,7 @@
 
 #include "test_helper.h"
 #include <catch2/catch.hpp>
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 
 using namespace eversim::core::system;
 using namespace eversim::core::utility::math;

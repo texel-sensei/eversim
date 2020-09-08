@@ -5,7 +5,7 @@
 #include "core/input/rawinputconstants.h"
 #include "core/input/inputevent.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <string>
 #include <map>
