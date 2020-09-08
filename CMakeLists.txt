@@ -56,7 +56,18 @@ target_link_libraries(SDL2 INTERFACE
 )
 
 #GLEW
-find_package(GLEW REQUIRED)
+#find_package(GLEW REQUIRED)
+CPMFindPackage(
+    NAME GLEW
+    GIT_REPOSITORY https://github.com/nigels-com/glew.git
+    VERSION 2.1.0
+    GIT_TAG glew-2.1.0
+    DOWNLOAD_ONLY YES
+)
+
+if(GLEW_ADDED)
+    add_subdirectory("${GLEW_SOURCE_DIR}/build/cmake")
+endif()
 
 #GLM
 find_package(glm REQUIRED)
