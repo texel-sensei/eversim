@@ -41,12 +41,18 @@ include(cmake/CPM.cmake)
 find_package(OpenGL REQUIRED)
 
 #SDL2
-find_package(SDL2 REQUIRED)
-# On windows we are using the FindSDL2.cmake version that is shipped with the repo
-add_library(SDL2 INTERFACE)
-set_target_properties(SDL2 PROPERTIES
-	INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIR}"
-	INTERFACE_LINK_LIBRARIES "${SDL2_LIBRARY}"
+CPMAddPackage(
+    NAME SDL2
+    VERSION 2.0.12
+    URL https://www.libsdl.org/release/SDL2-2.0.12.tar.gz
+    OPTIONS
+     "SDL_STATIC ON"
+     "SDL_SHARED OFF"
+)
+add_library(SDL2 INTERFACE IMPORTED)
+target_link_libraries(SDL2 INTERFACE
+    SDL2main
+    SDL2-static
 )
 
 #GLEW
@@ -177,13 +183,6 @@ add_executable(game ${GAME_HEADERS} ${GAME_SOURCES})
 
 # copy dlls
 if (WIN32)
-	if (CMAKE_CL_64)
-      set(SDL_DLL "${SDL2_INCLUDE_DIR}/../lib/x64/SDL2.dll")
-	else()
-      set(SDL_DLL "${SDL2_INCLUDE_DIR}/../lib/x86/SDL2.dll")
-	endif()
-	add_custom_command(TARGET game POST_BUILD COMMAND ${CMAKE_COMMAND} -E
-	copy_if_different "${SDL_DLL}" $<TARGET_FILE_DIR:game>)
 
 	set(GLEW_DLL_DEBUG "${GLEW_INCLUDE_DIR}/../bin/bin/Debug/glew32d.dll")
 	set(GLEW_DLL_RELEASE "${GLEW_INCLUDE_DIR}/../bin/bin/Release/glew32.dll")
