@@ -35,7 +35,7 @@ target_link_libraries(utility
 		glm::glm
 		OpenGL::GL
 		GLEW::GLEW
-		SDL2
+		SDL2::SDL2
 		Boost::boost
 		easyloggingpp
 		eversim_common

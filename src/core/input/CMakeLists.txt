@@ -22,6 +22,6 @@ target_link_libraries(input
 		utility
 		easyloggingpp
 		Boost::boost
-		SDL2
+		SDL2::SDL2
 		glm::glm
 )
