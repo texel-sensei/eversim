@@ -41,7 +41,7 @@ include(cmake/CPM.cmake)
 find_package(OpenGL REQUIRED)
 
 #SDL2
-CPMAddPackage(
+CPMFindPackage(
     NAME SDL2
     VERSION 2.0.12
     URL https://www.libsdl.org/release/SDL2-2.0.12.tar.gz
@@ -51,8 +51,8 @@ CPMAddPackage(
 )
 add_library(SDL2 INTERFACE IMPORTED)
 target_link_libraries(SDL2 INTERFACE
-    SDL2main
-    SDL2-static
+    SDL2::SDL2main
+    SDL2::SDL2
 )
 
 #GLEW
