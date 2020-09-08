@@ -3,10 +3,8 @@
 eversim is a 2D game engine written in modern C++. Its goal is to support
 games which depend on different systems to simulate a living and breathing world
 and to create emergent gameplay. See the videos of GMTK about [immersive
-sims](immersive sim) and [systemic games](systemic game) for reference.
-
-[immersive sim]: https://www.youtube.com/watch?v=kbyTOAlhRHk
-[systemic game]: https://www.youtube.com/watch?v=SnpAAX9CkIc
+sims](https://www.youtube.com/watch?v=kbyTOAlhRHk) and
+[systemic games](https://www.youtube.com/watch?v=SnpAAX9CkIc) for reference.
 
 It runs on Windows and support for Linux is in work.
 
